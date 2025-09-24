@@ -66,7 +66,7 @@ const Navbar = () => {
             <img 
               src={tfwLogo} 
               alt="Trade Finance World" 
-              className="h-25 w-auto brightness-110 contrast-110"
+              className="h-20 w-auto brightness-110 contrast-110"
             />
           </div>
 
