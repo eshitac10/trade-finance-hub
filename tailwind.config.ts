@@ -60,6 +60,12 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontFamily: {
+        'sans': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'serif': ['Times New Roman', 'Playfair Display', 'ui-serif', 'serif'],
+        'banking': ['Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'display': ['Playfair Display', 'Times New Roman', 'serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
