@@ -58,15 +58,15 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-background border-b border-border shadow-professional sticky top-0 z-50">
+    <nav className="bg-background/95 backdrop-blur-md border-b border-border shadow-professional sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
             <img 
               src={tfwLogo} 
               alt="Trade Finance World" 
-              className="h-20 w-auto brightness-110 contrast-110"
+              className="h-14 w-auto"
             />
           </div>
 
@@ -75,16 +75,16 @@ const Navbar = () => {
             {/* About Us Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1">
+                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1 font-medium">
                   <span>About Us</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-background border border-border shadow-elegant">
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+              <DropdownMenuContent className="w-48 bg-background border border-border shadow-elegant z-50">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Team
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   About TFW
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -93,28 +93,28 @@ const Navbar = () => {
             {/* Resources Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1">
+                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1 font-medium">
                   <span>Resources</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-64 bg-background border border-border shadow-elegant">
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+              <DropdownMenuContent className="w-64 bg-background border border-border shadow-elegant z-50">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Member Important Conversations
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  className="hover:bg-secondary cursor-pointer"
+                  className="hover:bg-secondary cursor-pointer focus:bg-secondary"
                   onClick={() => window.open('https://drive.google.com/drive/folders/your-folder-id', '_blank')}
                 >
                   Member Articles
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Events
                 </DropdownMenuItem>
                 <Dialog>
                   <DialogTrigger asChild>
                     <DropdownMenuItem 
-                      className="hover:bg-secondary cursor-pointer"
+                      className="hover:bg-secondary cursor-pointer focus:bg-secondary"
                       onSelect={(e) => e.preventDefault()}
                     >
                       Submit a Document
@@ -153,7 +153,7 @@ const Navbar = () => {
                   </DialogContent>
                 </Dialog>
                 <DropdownMenuItem 
-                  className="hover:bg-secondary cursor-pointer"
+                  className="hover:bg-secondary cursor-pointer focus:bg-secondary"
                   onClick={() => window.open('https://youtube.com/@tradefinanceworld', '_blank')}
                 >
                   TFW Webinars
@@ -164,19 +164,19 @@ const Navbar = () => {
             {/* Upcoming Events Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1">
+                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1 font-medium">
                   <span>Upcoming Events</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-background border border-border shadow-elegant">
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+              <DropdownMenuContent className="w-56 bg-background border border-border shadow-elegant z-50">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Upcoming TFW Webinars
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Upcoming TFW Events
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer">
+                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
                   Other Events
                 </DropdownMenuItem>
               </DropdownMenuContent>
