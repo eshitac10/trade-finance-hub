@@ -51,7 +51,7 @@ const Navbar = () => {
   const handleSocialClick = (platform: string) => {
     const urls = {
       youtube: 'https://www.youtube.com/embed/videoseries?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X',
-      whatsapp: 'https://wa.me/919176827480',
+      whatsapp: 'https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!',
       email: 'mailto:contact@tradefinanceworld.com'
     };
     window.open(urls[platform as keyof typeof urls], '_blank');
