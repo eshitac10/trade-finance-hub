@@ -148,10 +148,17 @@ const Navbar = () => {
                   </DialogContent>
                 </Dialog>
                 <DropdownMenuItem 
+                  asChild
                   className="hover:bg-secondary cursor-pointer focus:bg-secondary"
-                  onClick={() => window.open('https://youtube.com/@tradefinanceworld', '_blank')}
                 >
-                  TFW Webinars
+                  <a
+                    href="https://youtube.com/@tradefinanceworld"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open TFW Webinars on YouTube"
+                  >
+                    TFW Webinars
+                  </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
