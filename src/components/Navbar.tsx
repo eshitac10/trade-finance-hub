@@ -54,7 +54,7 @@ const Navbar = () => {
       whatsapp: 'https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!',
       email: 'mailto:contact@tradefinanceworld.com'
     };
-    window.open(urls[platform as keyof typeof urls], '_blank');
+    window.open(urls[platform as keyof typeof urls], '_blank', 'noopener,noreferrer');
   };
 
   return (
