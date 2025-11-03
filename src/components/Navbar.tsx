@@ -50,7 +50,7 @@ const Navbar = () => {
 
   const handleSocialClick = (platform: string) => {
     const urls = {
-      youtube: 'https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa',
+      youtube: 'https://www.youtube.com/embed/videoseries?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X',
       whatsapp: 'https://wa.me/1234567890',
       email: 'mailto:contact@tradefinanceworld.com'
     };
