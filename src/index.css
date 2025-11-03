@@ -117,19 +117,22 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-banking;
+    @apply bg-background text-foreground;
+    font-family: 'Times New Roman', serif;
   }
 
-  /* Banking Typography System */
+  /* Typography System */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-semibold;
+    font-family: 'Times New Roman', serif;
+    @apply font-semibold;
   }
 
   .banking-text {
-    @apply font-serif;
+    font-family: 'Times New Roman', serif;
   }
 
   .professional-heading {
-    @apply font-display font-semibold tracking-tight;
+    font-family: 'Times New Roman', serif;
+    @apply font-semibold tracking-tight;
   }
 }
