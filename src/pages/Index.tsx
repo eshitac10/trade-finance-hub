@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
+import WhatsAppFloat from '@/components/WhatsAppFloat';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award } from 'lucide-react';
 
@@ -8,6 +9,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <WhatsAppFloat />
       
       {/* Hero Section with Gradient */}
       <section className="relative bg-gradient-hero py-24 lg:py-32 overflow-hidden">
