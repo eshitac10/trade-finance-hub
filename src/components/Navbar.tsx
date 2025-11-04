@@ -50,7 +50,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
   const handleSubmitDocument = () => {
     if (file) {
-      // In a real implementation, this would send the file to an email service
       toast({
         title: "Document Submitted",
         description: `${file.name} has been sent to our team for review.`,
@@ -89,18 +88,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   };
 
   return (
-    <nav className="bg-background/95 backdrop-blur-md border-b border-border shadow-professional sticky top-0 z-50">
+    <nav className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-soft sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Show full navigation only when authenticated */}
           {isAuthenticated ? (
             <>
               {/* Navigation Menu */}
-              <div className="hidden md:flex items-center space-x-8">
+              <div className="hidden md:flex items-center space-x-1">
                 {/* Home Button */}
                 <Button
                   variant="ghost"
-                  className="text-foreground hover:text-primary font-medium"
+                  className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                   onClick={() => navigate("/")}
                 >
                   <Home className="h-4 w-4 mr-2" />
@@ -110,7 +109,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 {/* Forum Link */}
                 <Button
                   variant="ghost"
-                  className="text-foreground hover:text-primary font-medium"
+                  className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                   onClick={() => navigate("/forum")}
                 >
                   Forum
@@ -121,18 +120,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="text-foreground hover:text-primary flex items-center space-x-1 font-medium"
+                      className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                     >
                       <span>Resources</span>
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 bg-background border border-border shadow-elegant z-50">
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
+                  <DropdownMenuContent className="w-64 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
+                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
                       Member Important Conversations
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="hover:bg-secondary cursor-pointer focus:bg-secondary"
+                      className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                       onClick={() => window.open("https://drive.google.com/drive/folders/your-folder-id", "_blank")}
                     >
                       Member Articles
@@ -140,33 +139,33 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     <Dialog>
                       <DialogTrigger asChild>
                         <DropdownMenuItem
-                          className="hover:bg-secondary cursor-pointer focus:bg-secondary"
+                          className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                           onSelect={(e) => e.preventDefault()}
                         >
                           Submit a Document
                         </DropdownMenuItem>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-md bg-background border border-border">
+                      <DialogContent className="sm:max-w-md bg-card/98 backdrop-blur-xl border border-border/60 shadow-premium rounded-2xl">
                         <DialogHeader>
-                          <DialogTitle>Submit Document</DialogTitle>
-                          <DialogDescription>Upload a document to share with our team.</DialogDescription>
+                          <DialogTitle className="professional-heading text-2xl">Submit Document</DialogTitle>
+                          <DialogDescription className="banking-text">Upload a document to share with our team.</DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                           <div className="grid gap-2">
-                            <Label htmlFor="document">Select Document</Label>
+                            <Label htmlFor="document" className="banking-text font-medium">Select Document</Label>
                             <Input
                               id="document"
                               type="file"
                               onChange={handleFileUpload}
                               accept=".pdf,.doc,.docx,.txt"
-                              className="cursor-pointer"
+                              className="cursor-pointer banking-text border-border/60 rounded-xl"
                             />
                           </div>
-                          {file && <p className="text-sm text-muted-foreground">Selected: {file.name}</p>}
+                          {file && <p className="text-sm text-muted-foreground banking-text">Selected: {file.name}</p>}
                         </div>
                         <Button
                           onClick={handleSubmitDocument}
-                          className="w-full bg-primary hover:bg-primary-hover text-primary-foreground"
+                          className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02]"
                         >
                           Submit Document
                         </Button>
@@ -180,20 +179,20 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="text-foreground hover:text-primary flex items-center space-x-1 font-medium"
+                      className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                     >
                       <span>Upcoming Events</span>
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-background border border-border shadow-elegant z-50">
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
+                  <DropdownMenuContent className="w-56 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
+                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
                       Upcoming TFW Webinars
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
+                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
                       Upcoming TFW Events
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
+                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
                       Other Events
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -202,18 +201,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 {/* Members Link */}
                 <Button
                   variant="ghost"
-                  className="text-foreground hover:text-primary font-medium"
+                  className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                   onClick={() => navigate("/members")}
                 >
                   Members
                 </Button>
 
                 {/* Social Media Icons */}
-                <div className="flex items-center space-x-3 ml-8">
+                <div className="flex items-center space-x-2 ml-6 pl-6 border-l border-border/40">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
+                    className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
                     onClick={() => handleSocialClick("youtube")}
                     aria-label="Open YouTube playlist"
                   >
@@ -222,7 +221,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
+                    className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
                     onClick={() => handleSocialClick("whatsapp")}
                   >
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -232,7 +231,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
+                    className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
                     onClick={() => handleSocialClick("email")}
                   >
                     <Mail className="h-5 w-5" />
@@ -240,11 +239,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 </div>
 
                 {/* Logout Button */}
-                <div className="flex items-center ml-4 border-l border-border pl-4">
+                <div className="flex items-center ml-4 pl-4 border-l border-border/40">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-foreground hover:text-destructive font-medium hover:scale-105 transition-all"
+                    className="banking-text text-foreground/80 hover:text-destructive font-medium px-4 py-2 rounded-lg hover:bg-destructive/10 transition-all hover:scale-105"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
@@ -255,11 +254,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             </>
           ) : (
             /* Login and Signup buttons when not authenticated - Centered */
-            <div className="flex items-center justify-center gap-3 flex-1">
+            <div className="flex items-center justify-center gap-4 flex-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
+                className="banking-text text-foreground/80 hover:text-primary font-semibold px-6 py-5 rounded-xl hover:bg-primary-light/30 transition-all hover:scale-105"
                 onClick={onLoginClick || (() => navigate("/"))}
               >
                 <LogIn className="h-4 w-4 mr-2" />
@@ -267,7 +266,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               </Button>
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-medium hover:scale-105 transition-all"
+                className="banking-text bg-gradient-primary hover:shadow-accent text-primary-foreground font-semibold px-8 py-5 rounded-xl transition-all hover:scale-105"
                 onClick={() => navigate("/signup")}
               >
                 Sign Up
@@ -277,7 +276,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="p-2">
               <span className="sr-only">Open main menu</span>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

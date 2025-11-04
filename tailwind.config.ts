@@ -23,6 +23,7 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           hover: "hsl(var(--primary-hover))",
+          light: "hsl(var(--primary-light))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -61,10 +62,10 @@ export default {
         },
       },
       fontFamily: {
-        'sans': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
-        'serif': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
-        'banking': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
-        'display': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
+        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        'serif': ['DM Serif Display', 'Playfair Display', 'Georgia', 'serif'],
+        'banking': ['Inter', 'sans-serif'],
+        'display': ['DM Serif Display', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -75,10 +76,16 @@ export default {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-accent': 'var(--gradient-accent)',
         'gradient-hero': 'var(--gradient-hero)',
+        'gradient-subtle': 'var(--gradient-subtle)',
+        'gradient-card': 'var(--gradient-card)',
       },
       boxShadow: {
+        'soft': 'var(--shadow-soft)',
         'professional': 'var(--shadow-professional)',
         'elegant': 'var(--shadow-elegant)',
+        'premium': 'var(--shadow-premium)',
+        'glow': 'var(--shadow-glow)',
+        'accent': 'var(--shadow-accent)',
       },
       transitionProperty: {
         'smooth': 'var(--transition-smooth)',
