@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import tfwAnniversary1 from '@/assets/tfw-anniversary-1.png';
 import tfwAnniversary2 from '@/assets/tfw-anniversary-2.png';
+import tfwAnniversaryVideo from '@/assets/tfw-anniversary-video.mp4';
 
 const EventCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -15,9 +16,9 @@ const EventCarousel = () => {
       type: "image"
     },
     {
-      video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      title: "Trade Finance in Action",
-      description: "Discover how we're transforming global trade",
+      video: tfwAnniversaryVideo,
+      title: "5th Anniversary of TFW",
+      description: "Celebrating our journey and milestones in trade finance",
       type: "video"
     },
     {
