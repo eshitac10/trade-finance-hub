@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { 
   Users, 
   BookOpen, 
@@ -14,17 +15,21 @@ import {
   TrendingUp, 
   MessageSquare,
   Bell,
-  Search,
   BarChart3,
   Activity,
   Briefcase,
   GraduationCap,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Target,
+  Award,
+  Zap
 } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [mounted, setMounted] = useState(false);
   const userEmail = localStorage.getItem('userEmail') || 'admin@tfworld.com';
 
   // Check authentication
@@ -32,15 +37,24 @@ const Dashboard = () => {
     const isAuthenticated = localStorage.getItem('isAuthenticated');
     if (!isAuthenticated) {
       navigate('/');
+    } else {
+      setMounted(true);
     }
   }, [navigate]);
 
   // Sample data
   const stats = [
-    { label: 'Network Connections', value: '1,234', icon: Users, trend: '+12%', color: 'text-blue-500' },
-    { label: 'Articles Read', value: '89', icon: BookOpen, trend: '+23%', color: 'text-green-500' },
-    { label: 'Events Attended', value: '15', icon: Calendar, trend: '+5%', color: 'text-purple-500' },
-    { label: 'Certifications', value: '3', icon: GraduationCap, trend: 'New!', color: 'text-orange-500' },
+    { label: 'Network Connections', value: '1,234', icon: Users, trend: '+12%', color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-500/10', progress: 75 },
+    { label: 'Articles Read', value: '89', icon: BookOpen, trend: '+23%', color: 'from-green-500 to-green-600', bgColor: 'bg-green-500/10', progress: 60 },
+    { label: 'Events Attended', value: '15', icon: Calendar, trend: '+5%', color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500/10', progress: 45 },
+    { label: 'Certifications', value: '3', icon: GraduationCap, trend: 'New!', color: 'from-orange-500 to-orange-600', bgColor: 'bg-orange-500/10', progress: 90 },
+  ];
+
+  const achievements = [
+    { title: 'Top Contributor', icon: Award, color: 'text-yellow-500', bgColor: 'bg-yellow-500/10' },
+    { title: 'Network Builder', icon: Users, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+    { title: 'Knowledge Seeker', icon: BookOpen, color: 'text-green-500', bgColor: 'bg-green-500/10' },
+    { title: 'Event Champion', icon: Sparkles, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   ];
 
   const activities = [
@@ -50,7 +64,9 @@ const Dashboard = () => {
       action: 'posted an update',
       time: '2 months ago',
       content: 'Why Trade Finance is popular... Yes, the Criminal Community swear by the documents.. Step into the dark side of the visible hiding in plain sight.....',
-      avatar: '/placeholder.svg'
+      avatar: '/placeholder.svg',
+      likes: 24,
+      comments: 8
     },
     {
       id: 2,
@@ -58,7 +74,9 @@ const Dashboard = () => {
       action: 'shared an article',
       time: '1 week ago',
       content: 'New regulations in trade finance: A comprehensive guide for 2024',
-      avatar: '/placeholder.svg'
+      avatar: '/placeholder.svg',
+      likes: 42,
+      comments: 15
     },
     {
       id: 3,
@@ -66,7 +84,9 @@ const Dashboard = () => {
       action: 'joined an event',
       time: '3 days ago',
       content: 'Global Trade Finance Summit 2024',
-      avatar: '/placeholder.svg'
+      avatar: '/placeholder.svg',
+      likes: 18,
+      comments: 5
     },
   ];
 
@@ -74,17 +94,23 @@ const Dashboard = () => {
     {
       title: 'Recent Recertification CDCS Courses and Events',
       date: 'April 3, 2022',
-      author: 'its.priyo'
+      author: 'its.priyo',
+      category: 'Certification',
+      readTime: '5 min'
     },
     {
       title: 'Users Guide to the eUCP',
       date: 'February 28, 2021',
-      author: 'Admin'
+      author: 'Admin',
+      category: 'Guidelines',
+      readTime: '8 min'
     },
     {
       title: 'Larger govt banks may acquire smaller peers',
       date: 'June 6, 2018',
-      author: 'Trade Desk'
+      author: 'Trade Desk',
+      category: 'News',
+      readTime: '4 min'
     },
   ];
 
@@ -92,40 +118,54 @@ const Dashboard = () => {
     {
       title: 'Trade Finance Masterclass',
       date: 'Nov 15, 2024',
-      attendees: 234
+      time: '10:00 AM EST',
+      attendees: 234,
+      category: 'Workshop'
     },
     {
       title: 'Digital Banking Summit',
       date: 'Nov 22, 2024',
-      attendees: 567
+      time: '2:00 PM EST',
+      attendees: 567,
+      category: 'Summit'
     },
     {
       title: 'Risk Management Workshop',
       date: 'Dec 1, 2024',
-      attendees: 189
+      time: '3:00 PM EST',
+      attendees: 189,
+      category: 'Workshop'
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/5 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-primary/3 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="professional-heading text-4xl text-primary mb-2">
+              <h1 className="professional-heading text-4xl text-primary mb-2 flex items-center gap-3">
+                <Sparkles className="h-10 w-10 text-accent animate-pulse" />
                 Welcome Back! 👋
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-lg">
                 {userEmail}
               </p>
             </div>
-            <Button className="bg-accent hover:bg-accent-hover text-accent-foreground shadow-elegant">
-              <Bell className="h-4 w-4 mr-2" />
+            <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-elegant text-primary-foreground shadow-lg hover:scale-105 transition-all duration-300">
+              <Bell className="h-4 w-4 mr-2 animate-bounce" />
               Notifications
-              <Badge className="ml-2 bg-red-500 text-white">3</Badge>
+              <Badge className="ml-2 bg-red-500 text-white animate-pulse">3</Badge>
             </Button>
           </div>
 
@@ -134,20 +174,40 @@ const Dashboard = () => {
             {stats.map((stat, index) => (
               <Card 
                 key={index} 
-                className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant hover:border-accent/50 transition-all duration-500 hover:-translate-y-1 animate-scale-in group"
+                className={`relative p-6 bg-card/90 backdrop-blur-sm border-border hover:border-accent/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl animate-scale-in group overflow-hidden ${mounted ? 'opacity-100' : 'opacity-0'}`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                {/* Gradient Background */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg`}>
+                      <stat.icon className="h-7 w-7 text-white" />
+                    </div>
+                    <Badge variant="secondary" className="text-xs font-semibold group-hover:scale-110 transition-transform bg-accent/10 text-accent border-accent/20">
+                      {stat.trend}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="text-xs group-hover:scale-110 transition-transform">
-                    {stat.trend}
-                  </Badge>
+                  <div>
+                    <p className="text-4xl font-bold text-primary mb-1 group-hover:scale-105 transition-transform">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{stat.label}</p>
+                    <Progress value={stat.progress} className="h-1.5" />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold text-primary mb-1 group-hover:scale-105 transition-transform">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+              </Card>
+            ))}
+          </div>
+
+          {/* Achievements Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            {achievements.map((achievement, index) => (
+              <Card key={index} className="p-4 bg-card/80 backdrop-blur-sm border-border hover:border-accent/50 transition-all duration-300 hover:scale-105 group cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg ${achievement.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <achievement.icon className={`h-5 w-5 ${achievement.color}`} />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">{achievement.title}</p>
                 </div>
               </Card>
             ))}
@@ -155,21 +215,21 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <TabsList className="bg-card border border-border mb-6">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <TabsList className="bg-card/80 backdrop-blur-sm border border-border mb-6 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground transition-all duration-300">
               <Activity className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="activity" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="activity" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground transition-all duration-300">
               <MessageSquare className="h-4 w-4 mr-2" />
               Activity Feed
             </TabsTrigger>
-            <TabsTrigger value="library" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="library" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground transition-all duration-300">
               <BookOpen className="h-4 w-4 mr-2" />
               Library
             </TabsTrigger>
-            <TabsTrigger value="events" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger value="events" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground transition-all duration-300">
               <Calendar className="h-4 w-4 mr-2" />
               Events
             </TabsTrigger>
@@ -179,45 +239,47 @@ const Dashboard = () => {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Quick Actions */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border">
+              <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300 animate-slide-in-left">
                 <h3 className="professional-heading text-xl text-primary mb-4 flex items-center">
-                  <Briefcase className="h-5 w-5 mr-2" />
+                  <Zap className="h-5 w-5 mr-2 text-accent" />
                   Quick Actions
                 </h3>
                 <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start hover:bg-accent/10 hover:border-accent transition-all group">
-                    <FileText className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
+                    <FileText className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
                     Browse Articles
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-start hover:bg-accent/10 hover:border-accent transition-all group">
-                    <Calendar className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
+                    <Calendar className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
                     Register for Events
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-start hover:bg-accent/10 hover:border-accent transition-all group">
-                    <Users className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
+                    <Users className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
                     Expand Network
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-start hover:bg-accent/10 hover:border-accent transition-all group">
-                    <GraduationCap className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
+                    <GraduationCap className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
                     Get Certified
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
                   </Button>
                 </div>
               </Card>
 
               {/* Performance Chart Placeholder */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border">
+              <Card className="p-6 bg-gradient-to-br from-card/90 to-accent/5 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300 animate-slide-in-right">
                 <h3 className="professional-heading text-xl text-primary mb-4 flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Your Activity
+                  <BarChart3 className="h-5 w-5 mr-2 text-accent" />
+                  Your Activity Trends
                 </h3>
-                <div className="h-64 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg flex items-center justify-center border border-border/50">
-                  <div className="text-center">
-                    <TrendingUp className="h-16 w-16 text-primary/30 mx-auto mb-4 animate-pulse" />
-                    <p className="text-muted-foreground">Activity chart visualization</p>
+                <div className="h-72 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-xl flex items-center justify-center border-2 border-dashed border-primary/20 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="text-center relative z-10">
+                    <TrendingUp className="h-20 w-20 text-accent/30 mx-auto mb-4 animate-pulse" />
+                    <p className="text-muted-foreground font-semibold">Activity chart visualization</p>
+                    <p className="text-xs text-muted-foreground mt-2">Track your engagement over time</p>
                   </div>
                 </div>
               </Card>
@@ -226,15 +288,15 @@ const Dashboard = () => {
 
           {/* Activity Feed Tab */}
           <TabsContent value="activity" className="space-y-4">
-            <Card className="p-6 bg-card/80 backdrop-blur-sm border-border">
+            <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="professional-heading text-xl text-primary flex items-center">
-                  <Activity className="h-5 w-5 mr-2" />
+                  <Activity className="h-5 w-5 mr-2 text-accent animate-pulse" />
                   Recent Activity
                 </h3>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">All Members</Button>
-                  <Button variant="outline" size="sm">Mentions</Button>
+                  <Button variant="outline" size="sm" className="hover:bg-accent/10 hover:border-accent">All Members</Button>
+                  <Button variant="outline" size="sm" className="hover:bg-accent/10 hover:border-accent">Mentions</Button>
                 </div>
               </div>
               
@@ -242,28 +304,30 @@ const Dashboard = () => {
                 {activities.map((activity, index) => (
                   <div 
                     key={activity.id} 
-                    className="flex gap-4 pb-6 border-b border-border last:border-0 animate-fade-in hover:bg-accent/5 p-4 rounded-lg transition-all"
+                    className="flex gap-4 pb-6 border-b border-border last:border-0 animate-fade-in hover:bg-accent/5 p-4 rounded-xl transition-all duration-300 hover:shadow-lg group"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <Avatar className="h-12 w-12 border-2 border-primary/20">
+                    <Avatar className="h-14 w-14 border-3 border-primary/30 group-hover:border-accent/50 group-hover:scale-110 transition-all ring-2 ring-background">
                       <AvatarImage src={activity.avatar} />
-                      <AvatarFallback>{activity.user[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-primary font-bold">{activity.user[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-primary">{activity.user}</span>
+                        <span className="font-semibold text-primary group-hover:text-accent transition-colors">{activity.user}</span>
                         <span className="text-muted-foreground text-sm">{activity.action}</span>
                         <span className="text-muted-foreground text-xs ml-auto">{activity.time}</span>
                       </div>
-                      <p className="text-muted-foreground text-sm leading-relaxed">{activity.content}</p>
-                      <div className="flex gap-4 mt-3">
-                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent">
-                          Like
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-3">{activity.content}</p>
+                      <div className="flex gap-6">
+                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent hover:bg-accent/10 h-8">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          {activity.likes} Likes
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent">
-                          Comment
+                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent hover:bg-accent/10 h-8">
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          {activity.comments} Comments
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent">
+                        <Button variant="ghost" size="sm" className="text-xs hover:text-accent hover:bg-accent/10 h-8">
                           Share
                         </Button>
                       </div>
@@ -276,34 +340,45 @@ const Dashboard = () => {
 
           {/* Library Tab */}
           <TabsContent value="library" className="space-y-4">
-            <Card className="p-6 bg-card/80 backdrop-blur-sm border-border">
+            <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300">
               <h3 className="professional-heading text-xl text-primary mb-6 flex items-center">
-                <BookOpen className="h-5 w-5 mr-2" />
+                <BookOpen className="h-5 w-5 mr-2 text-accent" />
                 Library: Articles
               </h3>
               
-              <div className="space-y-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {recentArticles.map((article, index) => (
-                  <div 
+                  <Card 
                     key={index} 
-                    className="flex items-start gap-4 p-4 bg-gradient-to-r from-accent/5 to-transparent border border-border rounded-lg hover:border-accent/50 hover:shadow-md transition-all cursor-pointer animate-fade-in group"
+                    className="p-5 bg-gradient-to-br from-accent/5 to-primary/5 border-border hover:border-accent/50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer animate-scale-in group"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                      <FileText className="h-6 w-6 text-primary" />
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">{article.category}</Badge>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <BookOpen className="h-3 w-3" />
+                        {article.readTime}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-primary mb-2 group-hover:text-accent transition-colors">
-                        {article.title}
-                      </h4>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>Posted by {article.author}</span>
-                        <span>•</span>
-                        <span>{article.date}</span>
-                      </div>
+                    
+                    <h4 className="font-semibold text-primary mb-3 group-hover:text-accent transition-colors line-clamp-2 min-h-[3rem]">
+                      {article.title}
+                    </h4>
+                    
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {article.author}
+                      </span>
+                      <span>•</span>
+                      <span>{article.date}</span>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                  </div>
+                    
+                    <Button size="sm" variant="outline" className="w-full group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-accent transition-all">
+                      Read Article
+                      <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Card>
                 ))}
               </div>
             </Card>
@@ -311,34 +386,51 @@ const Dashboard = () => {
 
           {/* Events Tab */}
           <TabsContent value="events" className="space-y-4">
-            <Card className="p-6 bg-card/80 backdrop-blur-sm border-border">
+            <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300">
               <h3 className="professional-heading text-xl text-primary mb-6 flex items-center">
-                <Calendar className="h-5 w-5 mr-2" />
+                <Calendar className="h-5 w-5 mr-2 text-accent" />
                 Upcoming Events
               </h3>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {upcomingEvents.map((event, index) => (
                   <Card 
                     key={index} 
-                    className="p-5 bg-gradient-to-br from-primary/5 to-accent/5 border-border hover:shadow-elegant hover:border-accent/50 transition-all hover:-translate-y-1 cursor-pointer animate-scale-in group"
+                    className="relative p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-border hover:border-accent/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer animate-scale-in group overflow-hidden"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Calendar className="h-6 w-6 text-accent" />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/0 to-primary/0 group-hover:from-accent/10 group-hover:to-primary/10 transition-all duration-500"></div>
+                    
+                    <div className="relative">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg">
+                          <Calendar className="h-7 w-7 text-white" />
+                        </div>
+                        <Badge variant="secondary" className="text-xs bg-accent/10 text-accent border-accent/20">
+                          {event.attendees} attending
+                        </Badge>
                       </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {event.attendees} attending
-                      </Badge>
+                      
+                      <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 text-xs">{event.category}</Badge>
+                      
+                      <h4 className="font-semibold text-primary mb-2 group-hover:text-accent transition-colors">
+                        {event.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
+                        <Calendar className="h-3 w-3" />
+                        {event.date}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-4 flex items-center gap-2">
+                        <Target className="h-3 w-3" />
+                        {event.time}
+                      </p>
+                      
+                      <Button size="sm" className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground group-hover:scale-105 transition-all">
+                        <Sparkles className="h-3 w-3 mr-2" />
+                        Register Now
+                      </Button>
                     </div>
-                    <h4 className="font-semibold text-primary mb-2 group-hover:text-accent transition-colors">
-                      {event.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground mb-3">{event.date}</p>
-                    <Button size="sm" variant="outline" className="w-full group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
-                      Register Now
-                    </Button>
                   </Card>
                 ))}
               </div>
