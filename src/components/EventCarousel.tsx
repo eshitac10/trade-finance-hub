@@ -35,30 +35,30 @@ const EventCarousel = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-96 lg:h-[500px] overflow-hidden bg-muted rounded-lg shadow-elegant">
+    <div className="relative w-full h-96 lg:h-[500px] overflow-hidden bg-muted rounded-2xl shadow-premium group">
       {/* Images */}
       <div className="relative h-full">
         {slides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-500 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            className={`absolute inset-0 transition-all duration-700 ${
+              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
             <img
               src={slide.image}
               alt={slide.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             
             {/* Content Overlay */}
             <div className="absolute inset-0 flex items-end">
-              <div className="p-8 text-white">
-                <h3 className="text-2xl md:text-3xl font-bold mb-2">
+              <div className="p-8 md:p-12 text-white transform transition-transform duration-500 group-hover:translate-y-0">
+                <h3 className="professional-heading text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg">
                   {slide.title}
                 </h3>
-                <p className="text-lg text-gray-200">
+                <p className="text-lg md:text-xl text-white/90 drop-shadow-md">
                   {slide.description}
                 </p>
               </div>
@@ -71,7 +71,7 @@ const EventCarousel = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2"
+        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 backdrop-blur-md text-white p-3 rounded-full border border-white/20 transition-all duration-300 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
         onClick={prevSlide}
       >
         <ChevronLeft className="h-6 w-6" />
@@ -80,19 +80,21 @@ const EventCarousel = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2"
+        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/25 backdrop-blur-md text-white p-3 rounded-full border border-white/20 transition-all duration-300 hover:scale-110 shadow-lg opacity-0 group-hover:opacity-100"
         onClick={nextSlide}
       >
         <ChevronRight className="h-6 w-6" />
       </Button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full">
         {slides.map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              index === currentSlide ? 'bg-white' : 'bg-white/50'
+            className={`transition-all duration-300 rounded-full ${
+              index === currentSlide 
+                ? 'w-8 h-3 bg-white' 
+                : 'w-3 h-3 bg-white/50 hover:bg-white/70'
             }`}
             onClick={() => setCurrentSlide(index)}
           />

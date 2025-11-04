@@ -95,22 +95,22 @@ const Forum = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="professional-heading text-4xl text-primary mb-2 flex items-center gap-3">
-            <MessageSquare className="h-10 w-10" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Enhanced Header */}
+        <div className="mb-12 animate-fade-up space-y-3">
+          <h1 className="professional-heading text-5xl text-primary mb-3 flex items-center gap-4">
+            <MessageSquare className="h-12 w-12" />
             Forum
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Engage in discussions with trade finance professionals
           </p>
         </div>
 
-        {/* Forum Categories Table */}
-        <Card className="mb-8 overflow-hidden bg-card/80 backdrop-blur-sm border-border animate-scale-in">
-          <div className="bg-primary text-primary-foreground px-6 py-4">
-            <h2 className="professional-heading text-xl">Discussion Forums</h2>
+        {/* Enhanced Forum Categories Table */}
+        <Card className="mb-10 overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl">
+          <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-5">
+            <h2 className="professional-heading text-2xl">Discussion Forums</h2>
           </div>
           
           <div className="overflow-x-auto">
@@ -127,7 +127,7 @@ const Forum = () => {
                 {forumCategories.map((category, index) => (
                   <tr 
                     key={category.id} 
-                    className="hover:bg-accent/5 transition-colors cursor-pointer animate-fade-in"
+                    className="hover:bg-accent/10 transition-all duration-300 cursor-pointer animate-fade-in hover:shadow-sm"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <td className="px-6 py-5">
@@ -166,10 +166,10 @@ const Forum = () => {
           </div>
         </Card>
 
-        {/* Recent Topics Section */}
-        <Card className="overflow-hidden bg-card/80 backdrop-blur-sm border-border animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="bg-primary text-primary-foreground px-6 py-4">
-            <h2 className="professional-heading text-xl">Topics On the Forums</h2>
+        {/* Enhanced Recent Topics Section */}
+        <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-fade-in rounded-2xl" style={{ animationDelay: '0.3s' }}>
+          <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-5">
+            <h2 className="professional-heading text-2xl">Topics On the Forums</h2>
           </div>
           
           <div className="overflow-x-auto">
@@ -185,7 +185,7 @@ const Forum = () => {
                 {recentTopics.map((topic, index) => (
                   <tr 
                     key={topic.id} 
-                    className="hover:bg-accent/5 transition-colors cursor-pointer animate-fade-in"
+                    className="hover:bg-accent/10 transition-all duration-300 cursor-pointer animate-fade-in hover:shadow-sm"
                     style={{ animationDelay: `${(index + 3) * 0.1}s` }}
                   >
                     <td className="px-6 py-4">
@@ -213,10 +213,10 @@ const Forum = () => {
           </div>
         </Card>
 
-        {/* Create New Topic Button */}
-        <div className="mt-8 flex justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground">
-            <MessageSquare className="h-5 w-5 mr-2" />
+        {/* Enhanced Create New Topic Button */}
+        <div className="mt-12 flex justify-center animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-premium hover:-translate-y-1 transition-all duration-500 text-primary-foreground px-10 py-6 text-lg rounded-xl group">
+            <MessageSquare className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform" />
             Start New Discussion
           </Button>
         </div>

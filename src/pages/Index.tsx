@@ -127,33 +127,34 @@ const Index = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Hero Section with Gradient */}
-      <section className="relative bg-gradient-hero py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA1IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20 animate-float"></div>
+      {/* Hero Section with Enhanced Gradient */}
+      <section className="relative bg-gradient-hero py-28 lg:py-40 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA4IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20 animate-float"></div>
         
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-primary-foreground/10 rounded-full blur-3xl animate-float-delayed"></div>
+        {/* Enhanced Floating Elements */}
+        <div className="absolute top-20 left-10 w-40 h-40 bg-accent/15 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-52 h-52 bg-primary-foreground/15 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-primary-foreground/10 rounded-full blur-2xl animate-float"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="professional-heading text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 tracking-tight animate-fade-in">
+          <div className="text-center space-y-8">
+            <h1 className="professional-heading text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-8 tracking-tight animate-fade-up drop-shadow-2xl">
               Trade Finance World
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-12 leading-relaxed animate-fade-up drop-shadow-lg" style={{ animationDelay: '0.15s' }}>
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
-            <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
               <Button 
                 size="lg" 
                 onClick={() => setShowLoginDialog(true)}
-                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-12 py-6 text-lg shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group relative overflow-hidden"
+                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-14 py-7 text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center">
                   Login to Continue
-                  <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-accent-hover to-accent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </Button>
             </div>
 
@@ -162,116 +163,123 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section with Counters */}
-      <section className="py-16 bg-secondary border-y border-border relative overflow-hidden">
-        {/* Decorative Background */}
+      {/* Stats Section with Enhanced Design */}
+      <section className="py-20 bg-gradient-to-br from-secondary via-secondary/80 to-secondary border-y border-border relative overflow-hidden">
+        {/* Enhanced Decorative Background */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary via-transparent to-accent"></div>
         </div>
+        <div className="absolute top-10 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 left-10 w-72 h-72 bg-accent/5 rounded-full blur-3xl"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.1s' }}>
+          <div className="grid md:grid-cols-4 gap-10 text-center">
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-6 rounded-2xl hover:bg-background/40 hover:shadow-elegant backdrop-blur-sm" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
-                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">10,000+</div>
-                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">10,000+</div>
+                <div className="h-1.5 w-20 bg-gradient-primary mx-auto mb-4 rounded-full group-hover:w-28 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-medium">Global Members</div>
+              <div className="text-muted-foreground font-semibold text-base">Global Members</div>
             </div>
-            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.2s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-6 rounded-2xl hover:bg-background/40 hover:shadow-elegant backdrop-blur-sm" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
-                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">50+</div>
-                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">50+</div>
+                <div className="h-1.5 w-20 bg-gradient-primary mx-auto mb-4 rounded-full group-hover:w-28 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-medium">Countries Represented</div>
+              <div className="text-muted-foreground font-semibold text-base">Countries Represented</div>
             </div>
-            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.3s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-6 rounded-2xl hover:bg-background/40 hover:shadow-elegant backdrop-blur-sm" style={{ animationDelay: '0.3s' }}>
               <div className="relative">
-                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">200+</div>
-                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">200+</div>
+                <div className="h-1.5 w-20 bg-gradient-primary mx-auto mb-4 rounded-full group-hover:w-28 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-medium">Annual Events</div>
+              <div className="text-muted-foreground font-semibold text-base">Annual Events</div>
             </div>
-            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.4s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-6 rounded-2xl hover:bg-background/40 hover:shadow-elegant backdrop-blur-sm" style={{ animationDelay: '0.4s' }}>
               <div className="relative">
-                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">25+</div>
-                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">25+</div>
+                <div className="h-1.5 w-20 bg-gradient-primary mx-auto mb-4 rounded-full group-hover:w-28 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-medium">Years of Excellence</div>
+              <div className="text-muted-foreground font-semibold text-base">Years of Excellence</div>
             </div>
           </div>
         </div>
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Event Carousel Section */}
-        <section className="py-20">
-          <div className="text-center mb-12">
-            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-4">
+        {/* Event Carousel Section with Enhanced Spacing */}
+        <section className="py-24">
+          <div className="text-center mb-16 space-y-4 animate-fade-up">
+            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-5">
               Recent Events & Gatherings
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Bringing together industry leaders and professionals from across the globe
             </p>
           </div>
-          <EventCarousel />
+          <div className="animate-scale-in">
+            <EventCarousel />
+          </div>
         </section>
 
-        {/* Value Propositions */}
-        <section className="py-20">
-          <div className="text-center mb-16">
-            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-4">
+        {/* Value Propositions with Premium Design */}
+        <section className="py-24">
+          <div className="text-center mb-20 space-y-5 animate-fade-up">
+            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-5">
               Why Join Trade Finance World
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Empowering professionals with the resources and connections needed to excel
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="grid md:grid-cols-3 gap-10">
+            <div className="group p-10 bg-card rounded-2xl shadow-elegant border border-border hover:shadow-premium hover:border-accent/60 transition-all duration-700 hover:-translate-y-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
-                  <Users className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-gradient-to-br group-hover:from-primary/30 group-hover:to-accent/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 shadow-elegant">
+                  <Users className="h-10 w-10 text-primary" />
                 </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
+              <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
                 Expert Network
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 Connect with leading professionals in trade finance and banking. Build meaningful relationships that drive your career forward.
               </p>
               </div>
             </div>
             
-            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="group p-10 bg-card rounded-2xl shadow-elegant border border-border hover:shadow-premium hover:border-accent/60 transition-all duration-700 hover:-translate-y-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
-                  <BookOpen className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-gradient-to-br group-hover:from-primary/30 group-hover:to-accent/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 shadow-elegant">
+                  <BookOpen className="h-10 w-10 text-primary" />
                 </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
+              <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
                 Educational Resources
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 Access exclusive articles, webinars, and industry insights. Stay ahead with cutting-edge knowledge and best practices.
               </p>
               </div>
             </div>
             
-            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.3s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="group p-10 bg-card rounded-2xl shadow-elegant border border-border hover:shadow-premium hover:border-accent/60 transition-all duration-700 hover:-translate-y-4 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
-                  <Globe2 className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-gradient-to-br group-hover:from-primary/30 group-hover:to-accent/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 shadow-elegant">
+                  <Globe2 className="h-10 w-10 text-primary" />
                 </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
+              <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
                 Global Events
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed text-base">
                 Join conferences, seminars, and networking opportunities worldwide. Engage with thought leaders and shape the future of trade finance.
               </p>
               </div>
@@ -279,37 +287,42 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Additional Benefits */}
-        <section className="py-20 bg-secondary/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 rounded-2xl">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="h-6 w-6 text-accent" />
+        {/* Additional Benefits with Premium Card Design */}
+        <section className="py-24 bg-gradient-to-br from-secondary/60 via-secondary/40 to-secondary/60 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 rounded-3xl relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="grid md:grid-cols-3 gap-10">
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/40 backdrop-blur-sm border border-border/50 hover:border-accent/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 group">
+                <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-primary/20 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-professional">
+                  <TrendingUp className="h-8 w-8 text-accent" />
                 </div>
                 <div>
-                  <h4 className="font-display font-semibold text-lg text-primary mb-2">Industry Insights</h4>
-                  <p className="text-muted-foreground text-sm">Access real-time market analysis and expert commentary on emerging trends</p>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Industry Insights</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Access real-time market analysis and expert commentary on emerging trends</p>
                 </div>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Shield className="h-6 w-6 text-accent" />
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/40 backdrop-blur-sm border border-border/50 hover:border-accent/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 group">
+                <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-primary/20 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-professional">
+                  <Shield className="h-8 w-8 text-accent" />
                 </div>
                 <div>
-                  <h4 className="font-display font-semibold text-lg text-primary mb-2">Trusted Community</h4>
-                  <p className="text-muted-foreground text-sm">Join a vetted network of verified professionals and institutions</p>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Trusted Community</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Join a vetted network of verified professionals and institutions</p>
                 </div>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Award className="h-6 w-6 text-accent" />
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/40 backdrop-blur-sm border border-border/50 hover:border-accent/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 group">
+                <div className="w-16 h-16 bg-gradient-to-br from-accent/20 to-primary/20 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-professional">
+                  <Award className="h-8 w-8 text-accent" />
                 </div>
                 <div>
-                  <h4 className="font-display font-semibold text-lg text-primary mb-2">Professional Development</h4>
-                  <p className="text-muted-foreground text-sm">Elevate your expertise with certifications and specialized training programs</p>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Professional Development</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Elevate your expertise with certifications and specialized training programs</p>
                 </div>
               </div>
             </div>

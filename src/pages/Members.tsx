@@ -130,63 +130,63 @@ const Members = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="professional-heading text-4xl text-primary mb-2 flex items-center gap-3">
-            <Users className="h-10 w-10" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Enhanced Header */}
+        <div className="mb-12 animate-fade-up space-y-3">
+          <h1 className="professional-heading text-5xl text-primary mb-3 flex items-center gap-4">
+            <Users className="h-12 w-12" />
             Members Directory
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Browse {members.length}+ trade finance professionals
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-scale-in">
-          <Card className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
+        {/* Enhanced Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 animate-scale-in">
+          <Card className="p-8 bg-card/90 backdrop-blur-sm border-border hover:shadow-premium hover:border-accent/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-elegant">
+                <Users className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="text-3xl font-bold text-primary">{members.length}</p>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-4xl font-bold text-primary">{members.length}</p>
+                <p className="text-base text-muted-foreground font-medium">Total Members</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Search */}
-        <Card className="p-6 mb-8 bg-card/80 backdrop-blur-sm border-border animate-fade-in">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Enhanced Search */}
+        <Card className="p-8 mb-10 bg-card/90 backdrop-blur-sm border-border animate-fade-in shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
+          <div className="relative w-full md:w-2/3 lg:w-1/2">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-background/50"
+              className="pl-12 pr-4 py-6 bg-background/50 text-base rounded-xl border-border focus:border-accent transition-all"
             />
           </div>
         </Card>
 
-        {/* Members Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Enhanced Members Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredMembers.map((member, index) => (
             <Card 
               key={member.id}
-              className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 animate-scale-in group cursor-pointer"
-              style={{ animationDelay: `${index * 0.05}s` }}
+              className="p-8 bg-card/90 backdrop-blur-sm border-border hover:shadow-premium hover:border-accent/60 transition-all duration-500 hover:-translate-y-3 animate-scale-in group cursor-pointer rounded-2xl"
+              style={{ animationDelay: `${index * 0.03}s` }}
             >
               <div className="flex flex-col items-center text-center">
-                <Avatar className="h-20 w-20 mb-4 border-4 border-primary/20 group-hover:border-accent/50 transition-all group-hover:scale-110">
+                <Avatar className="h-24 w-24 mb-5 border-4 border-primary/20 group-hover:border-accent/60 transition-all duration-500 group-hover:scale-110 shadow-elegant">
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
+                  <AvatarFallback className="bg-gradient-to-br from-primary/15 to-accent/15 text-primary text-xl font-semibold">
                     {member.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 
-                <h3 className="font-semibold text-primary group-hover:text-accent transition-colors">
+                <h3 className="font-semibold text-base text-primary group-hover:text-accent transition-colors duration-300">
                   {member.name}
                 </h3>
               </div>
