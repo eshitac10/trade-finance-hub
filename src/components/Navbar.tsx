@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Youtube, Mail, LogIn, LogOut } from 'lucide-react';
+import { ChevronDown, Youtube, Mail, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +23,135 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import tfwLogo from '@/assets/tfv-logo.png';
+
+const members = [
+  {
+    name: "Priyanka Chaudhuri",
+    activity: "Active right now",
+    post: "13th TFW Webinar: Non-Payment Insurance and consequential Regulatory Capital Relief on Saturday, 24th Sep' 2022 Deck: https://drive.google.com/file/d/1Pq5hH09aXQtWBtdcXzwS2sxvRjxHVxmW/view?usp=sharing Audio: […]"
+  },
+  { name: "KhushnamaZDavar", activity: "Active 1 week, 5 days ago" },
+  { name: "BHASKAR DAS", activity: "Active 1 month, 1 week ago" },
+  { name: "shudeepghosh@gmail.com", activity: "Active 1 month, 1 week ago" },
+  { name: "SuperAdmin", activity: "Active 2 months ago" },
+  {
+    name: "GaneshVishwanathan",
+    activity: "Active 2 months, 1 week ago",
+    post: "GREENING THE FINANCIAL SYSTEM Do you know, regulators the world over have gotten together to form a forum for greening the financial system… The thrust is on climate risk management by financial institutions all […]"
+  },
+  { name: "KEswar", activity: "Active 1 year, 6 months ago" },
+  { name: "AmishaShah", activity: "Active 1 year, 11 months ago" },
+  { name: "RajeshIyer", activity: "Active 2 years ago" },
+  { name: "ZaheerSarguroh", activity: "Active 2 years, 1 month ago" },
+  { name: "AbrarAhmed", activity: "Active 2 years, 1 month ago" },
+  {
+    name: "Andre Casterman",
+    activity: "Active 2 years, 2 months ago",
+    post: "DNI Initiative attracts 12 additional institutions committed to drive adoption of MLETR https://www.linkedin.com/pulse/dni-initiative-attracts-12-additional-institutions-drive-casterman/"
+  },
+  { name: "SaurabhSharma", activity: "Active 2 years, 2 months ago" },
+  { name: "Sridhar S", activity: "Active 2 years, 2 months ago" },
+  { name: "Bharat Chandela", activity: "Active 2 years, 4 months ago" },
+  { name: "Parameswaran", activity: "Active 2 years, 6 months ago" },
+  { name: "Sureshkapoor966@gmail.com", activity: "Active 2 years, 6 months ago" },
+  { name: "Sunil Makhecha", activity: "Active 2 years, 6 months ago" },
+  {
+    name: "Kashinath Katakdhond",
+    activity: "Active 2 years, 9 months ago",
+    post: "Central Bank Digital Currency – U.S., Europe, England, Japan, Switzerland, Canada and Sweden, and the Bank for International Settlements Sharing link as the file size is big and the report cannot be […]"
+  },
+  { name: "SridharK", activity: "Active 3 years, 1 month ago" },
+  { name: "Kishor Parulekar", activity: "Active 3 years, 1 month ago" },
+  { name: "Chandra Sekhar Pentakota", activity: "Active 3 years, 2 months ago" },
+  { name: "Vishal Raipure", activity: "Active 3 years, 7 months ago" },
+  { name: "Vimal Karimbil", activity: "Active 3 years, 7 months ago" },
+  { name: "Krishnakumar Duraiswamy (KK)", activity: "Active 3 years, 7 months ago" },
+  { name: "SandipChauhan", activity: "Active 3 years, 8 months ago" },
+  { name: "SunilKumarJain", activity: "Active 3 years, 9 months ago" },
+  { name: "RajeswariKesavan", activity: "Active 3 years, 9 months ago" },
+  { name: "JayantMehrotra", activity: "Active 3 years, 10 months ago" },
+  { name: "ParshantMittal", activity: "Active 4 years ago" },
+  { name: "Srinath Keshavan", activity: "Active 4 years, 1 month ago" },
+  { name: "ShirazPercyBadhniwalla", activity: "Active 4 years, 1 month ago" },
+  { name: "YogeshBelekar", activity: "Active 4 years, 1 month ago" },
+  { name: "SunilSenapati", activity: "Active 4 years, 5 months ago" },
+  { name: "AshwaniSindhwani", activity: "Active 4 years, 6 months ago" },
+  { name: "Ajitabh Bharti", activity: "Active 4 years, 8 months ago" },
+  { name: "Abin Daya", activity: "Active 4 years, 10 months ago" },
+  { name: "Richa Mukherjee", activity: "Active 4 years, 10 months ago" },
+  { name: "RChandraSekhar", activity: "Active 4 years, 11 months ago" },
+  { name: "GurudattSamant", activity: "Active 5 years, 1 month ago" },
+  { name: "SripadMurthy", activity: "Active 5 years, 1 month ago" },
+  { name: "KishorPradhan", activity: "Active 5 years, 1 month ago" },
+  { name: "ShilpaSadh", activity: "Active 5 years, 2 months ago" },
+  { name: "Shantanu Pradhan", activity: "Active 5 years, 2 months ago" },
+  { name: "naren_juria@yahoo.com", activity: "Active 5 years, 2 months ago" },
+  { name: "AmarNathDhar", activity: "Active 5 years, 2 months ago" },
+  { name: "Pinaki Roy", activity: "Active 5 years, 2 months ago" },
+  { name: "H D Rathi", activity: "Active 5 years, 2 months ago" },
+  { name: "Ashok Mogal", activity: "Active 5 years, 2 months ago" },
+  { name: "Sugandha Sinha", activity: "Active 5 years, 2 months ago" },
+  { name: "Sanjay Sinha", activity: "Active 5 years, 2 months ago" },
+  { name: "ShyamaleshKumarChoudhury", activity: "Active 5 years, 2 months ago" },
+  {
+    name: "GSubramaniam",
+    activity: "Active 5 years, 4 months ago",
+    post: "Just wondering whether Gyroscopes are used on such ships to prevent the roll . An engineering problem that Feynman may have solved by ensuring that the the design of ship moves the slurry in adjacent modules to […]"
+  },
+  { name: "VikramMurarka", activity: "Active 5 years, 4 months ago" },
+  { name: "GoutamChakraborty", activity: "Active 5 years, 4 months ago" },
+  { name: "Rahul Gupta", activity: "Active 5 years, 4 months ago" },
+  { name: "SurathSengupta", activity: "Active 5 years, 4 months ago" },
+  { name: "Parvaiz", activity: "Active 5 years, 4 months ago" },
+  {
+    name: "AlexanderRMalaket",
+    activity: "Active 5 years, 4 months ago",
+    post: "And just for the fun of it…I hesitate to do this among such an illustrious and expert group of trade finance practitioners – but a small piece of history, something authored perhaps ten years ago that may even […]"
+  },
+  { name: "Anish", activity: "Active 5 years, 4 months ago" },
+  { name: "PrashantPillai", activity: "Active 5 years, 4 months ago" },
+  { name: "RekhaRamanathan", activity: "Active 5 years, 4 months ago" },
+  { name: "BasudevBhattacharya", activity: "Active 5 years, 4 months ago" },
+  { name: "KetanGaikwad", activity: "Active 5 years, 4 months ago" },
+  { name: "Alexander Goulandris", activity: "Active 5 years, 4 months ago" },
+  { name: "SandeepSahu", activity: "Active 5 years, 4 months ago" },
+  { name: "Atul Deshpande", activity: "Active 5 years, 4 months ago" },
+  { name: "SantoshAbraham", activity: "Active 5 years, 4 months ago" },
+  { name: "JaccoDeJong", activity: "Active 5 years, 4 months ago" },
+  { name: "MritunjaySingh", activity: "Active 5 years, 4 months ago" },
+  { name: "RanadeepMookerjee", activity: "Active 5 years, 4 months ago" },
+  { name: "UtpalKant", activity: "Active 5 years, 4 months ago" },
+  { name: "VikramLodha", activity: "Active 5 years, 4 months ago" },
+  { name: "HunyGarg", activity: "Active 5 years, 4 months ago" },
+  { name: "VineetSharma", activity: "Active 5 years, 4 months ago" },
+  { name: "VikramBose", activity: "Active 5 years, 4 months ago" },
+  { name: "VijayandarMotamari", activity: "Active 5 years, 5 months ago" },
+  { name: "SanjoyBanerjee", activity: "Active 5 years, 5 months ago" },
+  { name: "DimpleChitnis", activity: "Active 5 years, 5 months ago" },
+  { name: "SunnyGupta", activity: "Active 5 years, 5 months ago" },
+  { name: "DipankarDutta", activity: "Active 5 years, 5 months ago" },
+  { name: "SatyabrataBaruah", activity: "Active 5 years, 5 months ago" },
+  { name: "Venkatesh Balasubramaniam", activity: "Active 5 years, 5 months ago" },
+  { name: "VivekGupta", activity: "Active 5 years, 5 months ago" },
+  { name: "KSujatha", activity: "Active 5 years, 5 months ago" },
+  { name: "ImranKhan", activity: "Active 5 years, 5 months ago" },
+  { name: "RinsiSud", activity: "Active 5 years, 5 months ago" },
+  { name: "ParthasarathiMukherjee", activity: "Active 5 years, 5 months ago" },
+  { name: "GaryCutress", activity: "Active 5 years, 5 months ago" },
+  { name: "NVChandramouli", activity: "Active 5 years, 5 months ago" },
+  { name: "BUlagiyan", activity: "Active 5 years, 5 months ago" },
+  { name: "PARTHA BHATTACHARYYA", activity: "Active 5 years, 5 months ago" },
+  { name: "BrandonFeng", activity: "Active 5 years, 5 months ago" },
+  { name: "SatishKumarN", activity: "Active 5 years, 5 months ago" },
+  { name: "Nimesh Karwanyun", activity: "Active 5 years, 5 months ago" },
+  { name: "SrikanthRajan", activity: "Active 5 years, 5 months ago" },
+  { name: "PraveenGupta", activity: "Active 5 years, 5 months ago" },
+  { name: "VinitMishra", activity: "Active 5 years, 5 months ago" },
+  { name: "Krishnamoorthy S", activity: "Active 5 years, 5 months ago" },
+  { name: "LaxmanJoshi", activity: "Active 5 years, 5 months ago" },
+  { name: "Nita chavan", activity: "Active 7 years, 4 months ago" },
+  { name: "Ayalur Vasudevan", activity: "Active 7 years, 4 months ago" },
+];
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -199,6 +331,64 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Members Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1 font-medium">
+                  <span>Members</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-96 bg-background border border-border shadow-elegant z-50 max-h-[600px]">
+                <ScrollArea className="h-[550px]">
+                  <div className="p-2 space-y-2">
+                    {members.map((member, index) => (
+                      <div 
+                        key={index}
+                        className="p-3 rounded-lg hover:bg-secondary/50 transition-colors border border-transparent hover:border-accent/30"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10 border-2 border-primary/20">
+                            <AvatarImage src="/placeholder.svg" />
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {member.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <p className="font-semibold text-sm text-primary truncate">
+                                {member.name}
+                              </p>
+                              {member.activity === "Active right now" && (
+                                <Badge variant="secondary" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
+                                  Online
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {member.activity}
+                            </p>
+                            {member.post && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 mb-2 italic">
+                                "{member.post}"
+                              </p>
+                            )}
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-7 text-xs hover:bg-accent/10 hover:border-accent"
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              Add Friend
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* Social Media Icons */}
             <div className="flex items-center space-x-3 ml-8">
               <Button
