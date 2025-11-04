@@ -11,12 +11,20 @@ const EventCarousel = () => {
     {
       image: tfwAnniversary1,
       title: "6th Anniversary of TFW",
-      description: "Celebrating six years of excellence in trade finance"
+      description: "Celebrating six years of excellence in trade finance",
+      type: "image"
+    },
+    {
+      video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      title: "Trade Finance in Action",
+      description: "Discover how we're transforming global trade",
+      type: "video"
     },
     {
       image: tfwAnniversary2,
       title: "6th Anniversary of TFW",
-      description: "Industry leaders gathering to commemorate our milestone"
+      description: "Industry leaders gathering to commemorate our milestone",
+      type: "image"
     }
   ];
 
@@ -36,7 +44,7 @@ const EventCarousel = () => {
 
   return (
     <div className="relative w-full h-96 lg:h-[500px] overflow-hidden bg-muted rounded-2xl shadow-premium group">
-      {/* Images */}
+      {/* Images & Videos */}
       <div className="relative h-full">
         {slides.map((slide, index) => (
           <div
@@ -45,11 +53,22 @@ const EventCarousel = () => {
               index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            {slide.type === 'video' ? (
+              <video
+                src={slide.video}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             
             {/* Content Overlay */}
