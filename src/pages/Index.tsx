@@ -1,12 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background">{/* ... keep existing code */}
       <Navbar />
       
       {/* Hero Section with Gradient */}
@@ -26,36 +47,69 @@ const Index = () => {
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
-              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group">
-                Join Our Community <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Button 
+                size="lg" 
+                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group relative overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center">
+                  Join Our Community 
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-accent-hover to-accent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </Button>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1">
-                Upcoming Events
+              <Button 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 relative overflow-hidden group"
+              >
+                <span className="relative z-10">Upcoming Events</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white to-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </Button>
+            </div>
+
+            {/* Scroll Indicator */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+              <ChevronDown className="h-8 w-8 text-primary-foreground/50" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-secondary border-y border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Stats Section with Counters */}
+      <section className="py-16 bg-secondary border-y border-border relative overflow-hidden">
+        {/* Decorative Background */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary via-transparent to-accent"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.1s' }}>
-              <div className="text-4xl font-display font-bold text-primary mb-2">10,000+</div>
-              <div className="text-muted-foreground">Global Members</div>
+            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.1s' }}>
+              <div className="relative">
+                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">10,000+</div>
+                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+              </div>
+              <div className="text-muted-foreground font-medium">Global Members</div>
             </div>
-            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.2s' }}>
-              <div className="text-4xl font-display font-bold text-primary mb-2">50+</div>
-              <div className="text-muted-foreground">Countries Represented</div>
+            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.2s' }}>
+              <div className="relative">
+                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">50+</div>
+                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+              </div>
+              <div className="text-muted-foreground font-medium">Countries Represented</div>
             </div>
-            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.3s' }}>
-              <div className="text-4xl font-display font-bold text-primary mb-2">200+</div>
-              <div className="text-muted-foreground">Annual Events</div>
+            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.3s' }}>
+              <div className="relative">
+                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">200+</div>
+                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+              </div>
+              <div className="text-muted-foreground font-medium">Annual Events</div>
             </div>
-            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.4s' }}>
-              <div className="text-4xl font-display font-bold text-primary mb-2">25+</div>
-              <div className="text-muted-foreground">Years of Excellence</div>
+            <div className="group animate-slide-up hover:scale-110 transition-all duration-500 cursor-default" style={{ animationDelay: '0.4s' }}>
+              <div className="relative">
+                <div className="text-5xl font-display font-bold text-primary mb-2 group-hover:scale-125 transition-transform duration-500">25+</div>
+                <div className="h-1 w-16 bg-gradient-primary mx-auto mb-3 group-hover:w-24 transition-all duration-500"></div>
+              </div>
+              <div className="text-muted-foreground font-medium">Years of Excellence</div>
             </div>
           </div>
         </div>
@@ -87,40 +141,53 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                <Users className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4">
+            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
+              {/* Gradient Overlay on Hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
                 Expert Network
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Connect with leading professionals in trade finance and banking. Build meaningful relationships that drive your career forward.
               </p>
+              </div>
             </div>
             
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                <BookOpen className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4">
+            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
+                  <BookOpen className="h-8 w-8 text-primary" />
+                </div>
+              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
                 Educational Resources
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Access exclusive articles, webinars, and industry insights. Stay ahead with cutting-edge knowledge and best practices.
               </p>
+              </div>
             </div>
             
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                <Globe2 className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="professional-heading text-2xl text-primary mb-4">
+            <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-125 group-hover:rotate-6 transition-all duration-500 shadow-professional">
+                  <Globe2 className="h-8 w-8 text-primary" />
+                </div>
+              <h3 className="professional-heading text-2xl text-primary mb-4 group-hover:text-accent transition-colors duration-300">
                 Global Events
               </h3>
               <p className="text-muted-foreground leading-relaxed">
                 Join conferences, seminars, and networking opportunities worldwide. Engage with thought leaders and shape the future of trade finance.
               </p>
+              </div>
             </div>
           </div>
         </section>

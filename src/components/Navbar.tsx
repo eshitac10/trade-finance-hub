@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Youtube, Mail, LogIn } from 'lucide-react';
+import { ChevronDown, Youtube, Mail, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,6 +25,17 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    navigate('/login');
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -217,15 +228,27 @@ const Navbar = () => {
 
             {/* Auth Button */}
             <div className="flex items-center ml-4 border-l border-border pl-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
-                onClick={() => navigate('/login')}
-              >
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
-              </Button>
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-foreground hover:text-destructive font-medium hover:scale-105 transition-all"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
+                  onClick={() => navigate('/login')}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              )}
             </div>
           </div>
 
