@@ -54,7 +54,21 @@ const Navbar = () => {
       whatsapp: 'https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!',
       email: 'mailto:contact@tradefinanceworld.com'
     };
-    window.open(urls[platform as keyof typeof urls], '_blank', 'noopener,noreferrer');
+    const url = urls[platform as keyof typeof urls];
+    try {
+      const win = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!win || win.closed) {
+        window.location.assign(url);
+      }
+    } catch (err) {
+      if (navigator.clipboard && url) {
+        navigator.clipboard.writeText(url);
+        toast({
+          title: 'Link copied to clipboard',
+          description: 'Your environment blocked the site. Paste the URL into a permitted browser or device.',
+        });
+      }
+    }
   };
 
   return (
@@ -152,10 +166,10 @@ const Navbar = () => {
                   className="hover:bg-secondary cursor-pointer focus:bg-secondary"
                 >
                   <a
-                    href="https://youtube.com/@tradefinanceworld"
+                    href="https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa"
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Open TFW Webinars on YouTube"
+                    aria-label="Open TFW Webinars playlist on YouTube"
                   >
                     TFW Webinars
                   </a>
