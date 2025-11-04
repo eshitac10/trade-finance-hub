@@ -1,34 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import financeEvent1 from '@/assets/finance-event-1.jpg';
-import financeEvent2 from '@/assets/finance-event-2.jpg';
-import financeEvent3 from '@/assets/finance-event-3.jpg';
-import financeEvent4 from '@/assets/finance-event-4.jpg';
+import tfwAnniversary1 from '@/assets/tfw-anniversary-1.png';
+import tfwAnniversary2 from '@/assets/tfw-anniversary-2.png';
 
 const EventCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
     {
-      image: financeEvent1,
-      title: "Trade Finance Summit 2024",
-      description: "Leading professionals gathering to discuss the future of trade finance"
+      image: tfwAnniversary1,
+      title: "6th Anniversary of TFW",
+      description: "Celebrating six years of excellence in trade finance"
     },
     {
-      image: financeEvent2,
-      title: "Banking Innovation Forum",
-      description: "Networking event connecting financial institutions worldwide"
-    },
-    {
-      image: financeEvent3,
-      title: "TFW Educational Seminar",
-      description: "Expert-led session on emerging trends in international trade"
-    },
-    {
-      image: financeEvent4,
-      title: "Global Banking Conference",
-      description: "International summit bringing together industry leaders"
+      image: tfwAnniversary2,
+      title: "6th Anniversary of TFW",
+      description: "Industry leaders gathering to commemorate our milestone"
     }
   ];
 
