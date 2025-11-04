@@ -257,8 +257,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               </div>
             </>
           ) : (
-            /* Simple Login button when not authenticated */
-            <div className="flex items-center">
+            /* Login and Signup buttons when not authenticated */
+            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
@@ -267,6 +267,13 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Login
+              </Button>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-medium hover:scale-105 transition-all"
+                onClick={onLoginClick || (() => navigate('/'))}
+              >
+                Sign Up
               </Button>
             </div>
           )}

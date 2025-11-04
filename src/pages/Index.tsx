@@ -143,30 +143,21 @@ const Index = () => {
             <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
+            <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <Button 
                 size="lg" 
-                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group relative overflow-hidden"
+                onClick={() => setShowLoginDialog(true)}
+                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-12 py-6 text-lg shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center">
-                  Join Our Community 
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  Login to Continue
+                  <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-accent-hover to-accent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </Button>
-              <Button 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 relative overflow-hidden group"
-              >
-                <span className="relative z-10">Upcoming Events</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white to-secondary opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </Button>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-              <ChevronDown className="h-8 w-8 text-primary-foreground/50" />
-            </div>
+            {/* Removed scroll indicator */}
           </div>
         </div>
       </section>
@@ -327,44 +318,10 @@ const Index = () => {
 
       </main>
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-12 border-t border-primary-hover">
+      {/* Simplified Footer */}
+      <footer className="bg-primary text-primary-foreground py-6 border-t border-primary-hover">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h5 className="font-display font-semibold text-lg mb-4">About</h5>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><a href="#" className="hover:text-accent transition-colors">Our Story</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Team</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Careers</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-display font-semibold text-lg mb-4">Resources</h5>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><a href="#" className="hover:text-accent transition-colors">Articles</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Webinars</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Research</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-display font-semibold text-lg mb-4">Events</h5>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><a href="#" className="hover:text-accent transition-colors">Upcoming Events</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Past Events</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">Sponsorship</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-display font-semibold text-lg mb-4">Connect</h5>
-              <ul className="space-y-2 text-primary-foreground/80">
-                <li><a href="#" className="hover:text-accent transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">LinkedIn</a></li>
-                <li><a href="#" className="hover:text-accent transition-colors">YouTube</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-primary-foreground/20 pt-8 text-center text-primary-foreground/70">
+          <div className="text-center text-primary-foreground/70">
             <p>&copy; 2024 Trade Finance World. All rights reserved.</p>
           </div>
         </div>
