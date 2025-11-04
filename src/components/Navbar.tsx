@@ -92,9 +92,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     <nav className="bg-background/95 backdrop-blur-md border-b border-border shadow-professional sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Empty left section */}
-          <div className="flex items-center w-20"></div>
-
           {/* Show full navigation only when authenticated */}
           {isAuthenticated ? (
             <>
@@ -247,8 +244,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               </div>
             </>
           ) : (
-            /* Login and Signup buttons when not authenticated */
-            <div className="flex items-center gap-3">
+            /* Login and Signup buttons when not authenticated - Centered */
+            <div className="flex items-center justify-center gap-3 flex-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -261,7 +258,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               <Button
                 size="sm"
                 className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-medium hover:scale-105 transition-all"
-                onClick={onLoginClick || (() => navigate("/"))}
+                onClick={() => navigate("/signup")}
               >
                 Sign Up
               </Button>
