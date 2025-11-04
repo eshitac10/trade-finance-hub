@@ -229,20 +229,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-6">
-              Ready to Elevate Your Career?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-10">
-              Join thousands of professionals who are shaping the future of global trade finance
-            </p>
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary-hover font-semibold px-10 shadow-elegant">
-              Become a Member Today <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
