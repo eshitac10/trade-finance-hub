@@ -2,22 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, UserPlus, UserCheck, UserX, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-// Graph data structure for friend connections
-interface FriendshipGraph {
-  [userId: string]: {
-    friends: Set<string>;
-    pendingRequests: Set<string>; // Requests I sent
-    receivedRequests: Set<string>; // Requests I received
-  };
-}
+import { Search, Users } from 'lucide-react';
 
 interface Member {
   id: string;
@@ -122,27 +109,9 @@ const members: Member[] = [
   { id: "95", name: "Ayalur Vasudevan" },
 ];
 
-const CURRENT_USER_ID = "current-user";
-
 const Members = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  
-  // Initialize friendship graph
-  const [friendGraph, setFriendGraph] = useState<FriendshipGraph>(() => {
-    const initialGraph: FriendshipGraph = {};
-    // Initialize current user and all members
-    [CURRENT_USER_ID, ...members.map(m => m.id)].forEach(id => {
-      initialGraph[id] = {
-        friends: new Set(),
-        pendingRequests: new Set(),
-        receivedRequests: new Set(),
-      };
-    });
-    return initialGraph;
-  });
 
   // Check authentication
   useEffect(() => {
@@ -152,145 +121,10 @@ const Members = () => {
     }
   }, [navigate]);
 
-  // Send friend request
-  const sendFriendRequest = (targetUserId: string) => {
-    setFriendGraph(prev => {
-      const newGraph = JSON.parse(JSON.stringify(prev));
-      
-      // Add to current user's pending requests
-      if (!newGraph[CURRENT_USER_ID].pendingRequests) {
-        newGraph[CURRENT_USER_ID].pendingRequests = new Set();
-      }
-      newGraph[CURRENT_USER_ID].pendingRequests = new Set([...newGraph[CURRENT_USER_ID].pendingRequests, targetUserId]);
-      
-      // Add to target user's received requests
-      if (!newGraph[targetUserId].receivedRequests) {
-        newGraph[targetUserId].receivedRequests = new Set();
-      }
-      newGraph[targetUserId].receivedRequests = new Set([...newGraph[targetUserId].receivedRequests, CURRENT_USER_ID]);
-      
-      return newGraph;
-    });
-
-    toast({
-      title: "Friend Request Sent",
-      description: `Request sent to ${members.find(m => m.id === targetUserId)?.name}`,
-    });
-  };
-
-  // Accept friend request
-  const acceptFriendRequest = (requesterId: string) => {
-    setFriendGraph(prev => {
-      const newGraph = JSON.parse(JSON.stringify(prev));
-      
-      // Remove from received requests
-      newGraph[CURRENT_USER_ID].receivedRequests = new Set(
-        [...newGraph[CURRENT_USER_ID].receivedRequests].filter(id => id !== requesterId)
-      );
-      
-      // Remove from requester's pending
-      newGraph[requesterId].pendingRequests = new Set(
-        [...newGraph[requesterId].pendingRequests].filter(id => id !== CURRENT_USER_ID)
-      );
-      
-      // Add to both friends lists (bidirectional edge in graph)
-      newGraph[CURRENT_USER_ID].friends = new Set([...newGraph[CURRENT_USER_ID].friends, requesterId]);
-      newGraph[requesterId].friends = new Set([...newGraph[requesterId].friends, CURRENT_USER_ID]);
-      
-      return newGraph;
-    });
-
-    toast({
-      title: "Friend Request Accepted",
-      description: `You are now friends with ${members.find(m => m.id === requesterId)?.name}`,
-    });
-  };
-
-  // Reject friend request
-  const rejectFriendRequest = (requesterId: string) => {
-    setFriendGraph(prev => {
-      const newGraph = JSON.parse(JSON.stringify(prev));
-      
-      newGraph[CURRENT_USER_ID].receivedRequests = new Set(
-        [...newGraph[CURRENT_USER_ID].receivedRequests].filter(id => id !== requesterId)
-      );
-      newGraph[requesterId].pendingRequests = new Set(
-        [...newGraph[requesterId].pendingRequests].filter(id => id !== CURRENT_USER_ID)
-      );
-      
-      return newGraph;
-    });
-
-    toast({
-      title: "Request Rejected",
-      description: "Friend request has been declined",
-    });
-  };
-
-  // Cancel friend request
-  const cancelFriendRequest = (targetUserId: string) => {
-    setFriendGraph(prev => {
-      const newGraph = JSON.parse(JSON.stringify(prev));
-      
-      newGraph[CURRENT_USER_ID].pendingRequests = new Set(
-        [...newGraph[CURRENT_USER_ID].pendingRequests].filter(id => id !== targetUserId)
-      );
-      newGraph[targetUserId].receivedRequests = new Set(
-        [...newGraph[targetUserId].receivedRequests].filter(id => id !== CURRENT_USER_ID)
-      );
-      
-      return newGraph;
-    });
-
-    toast({
-      title: "Request Cancelled",
-      description: "Friend request has been cancelled",
-    });
-  };
-
-  // Remove friend
-  const removeFriend = (friendId: string) => {
-    setFriendGraph(prev => {
-      const newGraph = JSON.parse(JSON.stringify(prev));
-      
-      newGraph[CURRENT_USER_ID].friends = new Set(
-        [...newGraph[CURRENT_USER_ID].friends].filter(id => id !== friendId)
-      );
-      newGraph[friendId].friends = new Set(
-        [...newGraph[friendId].friends].filter(id => id !== CURRENT_USER_ID)
-      );
-      
-      return newGraph;
-    });
-
-    toast({
-      variant: "destructive",
-      title: "Friend Removed",
-      description: `Removed ${members.find(m => m.id === friendId)?.name} from friends`,
-    });
-  };
-
-  // Get relationship status
-  const getRelationshipStatus = (userId: string): 'friend' | 'pending' | 'received' | 'none' => {
-    if (friendGraph[CURRENT_USER_ID]?.friends?.has(userId)) return 'friend';
-    if (friendGraph[CURRENT_USER_ID]?.pendingRequests?.has(userId)) return 'pending';
-    if (friendGraph[CURRENT_USER_ID]?.receivedRequests?.has(userId)) return 'received';
-    return 'none';
-  };
-
   // Filter members
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const status = getRelationshipStatus(member.id);
-    
-    if (activeTab === 'all') return matchesSearch;
-    if (activeTab === 'friends') return matchesSearch && status === 'friend';
-    if (activeTab === 'requests') return matchesSearch && status === 'received';
-    return matchesSearch;
-  });
-
-  const friendsCount = [...(friendGraph[CURRENT_USER_ID]?.friends || [])].length;
-  const requestsCount = [...(friendGraph[CURRENT_USER_ID]?.receivedRequests || [])].length;
+  const filteredMembers = members.filter(member =>
+    member.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
@@ -301,10 +135,10 @@ const Members = () => {
         <div className="mb-8 animate-fade-in">
           <h1 className="professional-heading text-4xl text-primary mb-2 flex items-center gap-3">
             <Users className="h-10 w-10" />
-            Members Network
+            Members Directory
           </h1>
           <p className="text-muted-foreground">
-            Connect with {members.length}+ trade finance professionals worldwide
+            Browse {members.length}+ trade finance professionals
           </p>
         </div>
 
@@ -321,167 +155,49 @@ const Members = () => {
               </div>
             </div>
           </Card>
-          
-          <Card className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                <UserCheck className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-primary">{friendsCount}</p>
-                <p className="text-sm text-muted-foreground">Your Friends</p>
-              </div>
-            </div>
-          </Card>
-          
-          <Card className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <UserPlus className="h-6 w-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-primary">{requestsCount}</p>
-                <p className="text-sm text-muted-foreground">Pending Requests</p>
-              </div>
-            </div>
-          </Card>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search */}
         <Card className="p-6 mb-8 bg-card/80 backdrop-blur-sm border-border animate-fade-in">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search members..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background/50"
-              />
-            </div>
-            
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-background/50">
-                <TabsTrigger value="all">All Members</TabsTrigger>
-                <TabsTrigger value="friends">
-                  Friends
-                  {friendsCount > 0 && (
-                    <Badge variant="secondary" className="ml-2">{friendsCount}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="requests">
-                  Requests
-                  {requestsCount > 0 && (
-                    <Badge variant="secondary" className="ml-2 bg-orange-500/10 text-orange-600">{requestsCount}</Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search members..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-background/50"
+            />
           </div>
         </Card>
 
         {/* Members Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredMembers.map((member, index) => {
-            const status = getRelationshipStatus(member.id);
-            
-            return (
-              <Card 
-                key={member.id}
-                className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 animate-scale-in group"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-20 w-20 mb-4 border-4 border-primary/20 group-hover:border-accent/50 transition-all group-hover:scale-110">
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
-                      {member.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <h3 className="font-semibold text-primary mb-4 group-hover:text-accent transition-colors">
-                    {member.name}
-                  </h3>
-                  
-                  {status === 'friend' && (
-                    <div className="w-full space-y-2">
-                      <Badge className="w-full bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20">
-                        <UserCheck className="h-3 w-3 mr-1" />
-                        Friends
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                        onClick={() => removeFriend(member.id)}
-                      >
-                        <UserX className="h-3 w-3 mr-1" />
-                        Unfriend
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {status === 'pending' && (
-                    <div className="w-full space-y-2">
-                      <Badge className="w-full bg-blue-500/10 text-blue-600 border-blue-500/20">
-                        Request Sent
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => cancelFriendRequest(member.id)}
-                      >
-                        Cancel Request
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {status === 'received' && (
-                    <div className="w-full space-y-2">
-                      <Badge className="w-full bg-orange-500/10 text-orange-600 border-orange-500/20">
-                        Request Received
-                      </Badge>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-primary hover:bg-primary-hover"
-                          onClick={() => acceptFriendRequest(member.id)}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => rejectFriendRequest(member.id)}
-                        >
-                          Decline
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {status === 'none' && (
-                    <Button
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary-hover shadow-elegant"
-                      onClick={() => sendFriendRequest(member.id)}
-                    >
-                      <UserPlus className="h-3 w-3 mr-1" />
-                      Add Friend
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
+          {filteredMembers.map((member, index) => (
+            <Card 
+              key={member.id}
+              className="p-6 bg-card/80 backdrop-blur-sm border-border hover:shadow-elegant hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 animate-scale-in group cursor-pointer"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="h-20 w-20 mb-4 border-4 border-primary/20 group-hover:border-accent/50 transition-all group-hover:scale-110">
+                  <AvatarImage src="/placeholder.svg" />
+                  <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
+                    {member.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <h3 className="font-semibold text-primary group-hover:text-accent transition-colors">
+                  {member.name}
+                </h3>
+              </div>
+            </Card>
+          ))}
         </div>
 
         {filteredMembers.length === 0 && (
           <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
             <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No members found matching your criteria</p>
+            <p className="text-muted-foreground">No members found matching your search</p>
           </Card>
         )}
       </div>

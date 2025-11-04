@@ -101,23 +101,14 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             <>
               {/* Navigation Menu */}
               <div className="hidden md:flex items-center space-x-8">
-                {/* About Us Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-foreground hover:text-primary flex items-center space-x-1 font-medium">
-                      <span>About Us</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48 bg-background border border-border shadow-elegant z-50">
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
-                      Team
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
-                      About TFW
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {/* Forum Link */}
+                <Button 
+                  variant="ghost" 
+                  className="text-foreground hover:text-primary font-medium"
+                  onClick={() => navigate('/forum')}
+                >
+                  Forum
+                </Button>
 
                 {/* Resources Dropdown */}
                 <DropdownMenu>
