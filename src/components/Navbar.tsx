@@ -50,7 +50,7 @@ const Navbar = () => {
 
   const handleSocialClick = (platform: string) => {
     const urls = {
-      youtube: 'https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa',
+      youtube: 'https://www.youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X',
       whatsapp: 'https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!',
       email: 'mailto:contact@tradefinanceworld.com'
     };
@@ -166,7 +166,7 @@ const Navbar = () => {
                   className="hover:bg-secondary cursor-pointer focus:bg-secondary"
                 >
                   <a
-                    href="https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa"
+                    href="https://www.youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Open TFW Webinars playlist on YouTube"
