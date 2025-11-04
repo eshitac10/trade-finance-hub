@@ -121,22 +121,26 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
   }
 
   /* Premium Typography System */
   h1, h2, h3, h4, h5, h6 {
-    font-family: Arial, Helvetica, sans-serif;
-    @apply font-semibold tracking-tight;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    @apply tracking-tight;
   }
 
   .banking-text {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
   }
 
   .professional-heading {
-    font-family: Arial, Helvetica, sans-serif;
-    @apply font-semibold tracking-tight;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    @apply tracking-tight;
   }
 
   /* Smooth Scrolling */

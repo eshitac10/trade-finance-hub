@@ -62,10 +62,10 @@ export default {
         },
       },
       fontFamily: {
-        'sans': ['Arial', 'Helvetica', 'sans-serif'],
-        'serif': ['Arial', 'Helvetica', 'sans-serif'],
-        'banking': ['Arial', 'Helvetica', 'sans-serif'],
-        'display': ['Arial', 'Helvetica', 'sans-serif'],
+        'sans': ['Helvetica', 'Arial', 'sans-serif'],
+        'serif': ['Helvetica', 'Arial', 'sans-serif'],
+        'banking': ['Helvetica', 'Arial', 'sans-serif'],
+        'display': ['Helvetica', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
