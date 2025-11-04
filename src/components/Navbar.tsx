@@ -69,7 +69,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     const urls = {
       youtube: "https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=rEph3hnc-p6N4V-t",
       whatsapp: "https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!",
-      email: "mailto:itspriyo@gmail.com",
+      email: "mailto:world.tradefin@gmail.com",
     };
     const url = urls[platform as keyof typeof urls];
     try {
