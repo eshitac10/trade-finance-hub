@@ -21,7 +21,11 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import tfwLogo from '@/assets/tfv-logo.png';
 
-const Navbar = () => {
+interface NavbarProps {
+  onLoginClick?: () => void;
+}
+
+const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
@@ -243,7 +247,7 @@ const Navbar = () => {
                   variant="ghost"
                   size="sm"
                   className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
-                  onClick={() => navigate('/')}
+                  onClick={onLoginClick || (() => navigate('/'))}
                 >
                   <LogIn className="h-4 w-4 mr-2" />
                   Login

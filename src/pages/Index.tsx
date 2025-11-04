@@ -1,38 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [scrolled, setScrolled] = useState(false);
-  const [showLogin, setShowLogin] = useState(true);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Check authentication on mount
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated) {
-      setShowLogin(false);
-    }
-  }, []);
-
-  // Handle scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +34,7 @@ const Index = () => {
         description: "Welcome to Trade Finance World",
       });
       
+      setShowLoginDialog(false);
       navigate('/dashboard');
     } else {
       toast({
@@ -63,109 +47,85 @@ const Index = () => {
     setIsLoading(false);
   };
 
-  if (showLogin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA1IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-30 animate-float"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-primary-foreground/10 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse"></div>
-
-        <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
-          <div className="w-full max-w-md animate-scale-in">
-            <div className="bg-card/95 backdrop-blur-xl rounded-2xl shadow-elegant border border-primary-foreground/10 p-8">
-              {/* Header */}
-              <div className="text-center mb-8 animate-fade-in">
-                <h1 className="professional-heading text-4xl text-primary mb-3">
-                  Trade Finance World
-                </h1>
-                <p className="text-muted-foreground text-sm">
-                  Welcome back! Please login to continue
-                </p>
-              </div>
-
-              {/* Demo Credentials */}
-              <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <p className="text-xs font-semibold text-accent mb-2">Demo Credentials:</p>
-                <p className="text-xs text-muted-foreground">Email: admin@tfworld.com</p>
-                <p className="text-xs text-muted-foreground">Password: admin123</p>
-              </div>
-
-              {/* Login Form */}
-              <form onSubmit={handleLogin} className="space-y-5 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="email"
-                      placeholder="admin@tfworld.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-background/50 border-border focus:border-accent transition-colors"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-background/50 border-border focus:border-accent transition-colors"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-semibold shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-0.5"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
-                      Logging in...
-                    </div>
-                  ) : (
-                    <>
-                      Login
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            </div>
-
-            {/* Footer Text */}
-            <p className="text-center text-primary-foreground/70 text-sm mt-6 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-              Empowering trade finance professionals worldwide
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar onLoginClick={() => setShowLoginDialog(true)} />
+      
+      {/* Login Dialog */}
+      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border border-primary/20">
+          <DialogHeader>
+            <DialogTitle className="professional-heading text-2xl text-primary text-center">
+              Login to Trade Finance World
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Demo Credentials */}
+          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
+            <p className="text-xs font-semibold text-accent mb-2">Demo Credentials:</p>
+            <p className="text-xs text-muted-foreground">Email: admin@tfworld.com</p>
+            <p className="text-xs text-muted-foreground">Password: admin123</p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="admin@tfworld.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 bg-background/50 border-border focus:border-accent transition-colors"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 pr-10 bg-background/50 border-border focus:border-accent transition-colors"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-semibold shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-0.5"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
+                  Logging in...
+                </div>
+              ) : (
+                <>
+                  Login
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
       
       {/* Hero Section with Gradient */}
       <section className="relative bg-gradient-hero py-24 lg:py-32 overflow-hidden">
@@ -279,7 +239,6 @@ const Index = () => {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="group p-8 bg-card rounded-xl shadow-professional border border-border hover:shadow-2xl hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 animate-fade-in relative overflow-hidden" style={{ animationDelay: '0.1s' }}>
-              {/* Gradient Overlay on Hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               
               <div className="relative z-10">
