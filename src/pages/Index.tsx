@@ -7,6 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import tradeFinanceHero from '@/assets/trade-finance-hero.png';
+import tradeNetworking from '@/assets/trade-networking.png';
+import tradePatternBg from '@/assets/trade-pattern-bg.png';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -127,9 +130,17 @@ const Index = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Hero Section with Enhanced Gradient */}
+      {/* Hero Section with Enhanced Gradient and Graphics */}
       <section className="relative bg-gradient-hero py-28 lg:py-40 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA4IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20 animate-float"></div>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <img src={tradePatternBg} alt="" className="w-full h-full object-cover" />
+        </div>
+        
+        {/* Hero Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img src={tradeFinanceHero} alt="" className="w-full h-full object-cover mix-blend-overlay" />
+        </div>
         
         {/* Enhanced Floating Elements */}
         <div className="absolute top-20 left-10 w-40 h-40 bg-accent/15 rounded-full blur-3xl animate-float"></div>
@@ -157,8 +168,6 @@ const Index = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </Button>
             </div>
-
-            {/* Removed scroll indicator */}
           </div>
         </div>
       </section>
@@ -231,6 +240,22 @@ const Index = () => {
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Empowering professionals with the resources and connections needed to excel
             </p>
+          </div>
+          
+          {/* Featured Networking Image */}
+          <div className="mb-16 animate-fade-in">
+            <div className="relative rounded-3xl overflow-hidden shadow-premium border border-border hover:shadow-2xl transition-all duration-700 hover:-translate-y-2 group">
+              <img 
+                src={tradeNetworking} 
+                alt="Global Trade Finance Networking" 
+                className="w-full h-[400px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
+                <h3 className="text-3xl font-bold mb-3">Connect with Global Trade Finance Leaders</h3>
+                <p className="text-lg opacity-95">Building partnerships that drive international trade forward</p>
+              </div>
+            </div>
           </div>
           
           <div className="grid md:grid-cols-3 gap-10">
