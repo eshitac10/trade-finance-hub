@@ -117,9 +117,6 @@ const Navbar = () => {
                 >
                   Member Articles
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-secondary cursor-pointer focus:bg-secondary">
-                  Events
-                </DropdownMenuItem>
                 <Dialog>
                   <DialogTrigger asChild>
                     <DropdownMenuItem 
@@ -161,19 +158,6 @@ const Navbar = () => {
                     </Button>
                   </DialogContent>
                 </Dialog>
-                <DropdownMenuItem 
-                  asChild
-                  className="hover:bg-secondary cursor-pointer focus:bg-secondary"
-                >
-                  <a
-                    href="https://www.youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Open TFW Webinars playlist on YouTube"
-                  >
-                    TFW Webinars
-                  </a>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
