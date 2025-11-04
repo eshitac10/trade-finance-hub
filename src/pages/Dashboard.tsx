@@ -47,7 +47,6 @@ const Dashboard = () => {
     { label: 'Network Connections', value: '1,234', icon: Users, trend: '+12%', color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-500/10', progress: 75 },
     { label: 'Articles Read', value: '89', icon: BookOpen, trend: '+23%', color: 'from-green-500 to-green-600', bgColor: 'bg-green-500/10', progress: 60 },
     { label: 'Events Attended', value: '15', icon: Calendar, trend: '+5%', color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500/10', progress: 45 },
-    { label: 'Certifications', value: '3', icon: GraduationCap, trend: 'New!', color: 'from-orange-500 to-orange-600', bgColor: 'bg-orange-500/10', progress: 90 },
   ];
 
   const achievements = [
@@ -170,7 +169,7 @@ const Dashboard = () => {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {stats.map((stat, index) => (
               <Card 
                 key={index} 
@@ -258,11 +257,6 @@ const Dashboard = () => {
                   <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
                     <Users className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
                     Expand Network
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start hover:bg-gradient-to-r hover:from-accent/10 hover:to-primary/10 hover:border-accent transition-all group h-12">
-                    <GraduationCap className="h-4 w-4 mr-2 group-hover:scale-125 transition-transform text-accent" />
-                    Get Certified
                     <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-2 transition-transform" />
                   </Button>
                 </div>

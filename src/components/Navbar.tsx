@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Youtube, Mail, LogIn, LogOut } from "lucide-react";
+import { ChevronDown, Youtube, Mail, LogIn, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -97,6 +97,16 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             <>
               {/* Navigation Menu */}
               <div className="hidden md:flex items-center space-x-8">
+                {/* Home Button */}
+                <Button
+                  variant="ghost"
+                  className="text-foreground hover:text-primary font-medium"
+                  onClick={() => navigate("/")}
+                >
+                  <Home className="h-4 w-4 mr-2" />
+                  Home
+                </Button>
+
                 {/* Forum Link */}
                 <Button
                   variant="ghost"
