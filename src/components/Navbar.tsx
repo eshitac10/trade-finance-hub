@@ -34,7 +34,7 @@ const Navbar = () => {
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
-    navigate('/login');
+    navigate('/');
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,7 +243,7 @@ const Navbar = () => {
                   variant="ghost"
                   size="sm"
                   className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate('/')}
                 >
                   <LogIn className="h-4 w-4 mr-2" />
                   Login
