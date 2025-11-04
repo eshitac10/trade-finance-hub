@@ -62,10 +62,10 @@ export default {
         },
       },
       fontFamily: {
-        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        'serif': ['DM Serif Display', 'Playfair Display', 'Georgia', 'serif'],
-        'banking': ['Inter', 'sans-serif'],
-        'display': ['DM Serif Display', 'serif'],
+        'sans': ['Arial', 'Helvetica', 'sans-serif'],
+        'serif': ['Arial', 'Helvetica', 'sans-serif'],
+        'banking': ['Arial', 'Helvetica', 'sans-serif'],
+        'display': ['Arial', 'Helvetica', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
