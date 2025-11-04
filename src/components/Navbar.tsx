@@ -67,7 +67,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
   const handleSocialClick = (platform: string) => {
     const urls = {
-      youtube: 'https://www.youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X',
+      youtube: 'https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa',
       whatsapp: 'https://api.whatsapp.com/send?phone=919176827480&text=Hi%20there!',
       email: 'mailto:contact@tradefinanceworld.com'
     };
