@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Youtube, Mail, LogIn, UserPlus } from 'lucide-react';
+import { ChevronDown, Youtube, Mail, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -215,8 +215,8 @@ const Navbar = () => {
               </Button>
             </div>
 
-            {/* Auth Buttons */}
-            <div className="flex items-center space-x-2 ml-4 border-l border-border pl-4">
+            {/* Auth Button */}
+            <div className="flex items-center ml-4 border-l border-border pl-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -225,14 +225,6 @@ const Navbar = () => {
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Login
-              </Button>
-              <Button
-                size="sm"
-                className="bg-primary text-primary-foreground hover:bg-primary-hover font-medium shadow-professional hover:shadow-elegant hover:scale-105 transition-all"
-                onClick={() => navigate('/signup')}
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Sign Up
               </Button>
             </div>
           </div>

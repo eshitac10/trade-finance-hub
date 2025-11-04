@@ -93,29 +93,10 @@ const Login = () => {
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50"></div>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-4 text-muted-foreground font-medium">New to TFW?</span>
-            </div>
-          </div>
-
-          {/* Sign Up Link */}
-          <div className="text-center animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <p className="text-muted-foreground mb-4">
-              Join our global community of trade finance professionals
-            </p>
-            <Button
-              variant="outline"
-              className="w-full h-12 border-accent/50 text-accent hover:bg-accent hover:text-accent-foreground font-semibold transition-all"
-              onClick={() => navigate('/signup')}
-            >
-              Create Account
-            </Button>
-          </div>
+          {/* Footer Text */}
+          <p className="text-center text-muted-foreground text-sm mt-8 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            Contact your administrator for account access
+          </p>
         </div>
 
         {/* Footer Text */}
