@@ -176,7 +176,7 @@ const Index = () => {
           <div className="grid md:grid-cols-4 gap-10 text-center">
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-6 rounded-2xl hover:bg-background/40 hover:shadow-elegant backdrop-blur-sm" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
-                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">10,000+</div>
+                <div className="text-6xl font-display font-bold text-primary mb-3 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">200+</div>
                 <div className="h-1.5 w-20 bg-gradient-primary mx-auto mb-4 rounded-full group-hover:w-28 transition-all duration-500 shadow-glow"></div>
               </div>
               <div className="text-muted-foreground font-semibold text-base">Global Members</div>
