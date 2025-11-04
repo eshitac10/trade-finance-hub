@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, Youtube, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, Youtube, Mail, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import tfwLogo from '@/assets/tfv-logo.png';
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
 
@@ -187,7 +189,7 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-primary p-2"
+                className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
                 onClick={() => handleSocialClick('youtube')}
                 aria-label="Open YouTube playlist"
               >
@@ -196,7 +198,7 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-primary p-2"
+                className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
                 onClick={() => handleSocialClick('whatsapp')}
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -206,10 +208,31 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-primary p-2"
+                className="text-muted-foreground hover:text-primary p-2 hover:scale-110 transition-transform"
                 onClick={() => handleSocialClick('email')}
               >
                 <Mail className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="flex items-center space-x-2 ml-4 border-l border-border pl-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-foreground hover:text-primary font-medium hover:scale-105 transition-all"
+                onClick={() => navigate('/login')}
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+              <Button
+                size="sm"
+                className="bg-primary text-primary-foreground hover:bg-primary-hover font-medium shadow-professional hover:shadow-elegant hover:scale-105 transition-all"
+                onClick={() => navigate('/signup')}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Sign Up
               </Button>
             </div>
           </div>

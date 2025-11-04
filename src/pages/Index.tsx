@@ -11,20 +11,25 @@ const Index = () => {
       
       {/* Hero Section with Gradient */}
       <section className="relative bg-gradient-hero py-24 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA1IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjA1IiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20 animate-float"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-primary-foreground/10 rounded-full blur-3xl animate-float-delayed"></div>
+        
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="professional-heading text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 tracking-tight">
+            <h1 className="professional-heading text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 tracking-tight animate-fade-in">
               Trade Finance World
             </h1>
-            <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-3xl mx-auto mb-10 leading-relaxed">
-              The premier global community connecting trade finance professionals through education, networking, and industry excellence
+            <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 shadow-elegant">
-                Join Our Community <ArrowRight className="ml-2 h-5 w-5" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
+              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1 group">
+                Join Our Community <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-elegant">
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-1">
                 Upcoming Events
               </Button>
             </div>
@@ -36,19 +41,19 @@ const Index = () => {
       <section className="py-16 bg-secondary border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
+            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.1s' }}>
               <div className="text-4xl font-display font-bold text-primary mb-2">10,000+</div>
               <div className="text-muted-foreground">Global Members</div>
             </div>
-            <div>
+            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.2s' }}>
               <div className="text-4xl font-display font-bold text-primary mb-2">50+</div>
               <div className="text-muted-foreground">Countries Represented</div>
             </div>
-            <div>
+            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.3s' }}>
               <div className="text-4xl font-display font-bold text-primary mb-2">200+</div>
               <div className="text-muted-foreground">Annual Events</div>
             </div>
-            <div>
+            <div className="animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.4s' }}>
               <div className="text-4xl font-display font-bold text-primary mb-2">25+</div>
               <div className="text-muted-foreground">Years of Excellence</div>
             </div>
@@ -82,8 +87,8 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                 <Users className="h-7 w-7 text-primary" />
               </div>
               <h3 className="professional-heading text-2xl text-primary mb-4">
@@ -94,8 +99,8 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                 <BookOpen className="h-7 w-7 text-primary" />
               </div>
               <h3 className="professional-heading text-2xl text-primary mb-4">
@@ -106,8 +111,8 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <div className="group p-8 bg-card rounded-lg shadow-professional border border-border hover:shadow-elegant transition-all duration-500 hover:-translate-y-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                 <Globe2 className="h-7 w-7 text-primary" />
               </div>
               <h3 className="professional-heading text-2xl text-primary mb-4">
