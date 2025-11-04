@@ -37,11 +37,13 @@ const EventCarousel = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  // Auto-advance slides
+  // Auto-advance slides with longer duration for videos
   useEffect(() => {
-    const timer = setInterval(nextSlide, 5000);
+    const currentSlideType = slides[currentSlide].type;
+    const interval = currentSlideType === 'video' ? 15000 : 5000; // 15s for video, 5s for images
+    const timer = setInterval(nextSlide, interval);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentSlide]);
 
   return (
     <div className="relative w-full h-96 lg:h-[500px] overflow-hidden bg-muted rounded-2xl shadow-premium group">
