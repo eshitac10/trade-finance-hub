@@ -187,19 +187,13 @@ const Navbar = () => {
             {/* Social Media Icons */}
             <div className="flex items-center space-x-3 ml-8">
               <Button
-                asChild
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground hover:text-primary p-2"
+                onClick={() => handleSocialClick('youtube')}
+                aria-label="Open YouTube playlist"
               >
-                <a
-                  href="https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=GSzcSH37q9l_ZrSa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open YouTube playlist"
-                >
-                  <Youtube className="h-5 w-5" />
-                </a>
+                <Youtube className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
