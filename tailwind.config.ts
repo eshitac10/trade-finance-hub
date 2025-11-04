@@ -61,10 +61,10 @@ export default {
         },
       },
       fontFamily: {
-        'sans': ['Times New Roman', 'serif'],
-        'serif': ['Times New Roman', 'serif'],
-        'banking': ['Times New Roman', 'serif'],
-        'display': ['Times New Roman', 'serif'],
+        'sans': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
+        'serif': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
+        'banking': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
+        'display': ['Arial Black', 'Helvetica Bold', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

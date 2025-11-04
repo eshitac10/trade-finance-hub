@@ -118,21 +118,21 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Times New Roman', serif;
+    font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
   }
 
   /* Typography System */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Times New Roman', serif;
+    font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
     @apply font-semibold;
   }
 
   .banking-text {
-    font-family: 'Times New Roman', serif;
+    font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
   }
 
   .professional-heading {
-    font-family: 'Times New Roman', serif;
+    font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
     @apply font-semibold tracking-tight;
   }
 }
