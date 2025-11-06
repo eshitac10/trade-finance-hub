@@ -69,19 +69,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       youtube: "https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=rEph3hnc-p6N4V-t",
     };
     const url = urls[platform as keyof typeof urls];
-    try {
-      const win = window.open(url, "_blank", "noopener,noreferrer");
-      if (!win || win.closed) {
-        window.location.assign(url);
-      }
-    } catch (err) {
-      if (navigator.clipboard && url) {
-        navigator.clipboard.writeText(url);
-        toast({
-          title: "Link copied to clipboard",
-          description: "Your environment blocked the site. Paste the URL into a permitted browser or device.",
-        });
-      }
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
