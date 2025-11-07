@@ -19,6 +19,7 @@ const Index = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,19 +156,21 @@ const Index = () => {
             <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-12 leading-relaxed animate-fade-up drop-shadow-lg" style={{ animationDelay: '0.15s' }}>
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
-            <div className="flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
-              <Button 
-                size="lg" 
-                onClick={() => setShowLoginDialog(true)}
-                className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-14 py-7 text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center">
-                  Login to Continue
-                  <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              </Button>
-            </div>
+            {!isAuthenticated && (
+              <div className="flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
+                <Button 
+                  size="lg" 
+                  onClick={() => setShowLoginDialog(true)}
+                  className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-14 py-7 text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center">
+                    Login to Continue
+                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import cryptoCover from "@/assets/crypto-property-cover.jpg";
 
 interface Article {
   id: string;
@@ -101,7 +100,7 @@ const ArticleDetail = () => {
             <div className="relative h-80 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden rounded-t-2xl">
               {article.ai_thumbnail ? (
                 <img 
-                  src={cryptoCover}
+                  src={article.ai_thumbnail}
                   alt={article.name}
                   className="w-full h-full object-cover"
                 />
