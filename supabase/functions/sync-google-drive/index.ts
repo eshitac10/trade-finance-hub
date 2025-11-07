@@ -62,80 +62,83 @@ serve(async (req) => {
     );
 
     const folderId = Deno.env.get('GOOGLE_DRIVE_FOLDER_ID');
-    if (!folderId) {
-      throw new Error('Missing Google Drive folder ID');
+    const apiKey = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID'); // Using as API key
+
+    if (!folderId || !apiKey) {
+      throw new Error('Missing Google Drive configuration');
     }
 
-    // Get access token from database
-    const { data: tokenData, error: tokenError } = await supabaseClient
-      .from('google_oauth_tokens')
-      .select('access_token, refresh_token, expiry_time')
-      .eq('id', 'google_drive')
-      .single();
+    console.log('Fetching files from shared Google Drive folder:', folderId);
 
-    if (tokenError || !tokenData) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Not authenticated', 
-          needsAuth: true,
-          message: 'Please authenticate with Google Drive first'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401
-        }
-      );
-    }
-
-    let accessToken = tokenData.access_token;
-
-    // Check if token is expired and refresh if needed
-    const expiryTime = new Date(tokenData.expiry_time);
-    if (expiryTime <= new Date()) {
-      console.log('Token expired, refreshing...');
-      
-      const clientId = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID');
-      const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
-
-      const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          client_id: clientId!,
-          client_secret: clientSecret!,
-          refresh_token: tokenData.refresh_token!,
-          grant_type: 'refresh_token',
-        }),
-      });
-
-      const refreshData = await refreshResponse.json();
-      
-      if (!refreshResponse.ok) {
-        throw new Error('Failed to refresh token');
-      }
-
-      accessToken = refreshData.access_token;
-      const newExpiryTime = new Date(Date.now() + refreshData.expires_in * 1000);
-
-      await supabaseClient
-        .from('google_oauth_tokens')
-        .update({
-          access_token: accessToken,
-          expiry_time: newExpiryTime.toISOString(),
-        })
-        .eq('id', 'google_drive');
-    }
-
-    console.log('Fetching files from Google Drive folder:', folderId);
-
-    // Use OAuth token to fetch files
-    const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType,webViewLink,thumbnailLink,createdTime,modifiedTime)`;
+    // For shared/public folders, we can use the API key directly
+    // The folder must be set to "Anyone with the link can view"
+    const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,webViewLink,thumbnailLink,createdTime,modifiedTime)&key=${apiKey}`;
     
-    const driveResponse = await fetch(driveUrl, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
+    const driveResponse = await fetch(driveUrl);
+    
+    if (!driveResponse.ok) {
+      const errorText = await driveResponse.text();
+      console.error('Google Drive API error:', errorText);
+      
+      // Check if it's a permissions error
+      if (driveResponse.status === 403 || driveResponse.status === 404) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Folder access denied',
+            message: 'Please ensure the Google Drive folder sharing is set to "Anyone with the link can view"',
+            needsPublicAccess: true
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 403
+          }
+        );
+      }
+      
+      throw new Error(`Failed to fetch from Google Drive: ${driveResponse.status}`);
+    }
+
+    const driveData = await driveResponse.json();
+    console.log('Fetched files:', driveData.files?.length || 0);
+
+    if (driveData.files && driveData.files.length > 0) {
+      for (const file of driveData.files) {
+        // Check if article already has AI thumbnail
+        const { data: existingArticle } = await supabaseClient
+          .from('google_drive_articles')
+          .select('ai_thumbnail')
+          .eq('file_id', file.id)
+          .single();
+
+        let aiThumbnail = existingArticle?.ai_thumbnail;
+
+        // Generate AI thumbnail if it doesn't exist
+        if (!aiThumbnail) {
+          console.log('Generating thumbnail for:', file.name);
+          aiThumbnail = await generateThumbnail(file.name);
+        }
+
+        const { error } = await supabaseClient
+          .from('google_drive_articles')
+          .upsert({
+            file_id: file.id,
+            name: file.name,
+            mime_type: file.mimeType,
+            web_view_link: file.webViewLink,
+            thumbnail_link: file.thumbnailLink,
+            created_time: file.createdTime,
+            modified_time: file.modifiedTime,
+            ai_thumbnail: aiThumbnail,
+            synced_at: new Date().toISOString(),
+          }, {
+            onConflict: 'file_id'
+          });
+
+        if (error) {
+          console.error('Error upserting file:', file.name, error);
+        }
+      }
+    }
     
     if (!driveResponse.ok) {
       const errorText = await driveResponse.text();
