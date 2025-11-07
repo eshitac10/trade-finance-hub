@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      google_drive_articles: {
+        Row: {
+          created_time: string | null
+          file_id: string
+          id: string
+          mime_type: string
+          modified_time: string | null
+          name: string
+          synced_at: string
+          thumbnail_link: string | null
+          web_view_link: string | null
+        }
+        Insert: {
+          created_time?: string | null
+          file_id: string
+          id?: string
+          mime_type: string
+          modified_time?: string | null
+          name: string
+          synced_at?: string
+          thumbnail_link?: string | null
+          web_view_link?: string | null
+        }
+        Update: {
+          created_time?: string | null
+          file_id?: string
+          id?: string
+          mime_type?: string
+          modified_time?: string | null
+          name?: string
+          synced_at?: string
+          thumbnail_link?: string | null
+          web_view_link?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

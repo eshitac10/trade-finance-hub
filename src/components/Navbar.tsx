@@ -119,7 +119,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                      onClick={() => window.open("https://drive.google.com/drive/folders/your-folder-id", "_blank")}
+                      onClick={() => navigate("/member-articles")}
                     >
                       Member Articles
                     </DropdownMenuItem>
