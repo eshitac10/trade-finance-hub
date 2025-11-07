@@ -61,19 +61,81 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const clientId = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID');
-    const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
     const folderId = Deno.env.get('GOOGLE_DRIVE_FOLDER_ID');
+    if (!folderId) {
+      throw new Error('Missing Google Drive folder ID');
+    }
 
-    if (!clientId || !clientSecret || !folderId) {
-      throw new Error('Missing Google Drive credentials');
+    // Get access token from database
+    const { data: tokenData, error: tokenError } = await supabaseClient
+      .from('google_oauth_tokens')
+      .select('access_token, refresh_token, expiry_time')
+      .eq('id', 'google_drive')
+      .single();
+
+    if (tokenError || !tokenData) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Not authenticated', 
+          needsAuth: true,
+          message: 'Please authenticate with Google Drive first'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        }
+      );
+    }
+
+    let accessToken = tokenData.access_token;
+
+    // Check if token is expired and refresh if needed
+    const expiryTime = new Date(tokenData.expiry_time);
+    if (expiryTime <= new Date()) {
+      console.log('Token expired, refreshing...');
+      
+      const clientId = Deno.env.get('GOOGLE_DRIVE_CLIENT_ID');
+      const clientSecret = Deno.env.get('GOOGLE_DRIVE_CLIENT_SECRET');
+
+      const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId!,
+          client_secret: clientSecret!,
+          refresh_token: tokenData.refresh_token!,
+          grant_type: 'refresh_token',
+        }),
+      });
+
+      const refreshData = await refreshResponse.json();
+      
+      if (!refreshResponse.ok) {
+        throw new Error('Failed to refresh token');
+      }
+
+      accessToken = refreshData.access_token;
+      const newExpiryTime = new Date(Date.now() + refreshData.expires_in * 1000);
+
+      await supabaseClient
+        .from('google_oauth_tokens')
+        .update({
+          access_token: accessToken,
+          expiry_time: newExpiryTime.toISOString(),
+        })
+        .eq('id', 'google_drive');
     }
 
     console.log('Fetching files from Google Drive folder:', folderId);
 
-    const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType,webViewLink,thumbnailLink,createdTime,modifiedTime)&key=${clientId}`;
+    // Use OAuth token to fetch files
+    const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType,webViewLink,thumbnailLink,createdTime,modifiedTime)`;
     
-    const driveResponse = await fetch(driveUrl);
+    const driveResponse = await fetch(driveUrl, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
     
     if (!driveResponse.ok) {
       const errorText = await driveResponse.text();
