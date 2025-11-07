@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Search, RefreshCw, ExternalLink, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { FileText, Search, ExternalLink, TrendingUp, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Article {
@@ -29,7 +29,6 @@ const MemberArticles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const isAuth = localStorage.getItem("isAuthenticated") === "true";
@@ -84,39 +83,6 @@ const MemberArticles = () => {
     }
   };
 
-  const syncWithGoogleDrive = async () => {
-    try {
-      setIsSyncing(true);
-      const { data, error } = await supabase.functions.invoke('sync-google-drive');
-
-      if (error) throw error;
-
-      if (data?.needsPublicAccess) {
-        toast({
-          title: "Folder Access Required",
-          description: "Please set folder sharing to 'Anyone with the link can view'",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Sync Complete",
-        description: `Synced ${data.synced} articles from Google Drive`,
-      });
-
-      setArticles(data.articles || []);
-    } catch (error) {
-      console.error('Error syncing:', error);
-      toast({
-        title: "Sync Failed",
-        description: "Failed to sync with Google Drive",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   const filteredArticles = articles.filter((article) =>
     article.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -135,10 +101,6 @@ const MemberArticles = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="banking-text text-sm font-medium text-primary">Auto-synced with Google Drive</span>
-          </div>
           <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
             Member Articles
           </h1>
@@ -179,15 +141,15 @@ const MemberArticles = () => {
                 <Clock className="h-6 w-6 text-blue-500" />
               </div>
               <div>
-                <p className="banking-text text-2xl font-bold">Live</p>
-                <p className="banking-text text-sm text-muted-foreground">Auto-Updated</p>
+                <p className="banking-text text-2xl font-bold">Updated</p>
+                <p className="banking-text text-sm text-muted-foreground">Recently Added</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="mb-8">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
             <Input
               type="text"
@@ -197,14 +159,6 @@ const MemberArticles = () => {
               className="pl-10 banking-text border-border/60 rounded-xl h-12"
             />
           </div>
-          <Button
-            onClick={syncWithGoogleDrive}
-            disabled={isSyncing}
-            className="bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold px-6 h-12 rounded-xl transition-all hover:scale-[1.02]"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
-          </Button>
         </div>
 
         {isLoading ? (
@@ -226,15 +180,9 @@ const MemberArticles = () => {
                 <FileText className="h-10 w-10 text-muted-foreground" />
               </div>
               <h3 className="professional-heading text-xl font-semibold mb-2">No Articles Found</h3>
-              <p className="banking-text text-muted-foreground mb-6">
-                {searchQuery ? 'Try adjusting your search terms' : 'Click "Sync Now" to load articles from Google Drive'}
+              <p className="banking-text text-muted-foreground">
+                {searchQuery ? 'Try adjusting your search terms' : 'No articles available at the moment'}
               </p>
-              {!searchQuery && (
-                <Button onClick={syncWithGoogleDrive} className="bg-gradient-primary">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Sync Articles
-                </Button>
-              )}
             </CardContent>
           </Card>
         ) : (

@@ -53,33 +53,6 @@ export type Database = {
         }
         Relationships: []
       }
-      google_oauth_tokens: {
-        Row: {
-          access_token: string
-          created_at: string
-          expiry_time: string
-          id: string
-          refresh_token: string | null
-          updated_at: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string
-          expiry_time: string
-          id: string
-          refresh_token?: string | null
-          updated_at?: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expiry_time?: string
-          id?: string
-          refresh_token?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
