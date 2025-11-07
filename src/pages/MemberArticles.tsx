@@ -88,10 +88,8 @@ const MemberArticles = () => {
     article.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const openArticle = (webViewLink: string | null) => {
-    if (webViewLink) {
-      window.open(webViewLink, '_blank', 'noopener,noreferrer');
-    }
+  const openArticle = (articleId: string) => {
+    navigate(`/article/${articleId}`);
   };
 
   return (
@@ -191,7 +189,7 @@ const MemberArticles = () => {
               <Card 
                 key={article.id} 
                 className="bg-card/50 backdrop-blur-xl border-border/60 hover:shadow-premium transition-all duration-300 hover:scale-[1.03] cursor-pointer group overflow-hidden"
-                onClick={() => openArticle(article.web_view_link)}
+                onClick={() => openArticle(article.id)}
               >
                 {/* AI-Generated Thumbnail */}
                 <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
