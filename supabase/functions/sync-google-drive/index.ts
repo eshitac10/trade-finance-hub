@@ -139,54 +139,6 @@ serve(async (req) => {
         }
       }
     }
-    
-    if (!driveResponse.ok) {
-      const errorText = await driveResponse.text();
-      console.error('Google Drive API error:', errorText);
-      throw new Error(`Failed to fetch from Google Drive: ${driveResponse.status}`);
-    }
-
-    const driveData = await driveResponse.json();
-    console.log('Fetched files:', driveData.files?.length || 0);
-
-    if (driveData.files && driveData.files.length > 0) {
-      for (const file of driveData.files) {
-        // Check if article already has AI thumbnail
-        const { data: existingArticle } = await supabaseClient
-          .from('google_drive_articles')
-          .select('ai_thumbnail')
-          .eq('file_id', file.id)
-          .single();
-
-        let aiThumbnail = existingArticle?.ai_thumbnail;
-
-        // Generate AI thumbnail if it doesn't exist
-        if (!aiThumbnail) {
-          console.log('Generating thumbnail for:', file.name);
-          aiThumbnail = await generateThumbnail(file.name);
-        }
-
-        const { error } = await supabaseClient
-          .from('google_drive_articles')
-          .upsert({
-            file_id: file.id,
-            name: file.name,
-            mime_type: file.mimeType,
-            web_view_link: file.webViewLink,
-            thumbnail_link: file.thumbnailLink,
-            created_time: file.createdTime,
-            modified_time: file.modifiedTime,
-            ai_thumbnail: aiThumbnail,
-            synced_at: new Date().toISOString(),
-          }, {
-            onConflict: 'file_id'
-          });
-
-        if (error) {
-          console.error('Error upserting file:', file.name, error);
-        }
-      }
-    }
 
     // Fetch all articles from database
     const { data: articles, error: fetchError } = await supabaseClient
