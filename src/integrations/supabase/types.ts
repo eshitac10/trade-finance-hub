@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       google_drive_articles: {
         Row: {
+          ai_thumbnail: string | null
           created_time: string | null
           file_id: string
           id: string
@@ -27,6 +28,7 @@ export type Database = {
           web_view_link: string | null
         }
         Insert: {
+          ai_thumbnail?: string | null
           created_time?: string | null
           file_id: string
           id?: string
@@ -38,6 +40,7 @@ export type Database = {
           web_view_link?: string | null
         }
         Update: {
+          ai_thumbnail?: string | null
           created_time?: string | null
           file_id?: string
           id?: string

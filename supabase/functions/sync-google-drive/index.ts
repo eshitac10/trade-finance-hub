@@ -6,6 +6,50 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function generateThumbnail(articleTitle: string): Promise<string | null> {
+  try {
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not found');
+      return null;
+    }
+
+    const prompt = `Create a professional, modern thumbnail image for a trade finance article titled "${articleTitle}". The image should be clean, corporate, and visually appealing with finance-related imagery like graphs, currency symbols, documents, or global trade elements. Use a professional color scheme with blues, greens, and gold accents.`;
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-image',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        modalities: ['image', 'text']
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI API error:', errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    return imageUrl || null;
+  } catch (error) {
+    console.error('Error generating thumbnail:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -27,8 +71,6 @@ serve(async (req) => {
 
     console.log('Fetching files from Google Drive folder:', folderId);
 
-    // Get access token using service account or OAuth2
-    // For simplicity, we'll use the Drive API with the folder being publicly accessible
     const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&fields=files(id,name,mimeType,webViewLink,thumbnailLink,createdTime,modifiedTime)&key=${clientId}`;
     
     const driveResponse = await fetch(driveUrl);
@@ -43,8 +85,22 @@ serve(async (req) => {
     console.log('Fetched files:', driveData.files?.length || 0);
 
     if (driveData.files && driveData.files.length > 0) {
-      // Upsert files into database
       for (const file of driveData.files) {
+        // Check if article already has AI thumbnail
+        const { data: existingArticle } = await supabaseClient
+          .from('google_drive_articles')
+          .select('ai_thumbnail')
+          .eq('file_id', file.id)
+          .single();
+
+        let aiThumbnail = existingArticle?.ai_thumbnail;
+
+        // Generate AI thumbnail if it doesn't exist
+        if (!aiThumbnail) {
+          console.log('Generating thumbnail for:', file.name);
+          aiThumbnail = await generateThumbnail(file.name);
+        }
+
         const { error } = await supabaseClient
           .from('google_drive_articles')
           .upsert({
@@ -55,6 +111,7 @@ serve(async (req) => {
             thumbnail_link: file.thumbnailLink,
             created_time: file.createdTime,
             modified_time: file.modifiedTime,
+            ai_thumbnail: aiThumbnail,
             synced_at: new Date().toISOString(),
           }, {
             onConflict: 'file_id'
