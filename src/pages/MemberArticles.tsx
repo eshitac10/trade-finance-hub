@@ -66,7 +66,7 @@ const MemberArticles = () => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('google_drive_articles')
-        .select('*')
+        .select('id, name, file_id, ai_thumbnail, thumbnail_link, mime_type, web_view_link, created_time, modified_time, synced_at')
         .order('modified_time', { ascending: false });
 
       if (error) throw error;

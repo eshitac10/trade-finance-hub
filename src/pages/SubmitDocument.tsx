@@ -334,7 +334,7 @@ const SubmitDocument = () => {
               <Button
                 onClick={handleUpload}
                 disabled={!file || uploading}
-                className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-7 text-lg rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 {uploading ? (
                   <>

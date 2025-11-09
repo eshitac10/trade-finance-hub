@@ -368,9 +368,45 @@ const Forum = () => {
         </Card>
 
         {/* Main Content - Side by Side Layout */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Posts List - Takes 2 columns */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* Articles Discussion Section - Left Sidebar (2 columns) */}
+          {articles.length > 0 && (
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-professional hover:shadow-elegant transition-all rounded-2xl sticky top-6">
+                <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-6 rounded-t-2xl">
+                  <h2 className="professional-heading text-3xl flex items-center gap-3">
+                    <FileText className="h-7 w-7" />
+                    Discuss Articles
+                  </h2>
+                </div>
+                <div className="p-8 space-y-4 max-h-[700px] overflow-y-auto">
+                  {articles.map((article) => (
+                    <div
+                      key={article.id}
+                      onClick={() => navigate(`/article/${article.id}`)}
+                      className="flex items-center justify-between p-5 rounded-xl bg-background/50 hover:bg-background transition-all cursor-pointer group border border-border/40 hover:border-primary/40 hover:shadow-professional"
+                    >
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <FileText className="h-6 w-6 text-primary flex-shrink-0" />
+                        <span className="text-base font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                          {article.name}
+                        </span>
+                      </div>
+                      <MessageSquare className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Posts List - Takes 3 columns */}
+          <div className={`space-y-4 ${articles.length > 0 ? 'lg:col-span-3' : 'lg:col-span-5'}`}>
+            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-professional rounded-2xl mb-4">
+              <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-6 rounded-t-2xl">
+                <h2 className="professional-heading text-3xl">Community Posts</h2>
+              </div>
+            </Card>
           {topics.length > 0 ? (
             topics.map((topic, index) => (
               <Card
@@ -468,37 +504,6 @@ const Forum = () => {
             </Card>
           )}
           </div>
-
-          {/* Articles Discussion Section - Sidebar (1 column) */}
-          {articles.length > 0 && (
-            <div className="lg:col-span-1">
-              <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl sticky top-6">
-                <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-4 border-b border-border">
-                  <h2 className="professional-heading text-xl text-primary flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Discuss Articles
-                  </h2>
-                </div>
-                <div className="p-6 space-y-3 max-h-[600px] overflow-y-auto">
-                  {articles.map((article) => (
-                    <div
-                      key={article.id}
-                      onClick={() => navigate(`/article/${article.id}`)}
-                      className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-all cursor-pointer group border border-border/40 hover:border-primary/40 hover:shadow-soft"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                          {article.name}
-                        </span>
-                      </div>
-                      <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          )}
         </div>
 
         {/* Delete Confirmation Dialog */}

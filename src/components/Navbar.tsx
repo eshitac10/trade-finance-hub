@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Youtube, LogIn, LogOut, Home } from "lucide-react";
+import { ChevronDown, Youtube, LogIn, LogOut, Home, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     // Check authentication status
@@ -198,6 +200,14 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 onClick={() => navigate("/auth")}
               >
                 Sign Up
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2 p-2.5 rounded-lg hover:bg-primary-light/30 transition-all hover:scale-110"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
             </div>
           )}

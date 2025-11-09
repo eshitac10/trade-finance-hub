@@ -129,6 +129,15 @@ const TopicDetail = () => {
       return;
     }
 
+    if (!userId) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to post a reply',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     const { error } = await supabase
       .from('forum_replies')
@@ -141,6 +150,7 @@ const TopicDetail = () => {
     setLoading(false);
 
     if (error) {
+      console.error('Reply error:', error);
       toast({
         title: 'Error',
         description: 'Failed to post reply',
@@ -154,6 +164,7 @@ const TopicDetail = () => {
       title: 'Success',
       description: 'Reply posted successfully',
     });
+    fetchReplies();
   };
 
   const getInitials = (name: string) => {
