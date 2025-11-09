@@ -11,6 +11,7 @@ import Members from "./pages/Members";
 import MemberArticles from "./pages/MemberArticles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Forum from "./pages/Forum";
+import TopicDetail from "./pages/TopicDetail";
 import Webinars from "./pages/Webinars";
 import Events from "./pages/Events";
 import SubmitDocument from "./pages/SubmitDocument";
@@ -32,7 +33,8 @@ const App = () => (
           <Route path="/members" element={<Members />} />
           <Route path="/member-articles" element={<MemberArticles />} />
           <Route path="/article/:id" element={<ArticleDetail />} />
-          <Route path="/forum" element={<Forum />} />
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/forum/topic/:topicId" element={<TopicDetail />} />
           <Route path="/webinars" element={<Webinars />} />
           <Route path="/events" element={<Events />} />
           <Route path="/submit-document" element={<SubmitDocument />} />
