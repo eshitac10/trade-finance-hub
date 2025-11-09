@@ -168,23 +168,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   </Button>
                 </div>
 
-                {/* Dark/Light Mode Toggle */}
-                <div className="flex items-center ml-4 pl-4 border-l border-border/40">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2.5 rounded-lg hover:bg-primary-light/30 transition-all hover:scale-110"
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    aria-label="Toggle theme"
-                  >
-                    {theme === "dark" ? (
-                      <Sun className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-                    ) : (
-                      <Moon className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-                    )}
-                  </Button>
-                </div>
-
                 {/* Logout Button */}
                 <div className="flex items-center">
                   <Button
