@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Clock, FileText, TrendingUp } from 'lucide-react';
+import CreativeLoader from '@/components/CreativeLoader';
 
 interface Article {
   id: string;
@@ -45,22 +46,7 @@ const LatestArticles = () => {
     return (
       <section className="py-20 bg-gradient-subtle relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent animate-fade-in">
-              Latest Articles
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="overflow-hidden border-border/60 animate-pulse">
-                <div className="h-48 bg-muted" />
-                <CardContent className="p-6">
-                  <div className="h-6 bg-muted rounded mb-2" />
-                  <div className="h-4 bg-muted rounded w-2/3" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <CreativeLoader size="lg" text="Loading latest articles..." className="min-h-[400px]" />
         </div>
       </section>
     );
