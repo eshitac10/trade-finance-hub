@@ -39,8 +39,8 @@ const SubmitDocument = () => {
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
   const [editDescription, setEditDescription] = useState("");
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  // Using a demo user ID since the app doesn't have real Supabase auth yet
-  const userId = '00000000-0000-0000-0000-000000000000';
+  // Use email as user ID since we're using localStorage authentication
+  const userId = localStorage.getItem('userEmail') || 'demo-user';
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -126,9 +126,10 @@ const SubmitDocument = () => {
       setDescription("");
       fetchDocuments(userId);
     } catch (error: any) {
+      console.error("Upload error:", error);
       toast({
         title: "Upload Failed",
-        description: error.message,
+        description: error.message || "Failed to upload document. Please try again.",
         variant: "destructive",
       });
     } finally {
