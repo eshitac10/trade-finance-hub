@@ -142,9 +142,39 @@ export type Database = {
           },
         ]
       }
+      forum_topic_likes: {
+        Row: {
+          created_at: string
+          id: string
+          topic_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          topic_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          topic_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_topic_likes_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       forum_topics: {
         Row: {
-          category_id: string
+          article_slug: string | null
+          category_id: string | null
           content: string
           created_at: string
           id: string
@@ -153,7 +183,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category_id: string
+          article_slug?: string | null
+          category_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -162,7 +193,8 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category_id?: string
+          article_slug?: string | null
+          category_id?: string | null
           content?: string
           created_at?: string
           id?: string

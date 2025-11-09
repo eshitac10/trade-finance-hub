@@ -3,13 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MessageSquare, Clock, Users, Plus, ArrowRight, MessageCircle, TrendingUp } from 'lucide-react';
+import { MessageSquare, Heart, AtSign, Send, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -18,23 +14,30 @@ interface ForumTopic {
   id: string;
   title: string;
   content: string;
-  category_id: string;
+  category_id?: string;
   user_id: string;
   created_at: string;
+  article_slug?: string;
   replies_count?: number;
+  likes_count?: number;
+  user_has_liked?: boolean;
   author_name?: string;
+}
+
+interface Article {
+  id: string;
+  name: string;
+  file_id: string;
 }
 
 const Forum = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newTopicTitle, setNewTopicTitle] = useState('');
-  const [newTopicContent, setNewTopicContent] = useState('');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'recent' | 'trending'>('recent');
 
   // Check authentication and get user
   useEffect(() => {
@@ -49,11 +52,11 @@ const Forum = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch all topics
   const fetchTopics = async () => {
     const { data: topicsData, error } = await supabase
       .from('forum_topics')
       .select('*, profiles(full_name, email)')
+      .is('article_slug', null)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -63,15 +66,28 @@ const Forum = () => {
 
     const topicsWithCounts = await Promise.all(
       (topicsData || []).map(async (topic) => {
-        const { count } = await supabase
+        const { count: repliesCount } = await supabase
           .from('forum_replies')
           .select('*', { count: 'exact', head: true })
           .eq('topic_id', topic.id);
 
+        const { count: likesCount } = await supabase
+          .from('forum_topic_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('topic_id', topic.id);
+
+        const { count: userLike } = await supabase
+          .from('forum_topic_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('topic_id', topic.id)
+          .eq('user_id', userId || '');
+
         const profile = topic.profiles as any;
         return {
           ...topic,
-          replies_count: count || 0,
+          replies_count: repliesCount || 0,
+          likes_count: likesCount || 0,
+          user_has_liked: (userLike || 0) > 0,
           author_name: profile?.full_name || profile?.email || 'Anonymous'
         };
       })
@@ -80,10 +96,28 @@ const Forum = () => {
     setTopics(topicsWithCounts);
   };
 
-  useEffect(() => {
-    fetchTopics();
+  const fetchArticles = async () => {
+    const { data, error } = await supabase
+      .from('google_drive_articles')
+      .select('id, name, file_id')
+      .order('created_time', { ascending: false })
+      .limit(5);
 
-    // Subscribe to realtime updates
+    if (error) {
+      console.error('Error fetching articles:', error);
+      return;
+    }
+    setArticles(data || []);
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchTopics();
+      fetchArticles();
+    }
+  }, [userId]);
+
+  useEffect(() => {
     const topicsChannel = supabase
       .channel('forum-topics-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_topics' }, () => {
@@ -98,17 +132,25 @@ const Forum = () => {
       })
       .subscribe();
 
+    const likesChannel = supabase
+      .channel('forum-likes-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_topic_likes' }, () => {
+        fetchTopics();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(topicsChannel);
       supabase.removeChannel(repliesChannel);
+      supabase.removeChannel(likesChannel);
     };
-  }, []);
+  }, [userId]);
 
-  const handleCreateTopic = async () => {
-    if (!newTopicTitle.trim() || !newTopicContent.trim()) {
+  const handleCreatePost = async () => {
+    if (!newPost.trim()) {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all fields',
+        title: 'Empty Post',
+        description: 'Please write something',
         variant: 'destructive',
       });
       return;
@@ -124,28 +166,19 @@ const Forum = () => {
     }
 
     setLoading(true);
-    
-    // Get the first category (default)
-    const { data: categories } = await supabase
-      .from('forum_categories')
-      .select('id')
-      .limit(1)
-      .single();
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('forum_topics')
       .insert({
-        title: newTopicTitle,
-        content: newTopicContent,
-        category_id: categories?.id,
+        title: newPost.substring(0, 100),
+        content: newPost,
         user_id: userId,
-      })
-      .select();
+      });
 
     setLoading(false);
 
     if (error) {
-      console.error('Error creating topic:', error);
+      console.error('Error creating post:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to create post',
@@ -159,9 +192,23 @@ const Forum = () => {
       description: 'Post created successfully',
     });
 
-    setIsCreateDialogOpen(false);
-    setNewTopicTitle('');
-    setNewTopicContent('');
+    setNewPost('');
+  };
+
+  const handleLike = async (topicId: string, hasLiked: boolean) => {
+    if (!userId) return;
+
+    if (hasLiked) {
+      await supabase
+        .from('forum_topic_likes')
+        .delete()
+        .eq('topic_id', topicId)
+        .eq('user_id', userId);
+    } else {
+      await supabase
+        .from('forum_topic_likes')
+        .insert({ topic_id: topicId, user_id: userId });
+    }
   };
 
   const navigateToTopic = (topicId: string) => {
@@ -177,136 +224,138 @@ const Forum = () => {
       .slice(0, 2);
   };
 
-  const displayedTopics = sortBy === 'recent' 
-    ? topics 
-    : [...topics].sort((a, b) => (b.replies_count || 0) - (a.replies_count || 0));
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <Navbar />
       
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <h1 className="professional-heading text-4xl text-primary flex items-center gap-3">
-                <MessageSquare className="h-10 w-10" />
-                Forum
-              </h1>
-              <p className="text-muted-foreground">
-                Connect and discuss with trade finance professionals
-              </p>
-            </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Post
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] bg-card border-border">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl text-primary">Create a Post</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-5 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-foreground">Title</Label>
-                    <Input
-                      id="title"
-                      value={newTopicTitle}
-                      onChange={(e) => setNewTopicTitle(e.target.value)}
-                      placeholder="What's on your mind?"
-                      className="bg-background border-input"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="content" className="text-foreground">Content</Label>
-                    <Textarea
-                      id="content"
-                      value={newTopicContent}
-                      onChange={(e) => setNewTopicContent(e.target.value)}
-                      placeholder="Share your thoughts..."
-                      rows={8}
-                      className="bg-background border-input"
-                    />
-                  </div>
+        <div className="mb-8">
+          <h1 className="professional-heading text-4xl text-primary mb-2">Forum</h1>
+          <p className="text-muted-foreground">
+            Connect and discuss with trade finance professionals
+          </p>
+        </div>
+
+        {/* Create Post Card */}
+        <Card className="mb-6 overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl">
+          <div className="p-6">
+            <div className="flex gap-4">
+              <Avatar className="h-12 w-12 border-2 border-primary/20">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
+                  {userId ? 'ME' : 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-3">
+                <Textarea
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  placeholder="What's up today?"
+                  rows={3}
+                  className="bg-background border-input resize-none focus:ring-2 focus:ring-primary transition-all"
+                />
+                <div className="flex justify-end">
                   <Button
-                    onClick={handleCreateTopic}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300"
+                    onClick={handleCreatePost}
+                    disabled={loading || !newPost.trim()}
+                    className="bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300"
                   >
+                    <Send className="h-4 w-4 mr-2" />
                     {loading ? 'Posting...' : 'Post'}
                   </Button>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </div>
+            </div>
           </div>
+        </Card>
 
-          {/* Sort Options */}
-          <div className="flex gap-2">
-            <Button
-              variant={sortBy === 'recent' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('recent')}
-              className={sortBy === 'recent' ? 'bg-gradient-to-r from-primary to-accent' : ''}
-            >
-              <Clock className="h-4 w-4 mr-2" />
-              Recent
-            </Button>
-            <Button
-              variant={sortBy === 'trending' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('trending')}
-              className={sortBy === 'trending' ? 'bg-gradient-to-r from-primary to-accent' : ''}
-            >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Trending
-            </Button>
-          </div>
-        </div>
+        {/* Articles Discussion Section */}
+        {articles.length > 0 && (
+          <Card className="mb-6 overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-4 border-b border-border">
+              <h2 className="professional-heading text-xl text-primary flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Discuss Articles
+              </h2>
+            </div>
+            <div className="p-6 space-y-3">
+              {articles.map((article) => (
+                <div
+                  key={article.id}
+                  onClick={() => navigate(`/article/${article.id}`)}
+                  className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      {article.name}
+                    </span>
+                  </div>
+                  <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Posts List */}
-        <div className="space-y-3">
-          {displayedTopics.length > 0 ? (
-            displayedTopics.map((topic, index) => (
+        <div className="space-y-4">
+          {topics.length > 0 ? (
+            topics.map((topic, index) => (
               <Card
                 key={topic.id}
-                onClick={() => navigateToTopic(topic.id)}
-                className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-elegant hover:border-primary/30 transition-all duration-300 cursor-pointer animate-fade-in group rounded-xl"
+                className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-elegant transition-all duration-300 animate-fade-in rounded-2xl"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <div className="p-4">
+                <div className="p-6">
                   <div className="flex gap-4">
-                    <div className="flex flex-col items-center gap-1 min-w-[50px]">
-                      <Avatar className="h-10 w-10 border-2 border-primary/20 group-hover:border-primary/40 transition-colors">
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold">
-                          {getInitials(topic.author_name || 'U')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-center gap-1 mt-2">
-                        <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-xs font-semibold text-muted-foreground">{topic.replies_count || 0}</span>
-                      </div>
-                    </div>
+                    <Avatar className="h-12 w-12 border-2 border-primary/20">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
+                        {getInitials(topic.author_name || 'U')}
+                      </AvatarFallback>
+                    </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg text-primary group-hover:text-accent transition-colors mb-2 flex items-center gap-2">
-                        {topic.title}
-                        <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 flex-shrink-0" />
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+                      <div className="mb-2">
+                        <span className="font-semibold text-foreground">{topic.author_name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                      
+                      <p 
+                        className="text-foreground mb-4 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => navigateToTopic(topic.id)}
+                      >
                         {topic.content}
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Users className="h-3.5 w-3.5" />
-                          <span className="font-medium">{topic.author_name}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" />
-                          {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
-                        </div>
+
+                      <div className="flex items-center gap-6 text-muted-foreground">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike(topic.id, topic.user_has_liked || false);
+                          }}
+                          className={`flex items-center gap-2 hover:text-primary transition-colors ${
+                            topic.user_has_liked ? 'text-primary' : ''
+                          }`}
+                        >
+                          <Heart className={`h-5 w-5 ${topic.user_has_liked ? 'fill-current' : ''}`} />
+                          <span className="text-sm font-medium">{topic.likes_count || 0}</span>
+                        </button>
+
+                        <button
+                          onClick={() => navigateToTopic(topic.id)}
+                          className="flex items-center gap-2 hover:text-primary transition-colors"
+                        >
+                          <MessageSquare className="h-5 w-5" />
+                          <span className="text-sm font-medium">{topic.replies_count || 0}</span>
+                        </button>
+
+                        <button className="flex items-center gap-2 hover:text-primary transition-colors">
+                          <AtSign className="h-5 w-5" />
+                          <span className="text-sm font-medium">Mention</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -314,7 +363,7 @@ const Forum = () => {
               </Card>
             ))
           ) : (
-            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border border-dashed animate-fade-in rounded-xl">
+            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border border-dashed animate-fade-in rounded-2xl">
               <div className="px-8 py-16 text-center text-muted-foreground">
                 <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-20" />
                 <p className="text-lg font-medium mb-2">No posts yet</p>
