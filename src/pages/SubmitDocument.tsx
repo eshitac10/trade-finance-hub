@@ -293,7 +293,7 @@ const SubmitDocument = () => {
                     id="file"
                     type="file"
                     onChange={handleFileChange}
-                    className="banking-text border-2 border-border/60 rounded-xl py-6 hover:border-primary/50 transition-all cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-semibold hover:file:bg-primary/90"
+                    className="banking-text border-2 border-border/60 rounded-xl h-auto py-3 hover:border-primary/50 transition-all cursor-pointer file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:font-semibold file:text-sm hover:file:bg-primary/90 transition-colors"
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt"
                   />
                 </div>
