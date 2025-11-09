@@ -261,7 +261,13 @@ const Events = () => {
               </div>
             </div>
             
-            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              if (open) {
+                setIsDialogOpen(true);
+              } else {
+                handleCloseDialog();
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:scale-105 transition-all duration-300">
                   <Plus className="mr-2 h-4 w-4" />
