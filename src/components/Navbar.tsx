@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Youtube, LogIn, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,18 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import tfwLogo from "@/assets/tfv-logo.png";
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -27,7 +15,6 @@ interface NavbarProps {
 
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
-  const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
 
@@ -39,29 +26,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       description: "You have been successfully logged out.",
     });
     navigate("/");
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-    }
-  };
-
-  const handleSubmitDocument = () => {
-    if (file) {
-      toast({
-        title: "Document Submitted",
-        description: `${file.name} has been sent to our team for review.`,
-      });
-      setFile(null);
-    } else {
-      toast({
-        title: "No File Selected",
-        description: "Please select a document to submit.",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleSocialClick = (platform: string) => {
@@ -123,41 +87,12 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     >
                       Member Articles
                     </DropdownMenuItem>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <DropdownMenuItem
-                          className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                          onSelect={(e) => e.preventDefault()}
-                        >
-                          Submit a Document
-                        </DropdownMenuItem>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md bg-card/98 backdrop-blur-xl border border-border/60 shadow-premium rounded-2xl">
-                        <DialogHeader>
-                          <DialogTitle className="professional-heading text-2xl">Submit Document</DialogTitle>
-                          <DialogDescription className="banking-text">Upload a document to share with our team.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="document" className="banking-text font-medium">Select Document</Label>
-                            <Input
-                              id="document"
-                              type="file"
-                              onChange={handleFileUpload}
-                              accept=".pdf,.doc,.docx,.txt"
-                              className="cursor-pointer banking-text border-border/60 rounded-xl"
-                            />
-                          </div>
-                          {file && <p className="text-sm text-muted-foreground banking-text">Selected: {file.name}</p>}
-                        </div>
-                        <Button
-                          onClick={handleSubmitDocument}
-                          className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02]"
-                        >
-                          Submit Document
-                        </Button>
-                      </DialogContent>
-                    </Dialog>
+                    <DropdownMenuItem
+                      className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
+                      onClick={() => navigate("/submit-document")}
+                    >
+                      Submit a Document
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
