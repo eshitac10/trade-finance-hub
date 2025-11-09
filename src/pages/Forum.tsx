@@ -18,6 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -52,6 +62,7 @@ const Forum = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [editingTopic, setEditingTopic] = useState<ForumTopic | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [deleteTopicId, setDeleteTopicId] = useState<string | null>(null);
 
   // Check authentication and get user
   useEffect(() => {
@@ -277,13 +288,13 @@ const Forum = () => {
     await fetchTopics();
   };
 
-  const handleDelete = async (topicId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+  const handleDelete = async () => {
+    if (!deleteTopicId) return;
 
     const { error } = await supabase
       .from('forum_topics')
       .delete()
-      .eq('id', topicId);
+      .eq('id', deleteTopicId);
 
     if (error) {
       toast({
@@ -298,6 +309,7 @@ const Forum = () => {
       title: 'Success',
       description: 'Post deleted successfully',
     });
+    setDeleteTopicId(null);
     await fetchTopics();
   };
 
@@ -355,37 +367,10 @@ const Forum = () => {
           </div>
         </Card>
 
-        {/* Articles Discussion Section */}
-        {articles.length > 0 && (
-          <Card className="mb-6 overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl">
-            <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-4 border-b border-border">
-              <h2 className="professional-heading text-xl text-primary flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Discuss Articles
-              </h2>
-            </div>
-            <div className="p-6 space-y-3">
-              {articles.map((article) => (
-                <div
-                  key={article.id}
-                  onClick={() => navigate(`/article/${article.id}`)}
-                  className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      {article.name}
-                    </span>
-                  </div>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-
-        {/* Posts List */}
-        <div className="space-y-4">
+        {/* Main Content - Side by Side Layout */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Posts List - Takes 2 columns */}
+          <div className="lg:col-span-2 space-y-4">
           {topics.length > 0 ? (
             topics.map((topic, index) => (
               <Card
@@ -422,8 +407,8 @@ const Forum = () => {
                                 <Pencil className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleDelete(topic.id)}
+                               <DropdownMenuItem 
+                                onClick={() => setDeleteTopicId(topic.id)}
                                 className="text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -482,7 +467,62 @@ const Forum = () => {
               </div>
             </Card>
           )}
+          </div>
+
+          {/* Articles Discussion Section - Sidebar (1 column) */}
+          {articles.length > 0 && (
+            <div className="lg:col-span-1">
+              <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl sticky top-6">
+                <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-6 py-4 border-b border-border">
+                  <h2 className="professional-heading text-xl text-primary flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Discuss Articles
+                  </h2>
+                </div>
+                <div className="p-6 space-y-3 max-h-[600px] overflow-y-auto">
+                  {articles.map((article) => (
+                    <div
+                      key={article.id}
+                      onClick={() => navigate(`/article/${article.id}`)}
+                      className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background transition-all cursor-pointer group border border-border/40 hover:border-primary/40 hover:shadow-soft"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                          {article.name}
+                        </span>
+                      </div>
+                      <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteTopicId} onOpenChange={() => setDeleteTopicId(null)}>
+          <AlertDialogContent className="bg-card border-border shadow-premium rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl text-primary">Delete Post</AlertDialogTitle>
+              <AlertDialogDescription className="text-base text-muted-foreground">
+                Are you sure you want to delete this post? This action cannot be undone and the post will be permanently removed.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-2">
+              <AlertDialogCancel className="bg-background hover:bg-muted border-border">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-soft"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Edit Post Dialog */}
         <Dialog open={!!editingTopic} onOpenChange={() => setEditingTopic(null)}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
+import AnimatedCounter from '@/components/AnimatedCounter';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown } from 'lucide-react';
@@ -95,7 +96,11 @@ const Index = () => {
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
                 <div className="inline-block p-4 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
-                  <div className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md">200+</div>
+                  <AnimatedCounter 
+                    end={200} 
+                    suffix="+"
+                    className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                  />
                 </div>
                 <div className="h-1.5 w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
@@ -104,7 +109,11 @@ const Index = () => {
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
                 <div className="inline-block p-4 bg-gradient-to-br from-accent to-primary rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
-                  <div className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md">50+</div>
+                  <AnimatedCounter 
+                    end={50} 
+                    suffix="+"
+                    className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                  />
                 </div>
                 <div className="h-1.5 w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
@@ -113,7 +122,11 @@ const Index = () => {
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
               <div className="relative">
                 <div className="inline-block p-4 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
-                  <div className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md">200+</div>
+                  <AnimatedCounter 
+                    end={200} 
+                    suffix="+"
+                    className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                  />
                 </div>
                 <div className="h-1.5 w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
@@ -122,7 +135,11 @@ const Index = () => {
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
               <div className="relative">
                 <div className="inline-block p-4 bg-gradient-to-br from-accent to-primary rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
-                  <div className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md">25+</div>
+                  <AnimatedCounter 
+                    end={25} 
+                    suffix="+"
+                    className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                  />
                 </div>
                 <div className="h-1.5 w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
