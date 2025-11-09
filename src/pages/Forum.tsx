@@ -55,13 +55,27 @@ const Forum = () => {
   const fetchTopics = async () => {
     const { data: topicsData, error } = await supabase
       .from('forum_topics')
-      .select('*, profiles(full_name, email)')
+      .select('*')
       .is('article_slug', null)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching topics:', error);
       return;
+    }
+
+    // Batch fetch author profiles to avoid relationship requirement
+    const userIds = Array.from(new Set((topicsData || []).map(t => t.user_id).filter(Boolean)));
+    let profileMap: Record<string, { full_name: string | null; email: string | null }> = {};
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds as string[]);
+      profileMap = (profilesData || []).reduce((acc, p: any) => {
+        acc[p.id] = { full_name: p.full_name, email: p.email };
+        return acc;
+      }, {} as Record<string, { full_name: string | null; email: string | null }>);
     }
 
     const topicsWithCounts = await Promise.all(
@@ -82,13 +96,13 @@ const Forum = () => {
           .eq('topic_id', topic.id)
           .eq('user_id', userId || '');
 
-        const profile = topic.profiles as any;
+        const profile = profileMap[topic.user_id] || null;
         return {
           ...topic,
           replies_count: repliesCount || 0,
           likes_count: likesCount || 0,
           user_has_liked: (userLike || 0) > 0,
-          author_name: profile?.full_name || profile?.email || 'Anonymous'
+          author_name: (profile?.full_name || profile?.email) || 'Anonymous'
         };
       })
     );
@@ -191,7 +205,7 @@ const Forum = () => {
       title: 'Success',
       description: 'Post created successfully',
     });
-
+    await fetchTopics();
     setNewPost('');
   };
 
