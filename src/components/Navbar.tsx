@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Youtube, LogIn, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -16,11 +18,27 @@ interface NavbarProps {
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userEmail");
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
@@ -169,7 +187,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 variant="ghost"
                 size="sm"
                 className="banking-text text-foreground/80 hover:text-primary font-semibold px-6 py-5 rounded-xl hover:bg-primary-light/30 transition-all hover:scale-105"
-                onClick={onLoginClick || (() => navigate("/"))}
+                onClick={() => navigate("/auth")}
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Login
@@ -177,7 +195,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               <Button
                 size="sm"
                 className="banking-text bg-gradient-primary hover:shadow-accent text-primary-foreground font-semibold px-8 py-5 rounded-xl transition-all hover:scale-105"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/auth")}
               >
                 Sign Up
               </Button>

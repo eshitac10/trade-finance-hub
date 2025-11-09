@@ -38,22 +38,26 @@ const SubmitDocument = () => {
   const [loading, setLoading] = useState(true);
   const [editingDoc, setEditingDoc] = useState<Document | null>(null);
   const [editDescription, setEditDescription] = useState("");
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  // Use email as user ID since we're using localStorage authentication
-  const userId = localStorage.getItem('userEmail') || 'demo-user';
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       toast({
         title: "Authentication Required",
         description: "Please log in to access this page.",
         variant: "destructive",
       });
-      navigate("/");
-    } else {
-      fetchDocuments(userId);
+      navigate("/auth");
+      return;
     }
-  }, [isAuthenticated, navigate, toast]);
+    setUserId(session.user.id);
+    fetchDocuments(session.user.id);
+  };
 
   const fetchDocuments = async (uid: string) => {
     setLoading(true);
@@ -91,7 +95,7 @@ const SubmitDocument = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !userId) return;
 
     setUploading(true);
     try {

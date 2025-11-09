@@ -35,7 +35,7 @@ export type Database = {
           mime_type: string
           updated_at?: string
           uploaded_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           description?: string | null
@@ -122,6 +122,33 @@ export type Database = {
           synced_at?: string
           thumbnail_link?: string | null
           web_view_link?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }

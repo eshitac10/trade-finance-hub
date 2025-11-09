@@ -1,135 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown } from 'lucide-react';
 import tradeFinanceHero from '@/assets/trade-finance-hero.png';
 import tradeNetworking from '@/assets/trade-networking.png';
 import tradePatternBg from '@/assets/trade-pattern-bg.png';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate authentication delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Dummy credentials check
-    if (email === 'admin@tfworld.com' && password === 'admin123') {
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', email);
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Trade Finance World",
-      });
-      
-      setShowLoginDialog(false);
-      navigate('/dashboard');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid credentials. Try admin@tfworld.com / admin123",
-      });
-    }
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
     
-    setIsLoading(false);
-  };
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onLoginClick={() => setShowLoginDialog(true)} />
-      
-      {/* Login Dialog */}
-      <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
-        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="professional-heading text-2xl text-primary text-center">
-              Login to Trade Finance World
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* Demo Credentials */}
-          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-4">
-            <p className="text-xs font-semibold text-accent mb-2">Demo Credentials:</p>
-            <p className="text-xs text-muted-foreground">Email: admin@tfworld.com</p>
-            <p className="text-xs text-muted-foreground">Password: admin123</p>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="admin@tfworld.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-background/50 border-border focus:border-accent transition-colors"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 bg-background/50 border-border focus:border-accent transition-colors"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-semibold shadow-elegant hover:shadow-2xl transition-all hover:-translate-y-0.5"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
-                  Logging in...
-                </div>
-              ) : (
-                <>
-                  Login
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <Navbar />
       
       {/* Hero Section with Enhanced Gradient and Graphics */}
       <section className="relative bg-gradient-hero py-28 lg:py-40 overflow-hidden">
@@ -160,11 +65,11 @@ const Index = () => {
               <div className="flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
                 <Button 
                   size="lg" 
-                  onClick={() => setShowLoginDialog(true)}
+                  onClick={() => navigate('/auth')}
                   className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-14 py-7 text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center">
-                    Login to Continue
+                    Get Started
                     <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
