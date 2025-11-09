@@ -179,7 +179,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     >
                       Webinars
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
+                    <DropdownMenuItem 
+                      className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
+                      onClick={() => navigate("/events")}
+                    >
                       Upcoming TFW Events
                     </DropdownMenuItem>
                     <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
