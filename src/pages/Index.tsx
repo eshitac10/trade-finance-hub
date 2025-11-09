@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import EventCarousel from '@/components/EventCarousel';
 import AnimatedCounter from '@/components/AnimatedCounter';
+import LatestArticles from '@/components/LatestArticles';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award, ChevronDown } from 'lucide-react';
@@ -309,6 +310,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Latest Articles Section */}
+        <LatestArticles />
 
       </main>
 

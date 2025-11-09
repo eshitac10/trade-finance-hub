@@ -5,7 +5,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, MessageSquare, Send, Clock, User } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send, Clock, User, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -38,6 +48,7 @@ const TopicDetail = () => {
   const [newReply, setNewReply] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [deleteReplyId, setDeleteReplyId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -167,6 +178,30 @@ const TopicDetail = () => {
     fetchReplies();
   };
 
+  const handleDeleteReply = async (replyId: string) => {
+    const { error } = await supabase
+      .from('forum_replies')
+      .delete()
+      .eq('id', replyId);
+
+    if (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete reply',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: 'Reply deleted successfully',
+    });
+    setDeleteReplyId(null);
+    fetchReplies();
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -232,12 +267,12 @@ const TopicDetail = () => {
           {replies.map((reply, index) => (
             <Card
               key={reply.id}
-              className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-professional transition-all duration-300 animate-fade-in rounded-xl"
+              className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-professional transition-all duration-300 animate-fade-in rounded-xl group"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
               <div className="px-6 py-5">
                 <div className="flex gap-4">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
                     <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
                       {getInitials(reply.author_name)}
                     </AvatarFallback>
@@ -251,6 +286,14 @@ const TopicDetail = () => {
                           {formatDistanceToNow(new Date(reply.created_at), { addSuffix: true })}
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeleteReplyId(reply.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                     <p className="text-foreground whitespace-pre-wrap leading-relaxed">{reply.content}</p>
                   </div>
@@ -294,6 +337,29 @@ const TopicDetail = () => {
             </div>
           </div>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteReplyId !== null} onOpenChange={() => setDeleteReplyId(null)}>
+          <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="professional-heading text-2xl text-primary">Delete Reply?</AlertDialogTitle>
+              <AlertDialogDescription className="banking-text text-muted-foreground">
+                Are you sure you want to delete this reply? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="banking-text rounded-xl hover:bg-secondary transition-all">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteReplyId && handleDeleteReply(deleteReplyId)}
+                className="banking-text bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl transition-all"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
