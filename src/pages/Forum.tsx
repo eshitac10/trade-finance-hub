@@ -5,7 +5,19 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MessageSquare, Heart, AtSign, Send, FileText } from 'lucide-react';
+import { MessageSquare, Heart, AtSign, Send, FileText, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -38,6 +50,8 @@ const Forum = () => {
   const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [editingTopic, setEditingTopic] = useState<ForumTopic | null>(null);
+  const [editContent, setEditContent] = useState('');
 
   // Check authentication and get user
   useEffect(() => {
@@ -229,6 +243,64 @@ const Forum = () => {
     navigate(`/forum/topic/${topicId}`);
   };
 
+  const handleEdit = (topic: ForumTopic) => {
+    setEditingTopic(topic);
+    setEditContent(topic.content);
+  };
+
+  const handleUpdatePost = async () => {
+    if (!editContent.trim() || !editingTopic) return;
+
+    const { error } = await supabase
+      .from('forum_topics')
+      .update({
+        content: editContent,
+        title: editContent.substring(0, 100),
+      })
+      .eq('id', editingTopic.id);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update post',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: 'Post updated successfully',
+    });
+    setEditingTopic(null);
+    setEditContent('');
+    await fetchTopics();
+  };
+
+  const handleDelete = async (topicId: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+
+    const { error } = await supabase
+      .from('forum_topics')
+      .delete()
+      .eq('id', topicId);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete post',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Success',
+      description: 'Post deleted successfully',
+    });
+    await fetchTopics();
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -321,7 +393,7 @@ const Forum = () => {
                 className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-elegant transition-all duration-300 animate-fade-in rounded-2xl"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <div className="p-6">
+                  <div className="p-6">
                   <div className="flex gap-4">
                     <Avatar className="h-12 w-12 border-2 border-primary/20">
                       <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
@@ -330,11 +402,36 @@ const Forum = () => {
                     </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="mb-2">
-                        <span className="font-semibold text-foreground">{topic.author_name}</span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
-                        </span>
+                      <div className="mb-2 flex items-center justify-between">
+                        <div>
+                          <span className="font-semibold text-foreground">{topic.author_name}</span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
+                          </span>
+                        </div>
+                        
+                        {topic.user_id === userId && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEdit(topic)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDelete(topic.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
                       
                       <p 
@@ -386,6 +483,32 @@ const Forum = () => {
             </Card>
           )}
         </div>
+
+        {/* Edit Post Dialog */}
+        <Dialog open={!!editingTopic} onOpenChange={() => setEditingTopic(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Post</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                placeholder="Edit your post..."
+                rows={4}
+                className="bg-background border-input resize-none focus:ring-2 focus:ring-primary transition-all"
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setEditingTopic(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdatePost} disabled={!editContent.trim()}>
+                  Update
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
