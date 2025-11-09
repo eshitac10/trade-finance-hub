@@ -8,22 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MessageSquare, MessageCircle, Clock, TrendingUp, Users, Plus, ArrowRight } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { MessageSquare, Clock, Users, Plus, ArrowRight, MessageCircle, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-
-interface ForumCategory {
-  id: string;
-  name: string;
-  description: string | null;
-  topics_count?: number;
-  replies_count?: number;
-  last_activity?: {
-    user_name: string;
-    time: string;
-  };
-}
 
 interface ForumTopic {
   id: string;
@@ -39,14 +28,13 @@ interface ForumTopic {
 const Forum = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [categories, setCategories] = useState<ForumCategory[]>([]);
-  const [recentTopics, setRecentTopics] = useState<ForumTopic[]>([]);
+  const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [newTopicTitle, setNewTopicTitle] = useState('');
   const [newTopicContent, setNewTopicContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'recent' | 'trending'>('recent');
 
   // Check authentication and get user
   useEffect(() => {
@@ -61,78 +49,12 @@ const Forum = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch categories with counts
-  const fetchCategories = async () => {
-    const { data: categoriesData, error: categoriesError } = await supabase
-      .from('forum_categories')
-      .select('*')
-      .order('created_at', { ascending: true });
-
-    if (categoriesError) {
-      console.error('Error fetching categories:', categoriesError);
-      return;
-    }
-
-    // Get counts for each category
-    const categoriesWithCounts = await Promise.all(
-      (categoriesData || []).map(async (category) => {
-        const { count: topicsCount } = await supabase
-          .from('forum_topics')
-          .select('*', { count: 'exact', head: true })
-          .eq('category_id', category.id);
-
-        const { data: topicsData } = await supabase
-          .from('forum_topics')
-          .select('id')
-          .eq('category_id', category.id);
-
-        let repliesCount = 0;
-        if (topicsData && topicsData.length > 0) {
-          const topicIds = topicsData.map(t => t.id);
-          const { count } = await supabase
-            .from('forum_replies')
-            .select('*', { count: 'exact', head: true })
-            .in('topic_id', topicIds);
-          repliesCount = count || 0;
-        }
-
-        // Get last activity
-        const { data: lastTopic } = await supabase
-          .from('forum_topics')
-          .select('created_at, profiles(full_name, email)')
-          .eq('category_id', category.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        let last_activity;
-        if (lastTopic) {
-          const profile = lastTopic.profiles as any;
-          last_activity = {
-            user_name: profile?.full_name || profile?.email || 'Anonymous',
-            time: formatDistanceToNow(new Date(lastTopic.created_at), { addSuffix: true })
-          };
-        }
-
-        return {
-          ...category,
-          topics_count: topicsCount || 0,
-          replies_count: repliesCount,
-          last_activity
-        };
-      })
-    );
-
-    setCategories(categoriesWithCounts);
-  };
-
-  // Fetch recent topics
-  const fetchRecentTopics = async () => {
+  // Fetch all topics
+  const fetchTopics = async () => {
     const { data: topicsData, error } = await supabase
       .from('forum_topics')
       .select('*, profiles(full_name, email)')
-      .order('created_at', { ascending: false })
-      .limit(10);
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching topics:', error);
@@ -155,46 +77,35 @@ const Forum = () => {
       })
     );
 
-    setRecentTopics(topicsWithCounts);
+    setTopics(topicsWithCounts);
   };
 
   useEffect(() => {
-    fetchCategories();
-    fetchRecentTopics();
+    fetchTopics();
 
     // Subscribe to realtime updates
-    const categoriesChannel = supabase
-      .channel('forum-categories-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_categories' }, () => {
-        fetchCategories();
-      })
-      .subscribe();
-
     const topicsChannel = supabase
       .channel('forum-topics-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_topics' }, () => {
-        fetchCategories();
-        fetchRecentTopics();
+        fetchTopics();
       })
       .subscribe();
 
     const repliesChannel = supabase
       .channel('forum-replies-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_replies' }, () => {
-        fetchCategories();
-        fetchRecentTopics();
+        fetchTopics();
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(categoriesChannel);
       supabase.removeChannel(topicsChannel);
       supabase.removeChannel(repliesChannel);
     };
   }, []);
 
   const handleCreateTopic = async () => {
-    if (!newTopicTitle.trim() || !newTopicContent.trim() || !selectedCategory) {
+    if (!newTopicTitle.trim() || !newTopicContent.trim()) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all fields',
@@ -203,22 +114,41 @@ const Forum = () => {
       return;
     }
 
+    if (!userId) {
+      toast({
+        title: 'Not Authenticated',
+        description: 'Please log in to create a post',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
-    const { error } = await supabase
+    
+    // Get the first category (default)
+    const { data: categories } = await supabase
+      .from('forum_categories')
+      .select('id')
+      .limit(1)
+      .single();
+
+    const { data, error } = await supabase
       .from('forum_topics')
       .insert({
         title: newTopicTitle,
         content: newTopicContent,
-        category_id: selectedCategory,
+        category_id: categories?.id,
         user_id: userId,
-      });
+      })
+      .select();
 
     setLoading(false);
 
     if (error) {
+      console.error('Error creating topic:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create topic',
+        description: error.message || 'Failed to create post',
         variant: 'destructive',
       });
       return;
@@ -226,83 +156,78 @@ const Forum = () => {
 
     toast({
       title: 'Success',
-      description: 'Topic created successfully',
+      description: 'Post created successfully',
     });
 
     setIsCreateDialogOpen(false);
     setNewTopicTitle('');
     setNewTopicContent('');
-    setSelectedCategory('');
   };
 
   const navigateToTopic = (topicId: string) => {
     navigate(`/forum/topic/${topicId}`);
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const displayedTopics = sortBy === 'recent' 
+    ? topics 
+    : [...topics].sort((a, b) => (b.replies_count || 0) - (a.replies_count || 0));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="mb-12 animate-fade-up space-y-3">
-          <h1 className="professional-heading text-5xl text-primary mb-3 flex items-center gap-4">
-            <MessageSquare className="h-12 w-12" />
-            Community Forum
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Connect, discuss, and share insights with trade finance professionals worldwide
-          </p>
-        </div>
-
-        {/* Forum Categories */}
-        <Card className="mb-10 overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl">
-          <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-5 flex justify-between items-center">
-            <h2 className="professional-heading text-2xl">Discussion Categories</h2>
+        <div className="mb-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <h1 className="professional-heading text-4xl text-primary flex items-center gap-3">
+                <MessageSquare className="h-10 w-10" />
+                Forum
+              </h1>
+              <p className="text-muted-foreground">
+                Connect and discuss with trade finance professionals
+              </p>
+            </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="secondary" size="sm" className="bg-background/20 hover:bg-background/30 border border-primary-foreground/20">
+                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300">
                   <Plus className="h-4 w-4 mr-2" />
-                  New Topic
+                  Create Post
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px] bg-card border-border">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl text-primary">Start a New Discussion</DialogTitle>
+                  <DialogTitle className="text-2xl text-primary">Create a Post</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-6 py-4">
+                <div className="space-y-5 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category" className="text-foreground">Category</Label>
-                    <select
-                      id="category"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-foreground">Topic Title</Label>
+                    <Label htmlFor="title" className="text-foreground">Title</Label>
                     <Input
                       id="title"
                       value={newTopicTitle}
                       onChange={(e) => setNewTopicTitle(e.target.value)}
-                      placeholder="Enter an engaging title..."
+                      placeholder="What's on your mind?"
                       className="bg-background border-input"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="content" className="text-foreground">Description</Label>
+                    <Label htmlFor="content" className="text-foreground">Content</Label>
                     <Textarea
                       id="content"
                       value={newTopicContent}
                       onChange={(e) => setNewTopicContent(e.target.value)}
-                      placeholder="Describe your topic in detail..."
-                      rows={6}
+                      placeholder="Share your thoughts..."
+                      rows={8}
                       className="bg-background border-input"
                     />
                   </div>
@@ -311,112 +236,93 @@ const Forum = () => {
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300"
                   >
-                    {loading ? 'Creating...' : 'Create Topic'}
+                    {loading ? 'Posting...' : 'Post'}
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
           </div>
-          
-          <div className="divide-y divide-border">
-            {categories.map((category, index) => (
-              <div
-                key={category.id}
-                className="px-8 py-6 hover:bg-accent/5 transition-all duration-300 cursor-pointer animate-fade-in group"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex items-center justify-between gap-6">
-                  <div className="flex items-start gap-4 flex-1">
-                    <MessageCircle className="h-10 w-10 text-primary flex-shrink-0 mt-1 group-hover:scale-110 transition-transform duration-300" />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-primary group-hover:text-accent transition-colors mb-1">
-                        {category.name}
-                      </h3>
-                      {category.description && (
-                        <p className="text-sm text-muted-foreground">{category.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-8">
-                    <div className="text-center min-w-[80px]">
-                      <div className="text-2xl font-bold text-primary">{category.topics_count || 0}</div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Topics</div>
-                    </div>
-                    <div className="text-center min-w-[80px]">
-                      <div className="text-2xl font-bold text-accent">{category.replies_count || 0}</div>
-                      <div className="text-xs text-muted-foreground uppercase tracking-wide">Replies</div>
-                    </div>
-                    <div className="min-w-[200px]">
-                      {category.last_activity ? (
-                        <div className="text-right">
-                          <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground mb-1">
-                            <Clock className="h-4 w-4" />
-                            {category.last_activity.time}
-                          </div>
-                          <div className="text-xs text-muted-foreground">by {category.last_activity.user_name}</div>
-                        </div>
-                      ) : (
-                        <div className="text-right text-sm text-muted-foreground italic">No activity yet</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
 
-        {/* Recent Topics */}
-        <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-fade-in rounded-2xl" style={{ animationDelay: '0.3s' }}>
-          <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-5">
-            <h2 className="professional-heading text-2xl flex items-center gap-3">
-              <TrendingUp className="h-6 w-6" />
-              Recent Discussions
-            </h2>
+          {/* Sort Options */}
+          <div className="flex gap-2">
+            <Button
+              variant={sortBy === 'recent' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy('recent')}
+              className={sortBy === 'recent' ? 'bg-gradient-to-r from-primary to-accent' : ''}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Recent
+            </Button>
+            <Button
+              variant={sortBy === 'trending' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSortBy('trending')}
+              className={sortBy === 'trending' ? 'bg-gradient-to-r from-primary to-accent' : ''}
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Trending
+            </Button>
           </div>
-          
-          <div className="divide-y divide-border">
-            {recentTopics.length > 0 ? (
-              recentTopics.map((topic, index) => (
-                <div
-                  key={topic.id}
-                  onClick={() => navigateToTopic(topic.id)}
-                  className="px-8 py-5 hover:bg-accent/5 transition-all duration-300 cursor-pointer animate-fade-in group"
-                  style={{ animationDelay: `${(index + 3) * 0.1}s` }}
-                >
-                  <div className="flex items-center justify-between gap-6">
-                    <div className="flex-1">
+        </div>
+
+        {/* Posts List */}
+        <div className="space-y-3">
+          {displayedTopics.length > 0 ? (
+            displayedTopics.map((topic, index) => (
+              <Card
+                key={topic.id}
+                onClick={() => navigateToTopic(topic.id)}
+                className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-elegant hover:border-primary/30 transition-all duration-300 cursor-pointer animate-fade-in group rounded-xl"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className="p-4">
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center gap-1 min-w-[50px]">
+                      <Avatar className="h-10 w-10 border-2 border-primary/20 group-hover:border-primary/40 transition-colors">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold">
+                          {getInitials(topic.author_name || 'U')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-center gap-1 mt-2">
+                        <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs font-semibold text-muted-foreground">{topic.replies_count || 0}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg text-primary group-hover:text-accent transition-colors mb-2 flex items-center gap-2">
                         {topic.title}
-                        <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+                        <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 flex-shrink-0" />
                       </h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          {topic.author_name}
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+                        {topic.content}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Users className="h-3.5 w-3.5" />
+                          <span className="font-medium">{topic.author_name}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
                           {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
                         </div>
                       </div>
                     </div>
-                    
-                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-4 py-2 text-sm">
-                      {topic.replies_count || 0} {topic.replies_count === 1 ? 'reply' : 'replies'}
-                    </Badge>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="px-8 py-12 text-center text-muted-foreground">
+              </Card>
+            ))
+          ) : (
+            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border border-dashed animate-fade-in rounded-xl">
+              <div className="px-8 py-16 text-center text-muted-foreground">
                 <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-20" />
-                <p className="text-lg">No discussions yet. Be the first to start one!</p>
+                <p className="text-lg font-medium mb-2">No posts yet</p>
+                <p className="text-sm">Be the first to start a discussion!</p>
               </div>
-            )}
-          </div>
-        </Card>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
