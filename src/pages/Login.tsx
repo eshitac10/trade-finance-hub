@@ -70,7 +70,7 @@ const Login = () => {
       <Navbar onLoginClick={() => setShowLoginDialog(true)} />
       
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#2B0808] via-[#3D0C0C] to-[#2B0808] py-28 lg:py-40 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#1A0505] via-[#250707] to-[#1A0505] py-28 lg:py-40 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <img src={tradePatternBg} alt="" className="w-full h-full object-cover" />
         </div>
@@ -99,65 +99,65 @@ const Login = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-br from-background via-[#2B0808]/10 to-background border-y border-border relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-br from-background via-[#1A0505]/10 to-background border-y border-border relative overflow-hidden">
         <div className="absolute inset-0 opacity-5 dark:opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#2B0808] via-[#C9A961] to-[#2B0808]"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1A0505] via-[#C9A961] to-[#1A0505]"></div>
           <img src={tradePatternBg} alt="" className="w-full h-full object-cover mix-blend-overlay" />
         </div>
-        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-[#2B0808]/10 to-[#C9A961]/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-[#C9A961]/10 to-[#2B0808]/10 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-[#1A0505]/10 to-[#C9A961]/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-[#C9A961]/10 to-[#1A0505]/10 rounded-full blur-3xl animate-float-delayed"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-10 text-center">
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-[#C9A961]/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
-                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#2B0808] to-[#C9A961] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#1A0505] to-[#C9A961] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={200} 
                     suffix="+"
                     className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white drop-shadow-md"
                   />
                 </div>
-                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#2B0808] via-[#C9A961] to-[#2B0808] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#1A0505] via-[#C9A961] to-[#1A0505] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Global Members</div>
             </div>
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-[#C9A961]/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
-                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#C9A961] to-[#2B0808] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#C9A961] to-[#1A0505] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={50} 
                     suffix="+"
                     className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white drop-shadow-md"
                   />
                 </div>
-                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#C9A961] via-[#2B0808] to-[#C9A961] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#C9A961] via-[#1A0505] to-[#C9A961] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Countries</div>
             </div>
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-[#C9A961]/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
               <div className="relative">
-                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#2B0808] to-[#C9A961] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#1A0505] to-[#C9A961] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={200} 
                     suffix="+"
                     className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white drop-shadow-md"
                   />
                 </div>
-                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#2B0808] via-[#C9A961] to-[#2B0808] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#1A0505] via-[#C9A961] to-[#1A0505] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Events</div>
             </div>
             <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-[#C9A961]/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
               <div className="relative">
-                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#C9A961] to-[#2B0808] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-[#C9A961] to-[#1A0505] rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={25} 
                     suffix="+"
                     className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white drop-shadow-md"
                   />
                 </div>
-                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#C9A961] via-[#2B0808] to-[#C9A961] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-[#C9A961] via-[#1A0505] to-[#C9A961] mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Years</div>
             </div>
