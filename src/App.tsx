@@ -15,6 +15,7 @@ import TopicDetail from "./pages/TopicDetail";
 import Webinars from "./pages/Webinars";
 import Events from "./pages/Events";
 import SubmitDocument from "./pages/SubmitDocument";
+import ChatImport from "./pages/ChatImport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/webinars" element={<Webinars />} />
           <Route path="/events" element={<Events />} />
           <Route path="/submit-document" element={<SubmitDocument />} />
+          <Route path="/chat-import" element={<ChatImport />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

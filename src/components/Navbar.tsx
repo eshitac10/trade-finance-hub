@@ -113,6 +113,12 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     >
                       Submit a Document
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
+                      onClick={() => navigate("/chat-import")}
+                    >
+                      Chat Import Timeline
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 

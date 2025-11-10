@@ -281,6 +281,151 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_events: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          end_datetime: string
+          id: string
+          import_id: string
+          keywords: string[] | null
+          message_count: number | null
+          start_datetime: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          end_datetime: string
+          id?: string
+          import_id: string
+          keywords?: string[] | null
+          message_count?: number | null
+          start_datetime: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          end_datetime?: string
+          id?: string
+          import_id?: string
+          keywords?: string[] | null
+          message_count?: number | null
+          start_datetime?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_events_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_imports: {
+        Row: {
+          created_at: string
+          date_format: string | null
+          file_size: number
+          filename: string
+          id: string
+          status: string
+          timezone: string | null
+          total_messages: number | null
+          updated_at: string
+          upload_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_format?: string | null
+          file_size: number
+          filename: string
+          id?: string
+          status?: string
+          timezone?: string | null
+          total_messages?: number | null
+          updated_at?: string
+          upload_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_format?: string | null
+          file_size?: number
+          filename?: string
+          id?: string
+          status?: string
+          timezone?: string | null
+          total_messages?: number | null
+          updated_at?: string
+          upload_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      whatsapp_messages: {
+        Row: {
+          attachments: string[] | null
+          author: string
+          created_at: string
+          datetime_iso: string
+          event_id: string | null
+          id: string
+          import_id: string
+          is_noise: boolean | null
+          message_id: string
+          raw_line: string
+          text: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          author: string
+          created_at?: string
+          datetime_iso: string
+          event_id?: string | null
+          id?: string
+          import_id: string
+          is_noise?: boolean | null
+          message_id: string
+          raw_line: string
+          text: string
+        }
+        Update: {
+          attachments?: string[] | null
+          author?: string
+          created_at?: string
+          datetime_iso?: string
+          event_id?: string | null
+          id?: string
+          import_id?: string
+          is_noise?: boolean | null
+          message_id?: string
+          raw_line?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
