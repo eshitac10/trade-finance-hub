@@ -98,9 +98,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
-                    <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
-                      Member Important Conversations
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                       onClick={() => navigate("/member-articles")}
@@ -117,7 +114,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                       onClick={() => navigate("/chat-import")}
                     >
-                      Chat Import Timeline
+                      Member Important Conversations
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
