@@ -87,6 +87,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     <DropdownMenuItem onClick={() => navigate("/chat-import")}>
                       Member Important Conversations
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/memories")}>Memories</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <DropdownMenu>
@@ -181,6 +182,13 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
                           Member Important Conversations
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/memories")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Memories
                         </Button>
                       </div>
                       <div className="space-y-2">

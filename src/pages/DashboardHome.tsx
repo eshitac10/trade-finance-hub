@@ -1,641 +1,316 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import {
-  MessageSquare,
-  Plus,
-  Clock,
-  Users,
-  Sparkles,
-  Send,
-  Calendar,
-  FileText,
-  Heart,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  AtSign,
-} from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { formatDistanceToNow } from "date-fns";
-
-interface ForumTopic {
-  id: string;
-  title: string;
-  content: string;
-  user_id: string;
-  created_at: string;
-  article_slug: string | null;
-  category_id: string | null;
-  replies_count?: number;
-  likes_count?: number;
-  user_has_liked?: boolean;
-  author_name?: string;
-}
-
-interface DashboardStats {
-  totalArticles: number;
-  totalEvents: number;
-  totalMembers: number;
-}
-
-interface Article {
-  id: string;
-  name: string;
-  file_id: string;
-}
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
+import EventCarousel from '@/components/EventCarousel';
+import AnimatedCounter from '@/components/AnimatedCounter';
+import LatestArticles from '@/components/LatestArticles';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award } from 'lucide-react';
+import tradeFinanceHero from '@/assets/trade-finance-hero.png';
+import tradeNetworking from '@/assets/trade-networking.png';
+import tradePatternBg from '@/assets/trade-pattern-bg.png';
+import { supabase } from '@/integrations/supabase/client';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [topics, setTopics] = useState<ForumTopic[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [newTopicTitle, setNewTopicTitle] = useState("");
-  const [newTopicContent, setNewTopicContent] = useState("");
-  const [newPost, setNewPost] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [stats, setStats] = useState<DashboardStats>({ totalArticles: 0, totalEvents: 0, totalMembers: 0 });
-  const [user, setUser] = useState<any>(null);
-  const [editingTopic, setEditingTopic] = useState<ForumTopic | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [deleteTopicId, setDeleteTopicId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/");
+        navigate('/');
         return;
       }
-      setUser(session.user);
     };
-
+    
     checkAuth();
-    fetchTopics();
-    fetchArticles();
-    fetchStats();
 
-    const topicsChannel = supabase
-      .channel("forum_topics_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "forum_topics",
-        },
-        () => {
-          fetchTopics();
-        }
-      )
-      .subscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/');
+      }
+    });
 
-    const repliesChannel = supabase
-      .channel("forum_replies_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "forum_replies",
-        },
-        () => {
-          fetchTopics();
-        }
-      )
-      .subscribe();
-
-    const likesChannel = supabase
-      .channel("forum_likes_changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "forum_topic_likes",
-        },
-        () => {
-          fetchTopics();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(topicsChannel);
-      supabase.removeChannel(repliesChannel);
-      supabase.removeChannel(likesChannel);
-    };
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const fetchTopics = async () => {
-    try {
-      setIsLoading(true);
-      const { data: topicsData, error } = await supabase
-        .from("forum_topics")
-        .select("*")
-        .is("article_slug", null)
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-
-      // Fetch author profiles
-      const userIds = Array.from(new Set((topicsData || []).map((t) => t.user_id).filter(Boolean)));
-      let profileMap: Record<string, { full_name: string | null; email: string | null }> = {};
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("id, full_name, email")
-          .in("id", userIds as string[]);
-        profileMap = (profilesData || []).reduce((acc, p: any) => {
-          acc[p.id] = { full_name: p.full_name, email: p.email };
-          return acc;
-        }, {} as Record<string, { full_name: string | null; email: string | null }>);
-      }
-
-      const topicsWithCounts = await Promise.all(
-        (topicsData || []).map(async (topic) => {
-          const { count: repliesCount } = await supabase
-            .from("forum_replies")
-            .select("*", { count: "exact", head: true })
-            .eq("topic_id", topic.id);
-
-          const { count: likesCount } = await supabase
-            .from("forum_topic_likes")
-            .select("*", { count: "exact", head: true })
-            .eq("topic_id", topic.id);
-
-          const { count: userLike } = await supabase
-            .from("forum_topic_likes")
-            .select("*", { count: "exact", head: true })
-            .eq("topic_id", topic.id)
-            .eq("user_id", user?.id || "");
-
-          const profile = profileMap[topic.user_id] || null;
-          return {
-            ...topic,
-            replies_count: repliesCount || 0,
-            likes_count: likesCount || 0,
-            user_has_liked: (userLike || 0) > 0,
-            author_name: profile?.full_name || profile?.email || "Anonymous",
-          };
-        })
-      );
-
-      setTopics(topicsWithCounts);
-    } catch (error) {
-      console.error("Error fetching topics:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchArticles = async () => {
-    const { data, error } = await supabase
-      .from("google_drive_articles")
-      .select("id, name, file_id")
-      .order("created_time", { ascending: false })
-      .limit(5);
-
-    if (error) {
-      console.error("Error fetching articles:", error);
-      return;
-    }
-    setArticles(data || []);
-  };
-
-  const fetchStats = async () => {
-    try {
-      const { count: articlesCount } = await supabase
-        .from("google_drive_articles")
-        .select("*", { count: "exact", head: true });
-
-      setStats({
-        totalArticles: articlesCount || 0,
-        totalEvents: 12,
-        totalMembers: 1234,
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
-  };
-
-  const handleCreatePost = async () => {
-    if (!newPost.trim()) {
-      toast({
-        title: "Empty Post",
-        description: "Please write something",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!user) {
-      toast({
-        title: "Not Authenticated",
-        description: "Please log in to create a post",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const { error } = await supabase.from("forum_topics").insert({
-      title: newPost.substring(0, 100),
-      content: newPost,
-      user_id: user.id,
-    });
-
-    setIsSubmitting(false);
-
-    if (error) {
-      console.error("Error creating post:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create post",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Post created successfully",
-    });
-    await fetchTopics();
-    setNewPost("");
-  };
-
-  const handleLike = async (topicId: string, hasLiked: boolean) => {
-    if (!user) return;
-
-    if (hasLiked) {
-      await supabase
-        .from("forum_topic_likes")
-        .delete()
-        .eq("topic_id", topicId)
-        .eq("user_id", user.id);
-    } else {
-      await supabase.from("forum_topic_likes").insert({ topic_id: topicId, user_id: user.id });
-    }
-  };
-
-  const navigateToTopic = (topicId: string) => {
-    navigate(`/forum/topic/${topicId}`);
-  };
-
-  const handleEdit = (topic: ForumTopic) => {
-    setEditingTopic(topic);
-    setEditContent(topic.content);
-  };
-
-  const handleUpdatePost = async () => {
-    if (!editContent.trim() || !editingTopic) return;
-
-    const { error } = await supabase
-      .from("forum_topics")
-      .update({
-        content: editContent,
-        title: editContent.substring(0, 100),
-      })
-      .eq("id", editingTopic.id);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update post",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Post updated successfully",
-    });
-    setEditingTopic(null);
-    setEditContent("");
-    await fetchTopics();
-  };
-
-  const handleDelete = async () => {
-    if (!deleteTopicId) return;
-
-    const { error } = await supabase.from("forum_topics").delete().eq("id", deleteTopicId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete post",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Post deleted successfully",
-    });
-    setDeleteTopicId(null);
-    await fetchTopics();
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/5">
+    <div className="min-h-screen bg-background">
       <Navbar />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8 text-justify">
-          <h1 className="professional-heading text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent flex items-center gap-3">
-            <Sparkles className="h-10 w-10 text-accent animate-pulse" />
-            Dashboard
-          </h1>
-          <p className="banking-text text-lg text-muted-foreground">
-            Welcome to your Trade Finance World community hub
-          </p>
+      
+      {/* Hero Section with Enhanced Gradient and Graphics */}
+      <section className="relative bg-gradient-hero py-28 lg:py-40 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <img src={tradePatternBg} alt="" className="w-full h-full object-cover" />
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-lg transition-all">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="banking-text text-2xl font-bold text-foreground">{stats.totalArticles}</p>
-                <p className="banking-text text-sm text-muted-foreground">Articles</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-lg transition-all">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-green-500" />
-              </div>
-              <div>
-                <p className="banking-text text-2xl font-bold text-foreground">{stats.totalEvents}</p>
-                <p className="banking-text text-sm text-muted-foreground">Events</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-lg transition-all">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-500" />
-              </div>
-              <div>
-                <p className="banking-text text-2xl font-bold text-foreground">{stats.totalMembers}</p>
-                <p className="banking-text text-sm text-muted-foreground">Members</p>
-              </div>
-            </CardContent>
-          </Card>
+        
+        {/* Hero Image */}
+        <div className="absolute inset-0 opacity-20">
+          <img src={tradeFinanceHero} alt="" className="w-full h-full object-cover mix-blend-overlay" />
         </div>
+        
+        {/* Enhanced Floating Elements */}
+        <div className="absolute top-20 left-10 w-40 h-40 bg-accent/15 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-52 h-52 bg-primary-foreground/15 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-primary-foreground/10 rounded-full blur-2xl animate-float"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-6 sm:space-y-8">
+            <h1 className="professional-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 sm:mb-8 tracking-tight animate-fade-up drop-shadow-2xl px-4" style={{ animationDelay: '0.1s' }}>
+              Trade Finance World
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed animate-fade-up drop-shadow-lg px-4 sm:px-6" style={{ animationDelay: '0.2s' }}>
+              Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        {/* Main Content - Forum with Articles Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8">
-          {/* Articles Discussion Section - Left Sidebar */}
-          {articles.length > 0 && (
-            <div className="lg:col-span-2 order-2 lg:order-1">
-              <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-professional hover:shadow-elegant transition-all rounded-2xl lg:sticky lg:top-6">
-                <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 rounded-t-2xl">
-                  <h2 className="professional-heading text-2xl sm:text-3xl flex items-center gap-2 sm:gap-3">
-                    <FileText className="h-5 w-5 sm:h-7 sm:w-7" />
-                    Discuss Articles
-                  </h2>
+      {/* Stats Section with Enhanced Design */}
+      <section className="py-20 bg-gradient-to-br from-background via-secondary/30 to-background dark:from-background dark:via-secondary/20 dark:to-background border-y border-border relative overflow-hidden">
+        {/* Enhanced Decorative Background */}
+        <div className="absolute inset-0 opacity-5 dark:opacity-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-primary"></div>
+          <img src={tradePatternBg} alt="" className="w-full h-full object-cover mix-blend-overlay" />
+        </div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full blur-3xl animate-float-delayed"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-10 text-center">
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
+              <div className="relative">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                  <AnimatedCounter 
+                    end={200} 
+                    suffix="+"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                  />
                 </div>
-                <div className="p-6 sm:p-8 space-y-3 sm:space-y-4 max-h-[500px] sm:max-h-[700px] overflow-y-auto">
-                  {articles.map((article) => (
-                    <div
-                      key={article.id}
-                      onClick={() => navigate(`/article/${article.id}`)}
-                      className="flex items-center justify-between p-4 sm:p-5 rounded-xl bg-background/50 hover:bg-background transition-all cursor-pointer group border border-border/40 hover:border-primary/40 hover:shadow-professional"
-                    >
-                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                        <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
-                        <span className="text-sm sm:text-base font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                          {article.name}
-                        </span>
-                      </div>
-                      <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-3" />
-                    </div>
-                  ))}
-                </div>
-              </Card>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+              </div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Global Members</div>
             </div>
-          )}
-
-          {/* Forum Section */}
-          <div className={`space-y-4 order-1 lg:order-2 ${articles.length > 0 ? "lg:col-span-3" : "lg:col-span-5"}`}>
-            {/* Create Post Card */}
-            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft rounded-2xl">
-              <div className="p-6">
-                <div className="flex gap-4">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
-                      {user ? "ME" : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-3">
-                    <Textarea
-                      value={newPost}
-                      onChange={(e) => setNewPost(e.target.value)}
-                      placeholder="What's up today?"
-                      rows={3}
-                      className="bg-background border-input resize-none focus:ring-2 focus:ring-primary transition-all"
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={handleCreatePost}
-                        disabled={isSubmitting || !newPost.trim()}
-                        className="bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all duration-300"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        {isSubmitting ? "Posting..." : "Post"}
-                      </Button>
-                    </div>
-                  </div>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
+              <div className="relative">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                  <AnimatedCounter 
+                    end={50} 
+                    suffix="+"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                  />
                 </div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
-            </Card>
-
-            <Card className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-professional rounded-2xl">
-              <div className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-6 rounded-t-2xl">
-                <h2 className="professional-heading text-3xl">Community Posts</h2>
-              </div>
-            </Card>
-
-            {/* Topics List */}
-            <div className="space-y-4">
-              {isLoading ? (
-                <>
-                  {[1, 2, 3].map((i) => (
-                    <Card key={i} className="p-4 bg-background/50">
-                      <Skeleton className="h-6 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-full" />
-                    </Card>
-                  ))}
-                </>
-              ) : topics.length === 0 ? (
-                <div className="text-center py-12">
-                  <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="banking-text text-muted-foreground">No topics yet. Be the first to start a discussion!</p>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Countries</div>
+            </div>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
+              <div className="relative">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                  <AnimatedCounter 
+                    end={200} 
+                    suffix="+"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                  />
                 </div>
-              ) : (
-                topics.map((topic, index) => (
-                  <Card
-                    key={topic.id}
-                    className="overflow-hidden bg-card/90 backdrop-blur-sm border-border shadow-soft hover:shadow-elegant transition-all duration-300 animate-fade-in rounded-2xl"
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                  >
-                    <div className="p-6">
-                      <div className="flex gap-4">
-                        <Avatar className="h-12 w-12 border-2 border-primary/20">
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">
-                            {getInitials(topic.author_name || "U")}
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="mb-2 flex items-center justify-between">
-                            <div>
-                              <span className="font-semibold text-foreground">{topic.author_name}</span>
-                              <span className="text-xs text-muted-foreground ml-2">
-                                {formatDistanceToNow(new Date(topic.created_at), { addSuffix: true })}
-                              </span>
-                            </div>
-
-                            {topic.user_id === user?.id && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleEdit(topic)}>
-                                    <Pencil className="h-4 w-4 mr-2" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => setDeleteTopicId(topic.id)} className="text-destructive">
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
-
-                          <p className="text-foreground mb-4 cursor-pointer hover:text-primary transition-colors" onClick={() => navigateToTopic(topic.id)}>
-                            {topic.content}
-                          </p>
-
-                          <div className="flex items-center gap-6 text-muted-foreground">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleLike(topic.id, topic.user_has_liked || false);
-                              }}
-                              className={`flex items-center gap-2 hover:text-primary transition-colors ${topic.user_has_liked ? "text-primary" : ""}`}
-                            >
-                              <Heart className={`h-5 w-5 ${topic.user_has_liked ? "fill-current" : ""}`} />
-                              <span className="text-sm font-medium">{topic.likes_count || 0}</span>
-                            </button>
-
-                            <button onClick={() => navigateToTopic(topic.id)} className="flex items-center gap-2 hover:text-primary transition-colors">
-                              <MessageSquare className="h-5 w-5" />
-                              <span className="text-sm font-medium">{topic.replies_count || 0}</span>
-                            </button>
-
-                            <button className="flex items-center gap-2 hover:text-primary transition-colors">
-                              <AtSign className="h-5 w-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              )}
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+              </div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Events</div>
+            </div>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
+              <div className="relative">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                  <AnimatedCounter 
+                    end={25} 
+                    suffix="+"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                  />
+                </div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+              </div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Years</div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingTopic} onOpenChange={(open) => !open && setEditingTopic(null)}>
-        <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="professional-heading text-2xl">Edit Post</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="border-border/60 min-h-32"
-              placeholder="Edit your post..."
-            />
-            <Button onClick={handleUpdatePost} className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground">
-              Update Post
-            </Button>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Event Carousel Section with Enhanced Spacing */}
+        <section className="py-24">
+          <div className="text-center mb-16 space-y-4 animate-fade-up">
+            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-5">
+              Recent Events & Gatherings
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Bringing together industry leaders and professionals from across the globe
+            </p>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="animate-scale-in">
+            <EventCarousel />
+          </div>
+        </section>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteTopicId} onOpenChange={(open) => !open && setDeleteTopicId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>This action cannot be undone. This will permanently delete your post.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Value Propositions with Premium Design */}
+        <section className="py-24">
+          <div className="text-center mb-20 space-y-5 animate-fade-up">
+            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-5">
+              Why Join Trade Finance World
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Empowering professionals with the resources and connections needed to excel
+            </p>
+          </div>
+          
+          {/* Featured Networking Image */}
+          <div className="mb-16 animate-fade-in">
+            <div className="relative rounded-3xl overflow-hidden shadow-premium border border-border hover:shadow-2xl transition-all duration-700 hover:-translate-y-2 group">
+              <img 
+                src={tradeNetworking} 
+                alt="Global Trade Finance Networking" 
+                className="w-full h-[400px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
+                <h3 className="text-3xl font-bold mb-3">Connect with Global Trade Finance Leaders</h3>
+                <p className="text-lg opacity-95">Building partnerships that drive international trade forward</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-10">
+            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.1s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-accent/5 rounded-full blur-2xl"></div>
+              
+              <div className="relative z-10">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary via-primary-hover to-accent rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 shadow-elegant group-hover:shadow-accent">
+                  <Users className="h-12 w-12 text-primary-foreground" />
+                </div>
+                <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
+                <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
+                  Expert Network
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-base mb-6">
+                  Connect with leading professionals in trade finance and banking. Build meaningful relationships that drive your career forward.
+                </p>
+                <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <span className="text-sm font-semibold">Explore Network</span>
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl"></div>
+              
+              <div className="relative z-10">
+                <div className="w-24 h-24 bg-gradient-to-br from-accent via-accent-hover to-primary rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 shadow-elegant group-hover:shadow-accent">
+                  <BookOpen className="h-12 w-12 text-accent-foreground" />
+                </div>
+                <div className="h-1 w-16 bg-gradient-to-r from-accent to-primary rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
+                <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
+                  Educational Resources
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-base mb-6">
+                  Access exclusive articles, webinars, and industry insights. Stay ahead with cutting-edge knowledge and best practices.
+                </p>
+                <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <span className="text-sm font-semibold">View Resources</span>
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-accent/5 rounded-full blur-2xl"></div>
+              
+              <div className="relative z-10">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary via-primary-hover to-accent rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 shadow-elegant group-hover:shadow-accent">
+                  <Globe2 className="h-12 w-12 text-primary-foreground" />
+                </div>
+                <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
+                <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
+                  Global Events
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-base mb-6">
+                  Join conferences, seminars, and networking opportunities worldwide. Engage with thought leaders and shape the future of trade finance.
+                </p>
+                <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                  <span className="text-sm font-semibold">Discover Events</span>
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Additional Benefits with Premium Card Design */}
+        <section className="py-24 bg-gradient-to-br from-secondary/60 via-secondary/40 to-secondary/60 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 rounded-3xl relative overflow-hidden">
+          {/* Enhanced Background Graphics */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary to-accent rounded-full blur-3xl animate-float"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-accent to-primary rounded-full blur-3xl animate-float-delayed"></div>
+          </div>
+          <div className="absolute inset-0 opacity-5">
+            <img src={tradePatternBg} alt="" className="w-full h-full object-cover" />
+          </div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="grid md:grid-cols-3 gap-10">
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
+                  <TrendingUp className="h-10 w-10 text-primary-foreground" />
+                </div>
+                <div>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Industry Insights</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Access real-time market analysis and expert commentary on emerging trends</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
+                <div className="w-20 h-20 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
+                  <Shield className="h-10 w-10 text-accent-foreground" />
+                </div>
+                <div>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Trusted Community</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Join a vetted network of verified professionals and institutions</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
+                  <Award className="h-10 w-10 text-primary-foreground" />
+                </div>
+                <div>
+                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Professional Development</h4>
+                  <p className="text-muted-foreground text-base leading-relaxed">Elevate your expertise with certifications and specialized training programs</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Latest Articles Section */}
+        <LatestArticles />
+
+      </main>
+
+      {/* Simplified Footer */}
+      <footer className="bg-primary text-primary-foreground py-6 border-t border-primary-hover">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-primary-foreground/70">
+            <p>&copy; 2024 Trade Finance World. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

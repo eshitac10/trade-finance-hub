@@ -13,6 +13,7 @@ import TopicDetail from "./pages/TopicDetail";
 import Webinars from "./pages/Webinars";
 import Events from "./pages/Events";
 import ChatImport from "./pages/ChatImport";
+import Memories from "./pages/Memories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/webinars" element={<Webinars />} />
           <Route path="/events" element={<Events />} />
           <Route path="/chat-import" element={<ChatImport />} />
+          <Route path="/memories" element={<Memories />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
