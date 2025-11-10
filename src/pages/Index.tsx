@@ -56,23 +56,23 @@ const Index = () => {
         <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-primary-foreground/10 rounded-full blur-2xl animate-float"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-8">
-            <h1 className="professional-heading text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-8 tracking-tight animate-fade-up drop-shadow-2xl">
+          <div className="text-center space-y-6 sm:space-y-8">
+            <h1 className="professional-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 sm:mb-8 tracking-tight animate-fade-up drop-shadow-2xl px-4">
               Trade Finance World
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-12 leading-relaxed animate-fade-up drop-shadow-lg" style={{ animationDelay: '0.15s' }}>
+            <p className="text-base sm:text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed animate-fade-up drop-shadow-lg px-4 sm:px-6" style={{ animationDelay: '0.15s' }}>
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
             {!isAuthenticated && (
-              <div className="flex justify-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
+              <div className="flex justify-center animate-fade-up px-4" style={{ animationDelay: '0.3s' }}>
                 <Button 
                   size="lg" 
                   onClick={() => navigate('/auth')}
-                  className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-14 py-7 text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden"
+                  className="bg-accent text-accent-foreground hover:bg-accent-hover font-semibold px-8 sm:px-14 py-5 sm:py-7 text-base sm:text-lg rounded-xl shadow-premium hover:shadow-glow transition-all duration-500 hover:-translate-y-2 hover:scale-105 group relative overflow-hidden w-full sm:w-auto"
                 >
-                  <span className="relative z-10 flex items-center">
+                  <span className="relative z-10 flex items-center justify-center">
                     Get Started
-                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
+                    <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-2 transition-transform duration-300" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-accent-hover via-accent to-accent-hover bg-size-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </Button>
@@ -93,58 +93,58 @@ const Index = () => {
         <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full blur-3xl animate-float-delayed"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-4 gap-10 text-center">
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-10 text-center">
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
-                <div className="inline-block p-4 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={200} 
                     suffix="+"
-                    className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
                   />
                 </div>
-                <div className="h-1.5 w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-semibold text-base">Global Members</div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Global Members</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
-                <div className="inline-block p-4 bg-gradient-to-br from-accent to-primary rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={50} 
                     suffix="+"
-                    className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
                   />
                 </div>
-                <div className="h-1.5 w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-semibold text-base">Countries Represented</div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Countries</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
               <div className="relative">
-                <div className="inline-block p-4 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={200} 
                     suffix="+"
-                    className="text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-primary-foreground drop-shadow-md"
                   />
                 </div>
-                <div className="h-1.5 w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-primary via-accent to-primary mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-semibold text-base">Annual Events</div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Events</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-8 rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
               <div className="relative">
-                <div className="inline-block p-4 bg-gradient-to-br from-accent to-primary rounded-2xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
+                <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
                     end={25} 
                     suffix="+"
-                    className="text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
+                    className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-accent-foreground drop-shadow-md"
                   />
                 </div>
-                <div className="h-1.5 w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-4 rounded-full group-hover:w-32 transition-all duration-500 shadow-glow"></div>
+                <div className="h-1 sm:h-1.5 w-16 sm:w-24 bg-gradient-to-r from-accent via-primary to-accent mx-auto mb-2 sm:mb-4 rounded-full group-hover:w-24 sm:group-hover:w-32 transition-all duration-500 shadow-glow"></div>
               </div>
-              <div className="text-muted-foreground font-semibold text-base">Years of Excellence</div>
+              <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Years</div>
             </div>
           </div>
         </div>

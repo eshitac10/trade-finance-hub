@@ -137,51 +137,51 @@ const Members = () => {
 
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
         {/* Enhanced Header */}
-        <div className="mb-12 text-center space-y-4 animate-fade-in">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-primary/10 rounded-full mb-4 animate-scale-in">
-            <Users className="h-5 w-5 text-primary animate-pulse" />
-            <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
+        <div className="mb-8 sm:mb-12 text-center space-y-4 animate-fade-in">
+          <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-primary/10 rounded-full mb-3 sm:mb-4 animate-scale-in">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary animate-pulse" />
+            <span className="text-xs sm:text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
               {members.length}+ Professional Network
             </span>
           </div>
-          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="professional-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 bg-gradient-primary bg-clip-text text-transparent px-4">
             Members Directory
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Connect with trade finance professionals from around the globe
           </p>
         </div>
 
         {/* Enhanced Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 animate-scale-in">
-          <Card className="p-8 bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-premium hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl group overflow-hidden relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10 animate-scale-in">
+          <Card className="p-6 sm:p-8 bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-premium hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl group overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity"></div>
-            <div className="flex items-center gap-5 relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-elegant group-hover:scale-110 transition-transform duration-500">
-                <Users className="h-8 w-8 text-primary-foreground" />
+            <div className="flex items-center gap-3 sm:gap-5 relative">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-elegant group-hover:scale-110 transition-transform duration-500">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <p className="text-3xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
                   {members.length}
                 </p>
-                <p className="text-base text-muted-foreground font-medium">Total Members</p>
+                <p className="text-sm sm:text-base text-muted-foreground font-medium">Total Members</p>
               </div>
             </div>
           </Card>
         </div>
 
         {/* Enhanced Search */}
-        <Card className="p-8 mb-10 bg-card/90 backdrop-blur-xl border-border/60 animate-fade-in shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden relative">
+        <Card className="p-6 sm:p-8 mb-8 sm:mb-10 bg-card/90 backdrop-blur-xl border-border/60 animate-fade-in shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5"></div>
-          <div className="relative w-full md:w-2/3 lg:w-1/2">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="relative w-full">
+            <Search className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <Input
               placeholder="Search members by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-14 pr-4 py-7 bg-background/50 text-base rounded-xl border-2 border-border focus:border-primary hover:border-primary/50 transition-all"
+              className="pl-12 sm:pl-14 pr-4 py-5 sm:py-7 bg-background/50 text-sm sm:text-base rounded-xl border-2 border-border focus:border-primary hover:border-primary/50 transition-all"
             />
           </div>
         </Card>

@@ -239,23 +239,23 @@ const Events = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header with animated gradient */}
-          <div className="flex justify-between items-center mb-8 animate-fade-in">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8 animate-fade-in">
+            <div className="relative w-full sm:w-auto">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 blur-2xl opacity-30 rounded-full"></div>
               <div className="relative">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-3 bg-gradient-to-br from-primary to-accent rounded-xl shadow-lg">
-                    <CalendarDays className="h-8 w-8 text-primary-foreground" />
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <div className="p-2 sm:p-3 bg-gradient-to-br from-primary to-accent rounded-lg sm:rounded-xl shadow-lg">
+                    <CalendarDays className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                   </div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     TFW Events Calendar
                   </h1>
                 </div>
-                <p className="text-muted-foreground ml-16 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-accent" />
+                <p className="text-sm sm:text-base text-muted-foreground ml-0 sm:ml-16 flex items-center gap-2">
+                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-accent" />
                   Stay updated with upcoming Trade Finance Week events
                 </p>
               </div>
