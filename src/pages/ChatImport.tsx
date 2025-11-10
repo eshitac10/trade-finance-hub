@@ -49,6 +49,10 @@ interface WhatsAppMessage {
   attachments: string[];
 }
 
+interface ExpandedMessages {
+  [key: string]: boolean;
+}
+
 const ChatImport = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -66,6 +70,8 @@ const ChatImport = () => {
   const [newEventTitle, setNewEventTitle] = useState('');
   const [showSamplePreview, setShowSamplePreview] = useState(false);
   const [sampleLines, setSampleLines] = useState<string[]>([]);
+  const [expandedMessages, setExpandedMessages] = useState<ExpandedMessages>({});
+  const [showStats, setShowStats] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -320,6 +326,27 @@ const ChatImport = () => {
 
   const uniqueAuthors = [...new Set(messages.map(m => m.author))];
 
+  const toggleMessageExpansion = (messageId: string) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+
+  const copyMessage = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "Message copied to clipboard",
+    });
+  };
+
+  const selectedEventData = events.find(e => e.id === selectedEvent);
+  const messagesByAuthor = messages.reduce((acc, msg) => {
+    acc[msg.author] = (acc[msg.author] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle">
@@ -465,78 +492,101 @@ const ChatImport = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
                   Events Timeline
+                  {events.length > 0 && (
+                    <Badge variant="outline" className="ml-auto">
+                      {events.length} events
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {selectedImport ? (
                   <ScrollArea className="h-[600px]">
-                    {events.map((event) => (
-                      <Card 
-                        key={event.id}
-                        className={`mb-4 cursor-pointer transition-all ${
-                          selectedEvent === event.id ? 'ring-2 ring-primary' : ''
-                        }`}
-                        onClick={() => handleSelectEvent(event.id)}
-                      >
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg">{event.title}</CardTitle>
-                              <CardDescription className="flex items-center gap-2 mt-1">
-                                <Clock className="h-3 w-3" />
-                                {new Date(event.start_datetime).toLocaleString()}
-                              </CardDescription>
+                    {events.length > 0 ? (
+                      events.map((event) => (
+                        <Card 
+                          key={event.id}
+                          className={`mb-4 cursor-pointer transition-all hover:shadow-lg ${
+                            selectedEvent === event.id 
+                              ? 'ring-2 ring-primary shadow-elegant bg-primary/5' 
+                              : 'hover:bg-secondary/50'
+                          }`}
+                          onClick={() => handleSelectEvent(event.id)}
+                        >
+                          <CardHeader>
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <CardTitle className="text-lg truncate">{event.title}</CardTitle>
+                                  {selectedEvent === event.id && (
+                                    <ChevronRight className="h-5 w-5 text-primary animate-pulse" />
+                                  )}
+                                </div>
+                                <CardDescription className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(event.start_datetime).toLocaleString()}
+                                </CardDescription>
+                              </div>
+                              <div className="flex gap-1 flex-shrink-0">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingEvent(event);
+                                    setNewEventTitle(event.title);
+                                  }}
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleExportEvent(event, 'json');
+                                  }}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteEvent(event.id);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingEvent(event);
-                                  setNewEventTitle(event.title);
-                                }}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleExportEvent(event, 'json');
-                                }}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteEvent(event.id);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              <Badge variant="secondary" className="font-medium">
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                {event.message_count} messages
+                              </Badge>
+                              {event.keywords.slice(0, 3).map((kw) => (
+                                <Badge key={kw} variant="outline">{kw}</Badge>
+                              ))}
+                              {event.keywords.length > 3 && (
+                                <Badge variant="outline">+{event.keywords.length - 3}</Badge>
+                              )}
                             </div>
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="secondary">
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              {event.message_count} messages
-                            </Badge>
-                            {event.keywords.map((kw) => (
-                              <Badge key={kw} variant="outline">{kw}</Badge>
-                            ))}
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    ))}
+                          </CardHeader>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No events detected in this import</p>
+                      </div>
+                    )}
                   </ScrollArea>
                 ) : (
                   <div className="text-center text-muted-foreground py-8">
-                    Select an import to view events
+                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Select an import to view events</p>
                   </div>
                 )}
               </CardContent>
@@ -545,14 +595,59 @@ const ChatImport = () => {
         )}
 
         {/* Messages Viewer */}
-        {selectedEvent && (
+        {selectedEvent && selectedEventData && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </CardTitle>
-              <div className="flex gap-2 mt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    {selectedEventData.title}
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    {filteredMessages.length} of {messages.length} messages
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowStats(!showStats)}
+                >
+                  {showStats ? 'Hide Stats' : 'Show Stats'}
+                </Button>
+              </div>
+
+              {showStats && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 p-4 bg-secondary/50 rounded-lg">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Total Messages</div>
+                    <div className="text-2xl font-bold">{messages.length}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Participants</div>
+                    <div className="text-2xl font-bold">{uniqueAuthors.length}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Date Range</div>
+                    <div className="text-sm font-medium">
+                      {messages.length > 0 && (
+                        <>
+                          {new Date(messages[0].datetime_iso).toLocaleDateString()} - 
+                          {new Date(messages[messages.length - 1].datetime_iso).toLocaleDateString()}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Top Contributor</div>
+                    <div className="text-sm font-medium truncate">
+                      {Object.entries(messagesByAuthor).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -563,7 +658,7 @@ const ChatImport = () => {
                   />
                 </div>
                 <Select value={filterAuthor} onValueChange={setFilterAuthor}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[200px]">
                     <SelectValue placeholder="Filter by author" />
                   </SelectTrigger>
                   <SelectContent>
@@ -576,28 +671,77 @@ const ChatImport = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
-                {filteredMessages.map((msg) => (
-                  <div key={msg.id} className="mb-4 p-3 bg-secondary rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-sm">{msg.author}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(msg.datetime_iso).toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                    {msg.attachments.length > 0 && (
-                      <div className="flex gap-2 mt-2">
-                        {msg.attachments.map((att, i) => (
-                          <Badge key={i} variant="outline">
-                            <FileText className="h-3 w-3 mr-1" />
-                            {att}
-                          </Badge>
-                        ))}
+              <ScrollArea className="h-[500px] pr-4">
+                {filteredMessages.length > 0 ? (
+                  filteredMessages.map((msg, idx) => {
+                    const isLongMessage = msg.text.length > 200;
+                    const isExpanded = expandedMessages[msg.id];
+                    const displayText = isLongMessage && !isExpanded 
+                      ? msg.text.substring(0, 200) + '...' 
+                      : msg.text;
+
+                    return (
+                      <div 
+                        key={msg.id} 
+                        className="mb-3 p-4 bg-secondary/80 hover:bg-secondary rounded-lg transition-colors group"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Users className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <span className="font-semibold text-sm">{msg.author}</span>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {new Date(msg.datetime_iso).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => copyMessage(msg.text)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed mb-2">
+                          {displayText}
+                        </p>
+                        
+                        {isLongMessage && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs"
+                            onClick={() => toggleMessageExpansion(msg.id)}
+                          >
+                            {isExpanded ? 'Show less' : 'Show more'}
+                          </Button>
+                        )}
+                        
+                        {msg.attachments.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {msg.attachments.map((att, i) => (
+                              <Badge key={i} variant="outline" className="gap-1">
+                                <FileText className="h-3 w-3" />
+                                {att}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    );
+                  })
+                ) : (
+                  <div className="text-center text-muted-foreground py-12">
+                    <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No messages match your filters</p>
                   </div>
-                ))}
+                )}
               </ScrollArea>
             </CardContent>
           </Card>
