@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Youtube, LogOut, Sun, Moon, Menu } from "lucide-react";
+import { Youtube, LogOut, Sun, Moon, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import tfwLogo from "@/assets/tfw-full-logo.png";
@@ -51,7 +57,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <img src={tfwLogo} alt="TFW Logo" className="h-12 w-auto" />
+            <img src={tfwLogo} alt="TFW Logo" className="h-16 w-auto" />
           </div>
 
           {isAuthenticated ? (
@@ -67,25 +73,49 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/member-articles")}
+                  onClick={() => navigate("/articles")}
                   className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
                   Articles
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/webinars")}
-                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
-                >
-                  Resources
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/events")}
-                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
-                >
-                  Events
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                    >
+                      Resources
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
+                    <DropdownMenuItem onClick={() => navigate("/webinars")}>
+                      Webinars
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/submit-document")}>
+                      Submit Document
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                    >
+                      Events
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
+                    <DropdownMenuItem onClick={() => navigate("/events")}>
+                      Upcoming Events
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/chat-import")}>
+                      Chat Import
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Desktop Actions */}
@@ -151,25 +181,45 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       </Button>
                       <Button
                         variant="ghost"
-                        onClick={() => navigate("/member-articles")}
+                        onClick={() => navigate("/articles")}
                         className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                       >
                         Articles
                       </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate("/webinars")}
-                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
-                      >
-                        Resources
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate("/events")}
-                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
-                      >
-                        Events
-                      </Button>
+                      <div className="space-y-2">
+                        <p className="text-[#C9A961] text-xs px-3 font-bold">Resources</p>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/webinars")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Webinars
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/submit-document")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Submit Document
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-[#C9A961] text-xs px-3 font-bold">Events</p>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/events")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Upcoming Events
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/chat-import")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Chat Import
+                        </Button>
+                      </div>
                       <div className="border-t border-[#C9A961]/20 pt-4">
                         <Button
                           variant="ghost"
