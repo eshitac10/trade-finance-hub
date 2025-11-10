@@ -273,38 +273,35 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="banking-text text-foreground/80 hover:text-primary font-semibold px-3 sm:px-6 py-3 sm:py-5 text-sm sm:text-base rounded-xl hover:bg-primary-light/30 transition-all hover:scale-105"
-                onClick={() => navigate("/auth")}
+                className="banking-text text-foreground/80 hover:text-primary font-bold px-3 sm:px-6 py-3 sm:py-5 text-sm sm:text-base rounded-xl hover:bg-primary-light/30 transition-all hover:scale-105"
+                onClick={onLoginClick}
               >
                 <LogIn className="h-4 w-4 mr-1 sm:mr-2" />
                 Login
               </Button>
               <Button
                 size="sm"
-                className="banking-text bg-gradient-primary hover:shadow-accent text-primary-foreground font-semibold px-4 sm:px-8 py-3 sm:py-5 text-sm sm:text-base rounded-xl transition-all hover:scale-105"
-                onClick={() => navigate("/auth")}
+                className="banking-text bg-gradient-primary hover:shadow-accent text-primary-foreground font-bold px-4 sm:px-8 py-3 sm:py-5 text-sm sm:text-base rounded-xl transition-all hover:scale-105"
+                onClick={() => navigate("/signup")}
               >
                 Sign Up
               </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2.5 rounded-lg hover:bg-primary-light/30 transition-all hover:scale-110 ml-2"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
+                ) : (
+                  <Moon className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
+                )}
+              </Button>
             </div>
           )}
-
-          {/* Dark/Light Mode Toggle */}
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2.5 rounded-lg hover:bg-primary-light/30 transition-all hover:scale-110"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-              ) : (
-                <Moon className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-              )}
-            </Button>
-          </div>
         </div>
       </div>
     </nav>
