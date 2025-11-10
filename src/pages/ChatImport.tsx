@@ -61,7 +61,7 @@ const ChatImport = () => {
   const [loading, setLoading] = useState(true);
   const [timezone, setTimezone] = useState('UTC');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterAuthor, setFilterAuthor] = useState('');
+  const [filterAuthor, setFilterAuthor] = useState('all');
   const [editingEvent, setEditingEvent] = useState<WhatsAppEvent | null>(null);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [showSamplePreview, setShowSamplePreview] = useState(false);
@@ -314,7 +314,7 @@ const ChatImport = () => {
     const matchesSearch = searchTerm === '' || 
       m.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAuthor = filterAuthor === '' || m.author === filterAuthor;
+    const matchesAuthor = filterAuthor === 'all' || m.author === filterAuthor;
     return matchesSearch && matchesAuthor;
   });
 
@@ -567,7 +567,7 @@ const ChatImport = () => {
                     <SelectValue placeholder="Filter by author" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All authors</SelectItem>
+                    <SelectItem value="all">All authors</SelectItem>
                     {uniqueAuthors.map((author) => (
                       <SelectItem key={author} value={author}>{author}</SelectItem>
                     ))}
