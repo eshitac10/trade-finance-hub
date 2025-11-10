@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import tfwLogo from "@/assets/tfw-full-logo.png";
+import tfwNavbarLogo from "@/assets/tfw-navbar-logo.png";
 import youtubeIcon from "@/assets/youtube-icon.png";
 
 interface NavbarProps {
@@ -62,7 +62,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <img src={tfwLogo} alt="TFW Logo" className="h-20 w-auto" />
+            <img src={tfwNavbarLogo} alt="TFW Logo" className="h-16 w-auto" />
           </div>
 
           {isAuthenticated ? (
