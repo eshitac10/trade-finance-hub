@@ -68,13 +68,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     <nav className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-soft sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 md:h-20">
-          {/* Desktop Navigation */}
+          {/* Logo/Title - Centered */}
+          <div className="flex-1 flex justify-center">
+            <h1 className="professional-heading text-2xl font-bold text-primary">Trade Finance World</h1>
+          </div>
+
+          {/* Desktop Navigation - Centered */}
           {isAuthenticated && (
-            <div className="hidden md:flex items-center space-x-1 flex-1">
+            <div className="hidden md:flex items-center justify-center space-x-1 flex-1">
               <Button
                 variant="ghost"
-                className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                onClick={() => navigate("/")}
+                className="banking-text text-foreground/80 hover:text-primary font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
+                onClick={() => navigate("/dashboard")}
               >
                 <Home className="h-4 w-4 mr-2" />
                 Home
@@ -82,29 +87,23 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
               <Button
                 variant="ghost"
-                className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                onClick={() => navigate("/forum")}
+                className="banking-text text-foreground/80 hover:text-primary font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
+                onClick={() => navigate("/articles")}
               >
-                Forum
+                Articles
               </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
+                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                   >
                     <span>Resources</span>
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
-                  <DropdownMenuItem
-                    className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                    onClick={() => navigate("/member-articles")}
-                  >
-                    Member Articles
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                     onClick={() => navigate("/submit-document")}
@@ -124,7 +123,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
+                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                   >
                     <span>Events</span>
                     <ChevronDown className="h-4 w-4 ml-1" />
@@ -141,45 +140,51 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
                     onClick={() => navigate("/events")}
                   >
-                    Upcoming TFW Events
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all">
-                    Other Events
+                    Events
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
+            </div>
+          )}
+
+          {/* Right Side - YouTube & Theme & Logout */}
+          {isAuthenticated && (
+            <div className="hidden md:flex items-center space-x-2 flex-1 justify-end">
               <Button
                 variant="ghost"
-                className="banking-text text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                onClick={() => navigate("/members")}
+                size="sm"
+                className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
+                onClick={() => handleSocialClick("youtube")}
+                aria-label="Open YouTube playlist"
               >
-                Members
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
               </Button>
 
-              <div className="flex items-center space-x-2 ml-6 pl-6 border-l border-border/40">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
-                  onClick={() => handleSocialClick("youtube")}
-                  aria-label="Open YouTube playlist"
-                >
-                  <Youtube className="h-5 w-5" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-yellow-500" />
+                ) : (
+                  <Moon className="h-5 w-5 text-primary" />
+                )}
+              </Button>
 
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="banking-text text-foreground/80 hover:text-destructive font-medium px-4 py-2 rounded-lg hover:bg-destructive/10 transition-all hover:scale-105"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="banking-text text-foreground/80 hover:text-destructive font-bold px-4 py-2 rounded-lg hover:bg-destructive/10 transition-all hover:scale-105"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           )}
 
@@ -197,7 +202,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     <Button
                       variant="ghost"
                       className="banking-text justify-start text-foreground/80 hover:text-primary font-medium px-4 py-3 rounded-lg hover:bg-primary-light/30 transition-all"
-                      onClick={() => { navigate("/"); setMobileMenuOpen(false); }}
+                      onClick={() => { navigate("/dashboard"); setMobileMenuOpen(false); }}
                     >
                       <Home className="h-5 w-5 mr-3" />
                       Home
@@ -206,20 +211,13 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     <Button
                       variant="ghost"
                       className="banking-text justify-start text-foreground/80 hover:text-primary font-medium px-4 py-3 rounded-lg hover:bg-primary-light/30 transition-all"
-                      onClick={() => { navigate("/forum"); setMobileMenuOpen(false); }}
+                      onClick={() => { navigate("/articles"); setMobileMenuOpen(false); }}
                     >
-                      Forum
+                      Articles
                     </Button>
 
                     <div className="pl-4 space-y-2">
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Resources</p>
-                      <Button
-                        variant="ghost"
-                        className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                        onClick={() => { navigate("/member-articles"); setMobileMenuOpen(false); }}
-                      >
-                        Member Articles
-                      </Button>
                       <Button
                         variant="ghost"
                         className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
@@ -250,17 +248,9 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                         onClick={() => { navigate("/events"); setMobileMenuOpen(false); }}
                       >
-                        Upcoming TFW Events
+                        Events
                       </Button>
                     </div>
-
-                    <Button
-                      variant="ghost"
-                      className="banking-text justify-start text-foreground/80 hover:text-primary font-medium px-4 py-3 rounded-lg hover:bg-primary-light/30 transition-all"
-                      onClick={() => { navigate("/members"); setMobileMenuOpen(false); }}
-                    >
-                      Members
-                    </Button>
 
                     <Button
                       variant="ghost"
