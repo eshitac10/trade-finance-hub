@@ -138,12 +138,12 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-6 mb-6">
             <img src={globeLogo} alt="Trade Finance World Globe" className="h-32 w-32 md:h-40 md:w-40 object-contain drop-shadow-2xl" />
-            <h1
+            <h2
               className="professional-heading text-3xl md:text-4xl lg:text-5xl font-bold uppercase text-foreground tracking-[0.3em]"
               style={{ fontFamily: '"Times New Roman", Times, serif' }}
             >
               TRADE FINANCE WORLD
-            </h1>
+            </h2>
           </div>
         </div>
 
