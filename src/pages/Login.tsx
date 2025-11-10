@@ -13,7 +13,7 @@ import LatestArticles from '@/components/LatestArticles';
 import tradeFinanceHero from '@/assets/trade-finance-hero.png';
 import tradeNetworking from '@/assets/trade-networking.png';
 import tradePatternBg from '@/assets/trade-pattern-bg.png';
-import tfwLogo from "@/assets/tfw-logo-main.png";
+import tfwLogo from "@/assets/tfw-logo-updated.png";
 
 const Login = () => {
   const navigate = useNavigate();

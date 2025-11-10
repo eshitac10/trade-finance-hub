@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import tfwLogo from "@/assets/tfw-logo-main.png";
+import tfwLogo from "@/assets/tfw-logo-updated.png";
 
 interface NavbarProps {
   onLoginClick?: () => void;
