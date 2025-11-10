@@ -27,13 +27,17 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
     };
-    
+
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
 
@@ -83,12 +87,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
-                    <DropdownMenuItem onClick={() => navigate("/articles")}>
-                      Articles
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/submit-document")}>
-                      Submit Document
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/articles")}>Articles</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/submit-document")}>Submit Document</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/chat-import")}>
                       Member Important Conversations
                     </DropdownMenuItem>
@@ -105,12 +105,8 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
-                    <DropdownMenuItem onClick={() => navigate("/webinars")}>
-                      Webinars
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/events")}>
-                      Upcoming Events
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/webinars")}>Webinars</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/events")}>Upcoming Events</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -131,11 +127,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
+                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
                 <Button
                   onClick={handleLogout}
@@ -155,11 +147,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
+                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
                 <Sheet>
                   <SheetTrigger asChild>
@@ -273,11 +261,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
+                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
               </div>
 
@@ -289,11 +273,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  {theme === "dark" ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
+                  {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
                 <Sheet>
                   <SheetTrigger asChild>
