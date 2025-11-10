@@ -26,8 +26,11 @@ interface DetectedEvent {
 
 // Common WhatsApp timestamp patterns
 const TIMESTAMP_PATTERNS = [
+  // Format: [M/D/YY, h:mm:ss AM/PM] Author: Message
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]\s+(.+?):\s*(.*)$/,
+  // Format: M/D/YY, h:mm:ss AM/PM - Author: Message
   /^(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[-–—]\s*(.+?):\s*(.*)$/,
-  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]\s*(.+?):\s*(.*)$/,
+  // Format: YYYY-MM-DD HH:mm:ss - Author: Message
   /^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s*[-–—]\s*(.+?):\s*(.*)$/,
 ];
 
