@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import tfwNavbarLogo from "@/assets/tfw-navbar-logo.png";
 import youtubeIcon from "@/assets/youtube-icon.png";
 
 interface NavbarProps {
@@ -61,9 +60,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#1A0505]/95 border-b border-[#C9A961]/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <div className="flex-shrink-0">
-            <img src="globe-center.png" alt="TFW Logo" className="h-16 w-auto" />
-          </div>
 
           {isAuthenticated ? (
             <>
@@ -88,7 +84,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
                     <DropdownMenuItem onClick={() => navigate("/articles")}>Articles</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/submit-document")}>Submit Document</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/chat-import")}>
                       Member Important Conversations
                     </DropdownMenuItem>
@@ -179,13 +174,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
                           Articles
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => navigate("/submit-document")}
-                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
-                        >
-                          Submit Document
                         </Button>
                         <Button
                           variant="ghost"

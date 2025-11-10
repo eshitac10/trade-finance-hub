@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
-import tfwCenterLogo from "@/assets/tfw-center-logo.png";
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -136,9 +135,6 @@ const Auth = () => {
       <div className="relative w-full max-w-md animate-fade-in">
         <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium texture-overlay">
           <CardHeader className="space-y-6">
-            <div className="flex justify-center">
-              <img src={tfwCenterLogo} alt="Trade Finance World" className="h-32 w-32 object-contain drop-shadow-lg" />
-            </div>
             <CardTitle className="professional-heading text-2xl text-center">Welcome</CardTitle>
             <CardDescription className="banking-text text-center">
               Login or create an account to get started
