@@ -93,7 +93,7 @@ const MemberArticles = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-background dark:bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -109,37 +109,37 @@ const MemberArticles = () => {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-card/50 backdrop-blur-xl border-border/60">
+          <Card className="bg-card dark:bg-card backdrop-blur-xl border-border/60">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-primary" />
+              <div className="h-12 w-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                <FileText className="h-6 w-6 text-primary dark:text-primary" />
               </div>
               <div>
-                <p className="banking-text text-2xl font-bold">{articles.length}</p>
+                <p className="banking-text text-2xl font-bold text-foreground">{articles.length}</p>
                 <p className="banking-text text-sm text-muted-foreground">Total Articles</p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card/50 backdrop-blur-xl border-border/60">
+          <Card className="bg-card dark:bg-card backdrop-blur-xl border-border/60">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-green-500" />
+              <div className="h-12 w-12 rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-green-500 dark:text-green-400" />
               </div>
               <div>
-                <p className="banking-text text-2xl font-bold">{filteredArticles.length}</p>
+                <p className="banking-text text-2xl font-bold text-foreground">{filteredArticles.length}</p>
                 <p className="banking-text text-sm text-muted-foreground">Available Now</p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-card/50 backdrop-blur-xl border-border/60">
+          <Card className="bg-card dark:bg-card backdrop-blur-xl border-border/60">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 rounded-full bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-blue-500 dark:text-blue-400" />
               </div>
               <div>
-                <p className="banking-text text-2xl font-bold">Updated</p>
+                <p className="banking-text text-2xl font-bold text-foreground">Updated</p>
                 <p className="banking-text text-sm text-muted-foreground">Recently Added</p>
               </div>
             </CardContent>
@@ -188,11 +188,11 @@ const MemberArticles = () => {
             {filteredArticles.map((article) => (
               <Card 
                 key={article.id} 
-                className="bg-card/50 backdrop-blur-xl border-border/60 hover:shadow-premium transition-all duration-300 hover:scale-[1.03] cursor-pointer group overflow-hidden"
+                className="bg-card dark:bg-card backdrop-blur-xl border-border/60 hover:shadow-premium transition-all duration-300 hover:scale-[1.03] cursor-pointer group overflow-hidden"
                 onClick={() => openArticle(article.id)}
               >
                 {/* AI-Generated Thumbnail */}
-                <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 overflow-hidden">
                   {article.ai_thumbnail ? (
                     <img 
                       src={article.ai_thumbnail} 
@@ -201,11 +201,11 @@ const MemberArticles = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <FileText className="h-16 w-16 text-primary/40" />
+                      <FileText className="h-16 w-16 text-primary/40 dark:text-primary/60" />
                     </div>
                   )}
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-background/90 backdrop-blur-sm text-foreground border-border/60">
+                    <Badge className="bg-background/90 dark:bg-background/90 backdrop-blur-sm text-foreground border-border/60">
                       <FileText className="h-3 w-3 mr-1" />
                       Article
                     </Badge>

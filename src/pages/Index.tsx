@@ -83,14 +83,14 @@ const Index = () => {
       </section>
 
       {/* Stats Section with Enhanced Design */}
-      <section className="py-20 bg-gradient-to-br from-background via-secondary/30 to-background border-y border-border relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-br from-background via-secondary/30 to-background dark:from-background dark:via-secondary/20 dark:to-background border-y border-border relative overflow-hidden">
         {/* Enhanced Decorative Background */}
-        <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 opacity-5 dark:opacity-10">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-accent to-primary"></div>
           <img src={tradePatternBg} alt="" className="w-full h-full object-cover mix-blend-overlay" />
         </div>
-        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-10 right-10 w-96 h-96 bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full blur-3xl animate-float-delayed"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-4 gap-10 text-center">

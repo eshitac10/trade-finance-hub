@@ -358,12 +358,12 @@ const ChatImport = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
+    <div className="min-h-screen bg-background dark:bg-background relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-primary opacity-5 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 dark:bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-primary opacity-5 dark:opacity-10 rounded-full blur-3xl"></div>
       </div>
 
       <Navbar />
@@ -385,8 +385,8 @@ const ChatImport = () => {
         </div>
 
         {/* Upload Section */}
-        <Card className="mb-8 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
+        <Card className="mb-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-primary opacity-5 dark:opacity-10"></div>
           <CardHeader className="relative">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <div className="p-3 bg-gradient-primary rounded-xl">
@@ -483,7 +483,7 @@ const ChatImport = () => {
         {/* Imports List & Timeline */}
         {imports.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <Card className="lg:col-span-1 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
+            <Card className="lg:col-span-1 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <div className="p-2 bg-gradient-primary rounded-lg">
@@ -497,20 +497,54 @@ const ChatImport = () => {
                   {imports.map((imp, idx) => (
                     <Card
                       key={imp.id}
-                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 ${
+                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group ${
                         selectedImport === imp.id 
                           ? 'border-primary bg-primary/5 shadow-accent' 
                           : 'border-border hover:border-primary/50'
                       }`}
                       onClick={() => handleSelectImport(imp.id)}
                     >
-                      <div className="font-semibold truncate mb-1">{imp.filename}</div>
+                      <div className="font-semibold truncate mb-1 pr-8">{imp.filename}</div>
                       <div className="text-sm text-muted-foreground">
                         {imp.total_messages} messages
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(imp.upload_date), { addSuffix: true })}
                       </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const { error } = await supabase
+                            .from('whatsapp_imports')
+                            .delete()
+                            .eq('id', imp.id);
+                          
+                          if (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to delete import",
+                              variant: "destructive"
+                            });
+                          } else {
+                            toast({
+                              title: "Deleted",
+                              description: "Import deleted successfully",
+                            });
+                            fetchImports();
+                            if (selectedImport === imp.id) {
+                              setSelectedImport(null);
+                              setEvents([]);
+                              setSelectedEvent(null);
+                              setMessages([]);
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </Card>
                   ))}
                 </ScrollArea>
@@ -518,8 +552,8 @@ const ChatImport = () => {
             </Card>
 
             {/* Events Timeline */}
-            <Card className="lg:col-span-2 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
+            <Card className="lg:col-span-2 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 dark:from-primary/10 dark:to-accent/10 pointer-events-none"></div>
               <CardHeader className="relative">
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <div className="p-2 bg-gradient-primary rounded-lg">
@@ -634,8 +668,8 @@ const ChatImport = () => {
 
         {/* Messages Viewer */}
         {selectedEvent && selectedEventData && (
-          <Card className="mt-8 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none"></div>
+          <Card className="mt-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 dark:from-accent/10 dark:to-primary/10 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center justify-between">
                 <div>

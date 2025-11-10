@@ -126,7 +126,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       variant="ghost"
                       className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
                     >
-                      <span>Upcoming Events</span>
+                      <span>Events</span>
                       <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
