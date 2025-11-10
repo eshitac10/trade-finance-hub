@@ -30,14 +30,43 @@ const ArticleView = () => {
   const fetchArticle = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      // Try google_drive_articles first
+      const { data: googleData, error: googleError } = await supabase
         .from('google_drive_articles')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw error;
-      setArticle(data);
+      if (googleData && !googleError) {
+        setArticle(googleData);
+        setIsLoading(false);
+        return;
+      }
+
+      // If not found, try user_articles
+      const { data: userData, error: userError } = await supabase
+        .from('user_articles')
+        .select('id, title, description, file_path, thumbnail_url, created_at, updated_at')
+        .eq('id', id)
+        .single();
+
+      if (userError) throw userError;
+
+      // Get public URL for the file
+      const { data: { publicUrl } } = supabase.storage
+        .from('articles')
+        .getPublicUrl(userData.file_path);
+
+      // Transform user_article to match Article interface
+      setArticle({
+        id: userData.id,
+        name: userData.title,
+        content: userData.description || null,
+        created_time: userData.created_at,
+        modified_time: userData.updated_at,
+        ai_thumbnail: userData.thumbnail_url || publicUrl,
+      });
     } catch (error) {
       console.error('Error fetching article:', error);
       toast({

@@ -417,6 +417,10 @@ const Webinars = () => {
                     src={webinar.thumbnail}
                     alt={webinar.title}
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://img.youtube.com/vi/${webinar.videoUrl.split("v=")[1]?.split("&")[0]}/hqdefault.jpg`;
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">

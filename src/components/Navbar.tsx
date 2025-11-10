@@ -1,21 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, Youtube, LogIn, LogOut, Home, Moon, Sun, Menu, X } from "lucide-react";
+import { Youtube, LogOut, Sun, Moon, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import tfwLogo from "@/assets/tfw-logo-main.png";
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -25,11 +16,9 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    // Check authentication status
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
@@ -37,7 +26,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     
     checkAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
     });
@@ -54,253 +42,231 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
     navigate("/");
   };
 
-  const handleSocialClick = (platform: string) => {
-    const urls = {
-      youtube: "https://youtube.com/playlist?list=PL1Pevhekc6MWqRwA5XEfqkL3LP-LLJl9X&si=rEph3hnc-p6N4V-t",
-    };
-    const url = urls[platform as keyof typeof urls];
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+  const handleSocialClick = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <nav className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-soft sticky top-0 z-50 transition-all duration-300">
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#8B1F2F]/95 border-b border-[#C9A961]/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
-          {/* Logo/Title - Centered */}
-          <div className="flex-1 flex justify-center">
-            <h1 className="professional-heading text-2xl font-bold text-primary">Trade Finance World</h1>
+        <div className="flex items-center justify-between h-20">
+          <div className="flex-shrink-0">
+            <img src={tfwLogo} alt="TFW Logo" className="h-16 w-auto" />
           </div>
 
-          {/* Desktop Navigation - Centered */}
-          {isAuthenticated && (
-            <div className="hidden md:flex items-center justify-center space-x-1 flex-1">
-              <Button
-                variant="ghost"
-                className="banking-text text-foreground/80 hover:text-primary font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                onClick={() => navigate("/dashboard")}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
+          {isAuthenticated ? (
+            <>
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center justify-center flex-1 space-x-1">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/dashboard")}
+                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  Home
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/member-articles")}
+                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  Articles
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/webinars")}
+                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  Resources
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/events")}
+                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  Events
+                </Button>
+              </div>
 
-              <Button
-                variant="ghost"
-                className="banking-text text-foreground/80 hover:text-primary font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                onClick={() => navigate("/articles")}
-              >
-                Articles
-              </Button>
+              {/* Desktop Actions */}
+              <div className="hidden md:flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
+                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  <Youtube className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                  >
-                    <span>Resources</span>
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
-                  <DropdownMenuItem
-                    className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                    onClick={() => navigate("/submit-document")}
-                  >
-                    Submit a Document
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                    onClick={() => navigate("/chat-import")}
-                  >
-                    Member Important Conversations
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="banking-text text-foreground/80 hover:text-primary flex items-center space-x-1 font-bold px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                  >
-                    <span>Events</span>
-                    <ChevronDown className="h-4 w-4 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-card/98 backdrop-blur-xl border border-border/60 shadow-elegant z-50 rounded-xl p-2">
-                  <DropdownMenuItem 
-                    className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                    onClick={() => navigate("/webinars")}
-                  >
-                    Webinars
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="banking-text hover:bg-primary-light/30 cursor-pointer focus:bg-primary-light/30 rounded-lg px-3 py-2.5 transition-all"
-                    onClick={() => navigate("/events")}
-                  >
-                    Events
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-            </div>
-          )}
-
-          {/* Right Side - YouTube & Theme & Logout */}
-          {isAuthenticated && (
-            <div className="hidden md:flex items-center space-x-2 flex-1 justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-primary p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
-                onClick={() => handleSocialClick("youtube")}
-                aria-label="Open YouTube playlist"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2.5 hover:bg-primary-light/30 rounded-lg transition-all hover:scale-110"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-yellow-500" />
-                ) : (
-                  <Moon className="h-5 w-5 text-primary" />
-                )}
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="banking-text text-foreground/80 hover:text-destructive font-bold px-4 py-2 rounded-lg hover:bg-destructive/10 transition-all hover:scale-105"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          )}
-
-          {/* Mobile Menu - Only for authenticated users */}
-          {isAuthenticated && (
-            <div className="md:hidden flex items-center flex-1">
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm" className="p-2">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[280px] bg-background/98 backdrop-blur-xl">
-                  <div className="flex flex-col space-y-4 mt-8">
-                    <Button
-                      variant="ghost"
-                      className="banking-text justify-start text-foreground/80 hover:text-primary font-medium px-4 py-3 rounded-lg hover:bg-primary-light/30 transition-all"
-                      onClick={() => { navigate("/dashboard"); setMobileMenuOpen(false); }}
-                    >
-                      <Home className="h-5 w-5 mr-3" />
-                      Home
+              {/* Mobile Menu */}
+              <div className="md:hidden flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-[#C9A961]">
+                      <Menu className="h-6 w-6" />
                     </Button>
-
-                    <Button
-                      variant="ghost"
-                      className="banking-text justify-start text-foreground/80 hover:text-primary font-medium px-4 py-3 rounded-lg hover:bg-primary-light/30 transition-all"
-                      onClick={() => { navigate("/articles"); setMobileMenuOpen(false); }}
-                    >
-                      Articles
-                    </Button>
-
-                    <div className="pl-4 space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Resources</p>
+                  </SheetTrigger>
+                  <SheetContent className="w-64 bg-[#8B1F2F]/95 backdrop-blur-xl border-[#C9A961]/20">
+                    <div className="flex flex-col space-y-4 mt-8">
                       <Button
                         variant="ghost"
-                        className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                        onClick={() => { navigate("/submit-document"); setMobileMenuOpen(false); }}
+                        onClick={() => navigate("/dashboard")}
+                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                       >
-                        Submit a Document
+                        Home
                       </Button>
                       <Button
                         variant="ghost"
-                        className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                        onClick={() => { navigate("/chat-import"); setMobileMenuOpen(false); }}
+                        onClick={() => navigate("/member-articles")}
+                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                       >
-                        Important Conversations
-                      </Button>
-                    </div>
-
-                    <div className="pl-4 space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Events</p>
-                      <Button
-                        variant="ghost"
-                        className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                        onClick={() => { navigate("/webinars"); setMobileMenuOpen(false); }}
-                      >
-                        Webinars
+                        Articles
                       </Button>
                       <Button
                         variant="ghost"
-                        className="banking-text w-full justify-start text-foreground/80 hover:text-primary font-medium px-4 py-2 rounded-lg hover:bg-primary-light/30 transition-all"
-                        onClick={() => { navigate("/events"); setMobileMenuOpen(false); }}
+                        onClick={() => navigate("/webinars")}
+                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
+                      >
+                        Resources
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigate("/events")}
+                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                       >
                         Events
                       </Button>
+                      <div className="border-t border-[#C9A961]/20 pt-4">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
+                          className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
+                        >
+                          <Youtube className="h-5 w-5 mr-2" />
+                          YouTube
+                        </Button>
+                        <Button
+                          onClick={handleLogout}
+                          variant="outline"
+                          className="w-full mt-4 border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Logout
+                        </Button>
+                      </div>
                     </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Unauthenticated - Login/Signup centered with theme toggle on right */}
+              <div className="hidden md:flex items-center justify-center flex-1 space-x-4">
+                <Button
+                  onClick={() => navigate("/")}
+                  variant="outline"
+                  className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold"
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => navigate("/signup")}
+                  className="bg-gradient-to-r from-[#C9A961] to-[#8B1F2F] hover:shadow-lg text-white banking-text font-bold"
+                >
+                  Sign Up
+                </Button>
+              </div>
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="banking-text justify-start text-foreground/80 hover:text-destructive font-medium px-4 py-3 rounded-lg hover:bg-destructive/10 transition-all"
-                      onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                    >
-                      <LogOut className="h-5 w-5 mr-3" />
-                      Logout
+              <div className="hidden md:flex items-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Mobile - Unauthenticated */}
+              <div className="md:hidden flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-[#C9A961]">
+                      <Menu className="h-6 w-6" />
                     </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          )}
-
-          {/* Login/Signup buttons when not authenticated */}
-          {!isAuthenticated && (
-            <div className="flex items-center justify-center gap-2 sm:gap-4 flex-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="banking-text text-foreground/80 hover:text-primary font-bold px-3 sm:px-6 py-3 sm:py-5 text-sm sm:text-base rounded-xl hover:bg-primary-light/30 transition-all hover:scale-105"
-                onClick={onLoginClick}
-              >
-                <LogIn className="h-4 w-4 mr-1 sm:mr-2" />
-                Login
-              </Button>
-              <Button
-                size="sm"
-                className="banking-text bg-gradient-primary hover:shadow-accent text-primary-foreground font-bold px-4 sm:px-8 py-3 sm:py-5 text-sm sm:text-base rounded-xl transition-all hover:scale-105"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-2.5 rounded-lg hover:bg-primary-light/30 transition-all hover:scale-110 ml-2"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                aria-label="Toggle theme"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-                ) : (
-                  <Moon className="h-5 w-5 text-foreground/80 hover:text-primary transition-colors" />
-                )}
-              </Button>
-            </div>
+                  </SheetTrigger>
+                  <SheetContent className="w-64 bg-[#8B1F2F]/95 backdrop-blur-xl border-[#C9A961]/20">
+                    <div className="flex flex-col space-y-4 mt-8">
+                      <Button
+                        onClick={() => navigate("/")}
+                        variant="outline"
+                        className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold w-full"
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        onClick={() => navigate("/signup")}
+                        className="bg-gradient-to-r from-[#C9A961] to-[#8B1F2F] hover:shadow-lg text-white banking-text font-bold w-full"
+                      >
+                        Sign Up
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
           )}
         </div>
       </div>

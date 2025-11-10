@@ -13,6 +13,7 @@ import LatestArticles from '@/components/LatestArticles';
 import tradeFinanceHero from '@/assets/trade-finance-hero.png';
 import tradeNetworking from '@/assets/trade-networking.png';
 import tradePatternBg from '@/assets/trade-pattern-bg.png';
+import tfwLogo from "@/assets/tfw-logo-main.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -82,9 +83,9 @@ const Login = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6 sm:space-y-8">
-            <h1 className="professional-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 sm:mb-8 tracking-tight animate-fade-up drop-shadow-2xl px-4">
-              Trade Finance World
-            </h1>
+            <div className="flex justify-center mb-8 animate-fade-up">
+              <img src={tfwLogo} alt="Trade Finance World" className="h-48 md:h-64 w-auto" />
+            </div>
             <p className="text-base sm:text-lg md:text-xl text-primary-foreground/95 max-w-4xl mx-auto mb-8 sm:mb-12 leading-relaxed animate-fade-up drop-shadow-lg px-4 sm:px-6 text-justify" style={{ animationDelay: '0.15s' }}>
               Welcome to TradeFinanceWorld, a premier knowledge-sharing platform created with the objective of disseminating information, expertise, and insights in the field of trade finance. This represents a modest yet significant beginning of our knowledge-sharing initiative, and we look forward to fostering widespread participation across the business and academic communities through this distinguished platform.
             </p>
