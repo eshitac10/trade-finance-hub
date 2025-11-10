@@ -47,7 +47,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#8B1F2F]/95 border-b border-[#C9A961]/20 shadow-lg">
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#5C1010]/95 border-b border-[#C9A961]/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
@@ -140,7 +140,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <Menu className="h-6 w-6" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent className="w-64 bg-[#8B1F2F]/95 backdrop-blur-xl border-[#C9A961]/20">
+                  <SheetContent className="w-64 bg-[#5C1010]/95 backdrop-blur-xl border-[#C9A961]/20">
                     <div className="flex flex-col space-y-4 mt-8">
                       <Button
                         variant="ghost"
@@ -206,7 +206,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 </Button>
                 <Button
                   onClick={() => navigate("/signup")}
-                  className="bg-gradient-to-r from-[#C9A961] to-[#8B1F2F] hover:shadow-lg text-white banking-text font-bold"
+                  className="bg-gradient-to-r from-[#C9A961] to-[#5C1010] hover:shadow-lg text-white banking-text font-bold"
                 >
                   Sign Up
                 </Button>
@@ -247,7 +247,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <Menu className="h-6 w-6" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent className="w-64 bg-[#8B1F2F]/95 backdrop-blur-xl border-[#C9A961]/20">
+                  <SheetContent className="w-64 bg-[#5C1010]/95 backdrop-blur-xl border-[#C9A961]/20">
                     <div className="flex flex-col space-y-4 mt-8">
                       <Button
                         onClick={() => navigate("/")}
@@ -258,7 +258,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       </Button>
                       <Button
                         onClick={() => navigate("/signup")}
-                        className="bg-gradient-to-r from-[#C9A961] to-[#8B1F2F] hover:shadow-lg text-white banking-text font-bold w-full"
+                        className="bg-gradient-to-r from-[#C9A961] to-[#5C1010] hover:shadow-lg text-white banking-text font-bold w-full"
                       >
                         Sign Up
                       </Button>
