@@ -127,30 +127,45 @@ const Members = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-primary opacity-10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {/* Enhanced Header */}
-        <div className="mb-12 animate-fade-up space-y-3">
-          <h1 className="professional-heading text-5xl text-primary mb-3 flex items-center gap-4">
-            <Users className="h-12 w-12" />
+        <div className="mb-12 text-center space-y-4 animate-fade-in">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-primary/10 rounded-full mb-4 animate-scale-in">
+            <Users className="h-5 w-5 text-primary animate-pulse" />
+            <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
+              {members.length}+ Professional Network
+            </span>
+          </div>
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
             Members Directory
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Browse {members.length}+ trade finance professionals
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Connect with trade finance professionals from around the globe
           </p>
         </div>
 
         {/* Enhanced Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 animate-scale-in">
-          <Card className="p-8 bg-card/90 backdrop-blur-sm border-border hover:shadow-premium hover:border-accent/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-elegant">
-                <Users className="h-8 w-8 text-primary" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 animate-scale-in">
+          <Card className="p-8 bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-premium hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl group overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity"></div>
+            <div className="flex items-center gap-5 relative">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-elegant group-hover:scale-110 transition-transform duration-500">
+                <Users className="h-8 w-8 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-4xl font-bold text-primary">{members.length}</p>
+                <p className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                  {members.length}
+                </p>
                 <p className="text-base text-muted-foreground font-medium">Total Members</p>
               </div>
             </div>
@@ -158,35 +173,37 @@ const Members = () => {
         </div>
 
         {/* Enhanced Search */}
-        <Card className="p-8 mb-10 bg-card/90 backdrop-blur-sm border-border animate-fade-in shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
+        <Card className="p-8 mb-10 bg-card/90 backdrop-blur-xl border-border/60 animate-fade-in shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5"></div>
           <div className="relative w-full md:w-2/3 lg:w-1/2">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search members..."
+              placeholder="Search members by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 py-6 bg-background/50 text-base rounded-xl border-border focus:border-accent transition-all"
+              className="pl-14 pr-4 py-7 bg-background/50 text-base rounded-xl border-2 border-border focus:border-primary hover:border-primary/50 transition-all"
             />
           </div>
         </Card>
 
         {/* Enhanced Members Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredMembers.map((member, index) => (
             <Card 
               key={member.id}
-              className="p-8 bg-card/90 backdrop-blur-sm border-border hover:shadow-premium hover:border-accent/60 transition-all duration-500 hover:-translate-y-3 animate-scale-in group cursor-pointer rounded-2xl"
+              className="p-8 bg-card/90 backdrop-blur-xl border-border/60 hover:shadow-premium hover:border-primary/60 transition-all duration-500 hover:-translate-y-3 animate-scale-in group cursor-pointer rounded-2xl overflow-hidden relative"
               style={{ animationDelay: `${index * 0.03}s` }}
             >
-              <div className="flex flex-col items-center text-center">
-                <Avatar className="h-24 w-24 mb-5 border-4 border-primary/20 group-hover:border-accent/60 transition-all duration-500 group-hover:scale-110 shadow-elegant">
+              <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
+              <div className="flex flex-col items-center text-center relative">
+                <Avatar className="h-24 w-24 mb-5 border-4 border-primary/20 group-hover:border-primary/60 transition-all duration-500 group-hover:scale-110 shadow-elegant group-hover:shadow-accent">
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback className="bg-gradient-to-br from-primary/15 to-accent/15 text-primary text-xl font-semibold">
+                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xl font-bold">
                     {member.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 
-                <h3 className="font-semibold text-base text-primary group-hover:text-accent transition-colors duration-300">
+                <h3 className="font-semibold text-base group-hover:text-primary transition-colors duration-300">
                   {member.name}
                 </h3>
               </div>
@@ -195,9 +212,9 @@ const Members = () => {
         </div>
 
         {filteredMembers.length === 0 && (
-          <Card className="p-12 text-center bg-card/80 backdrop-blur-sm">
-            <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No members found matching your search</p>
+          <Card className="p-16 text-center bg-card/90 backdrop-blur-xl rounded-2xl border-border/60 animate-fade-in">
+            <Users className="h-20 w-20 text-muted-foreground mx-auto mb-6 opacity-30" />
+            <p className="text-lg text-muted-foreground font-medium">No members found matching your search</p>
           </Card>
         )}
       </div>

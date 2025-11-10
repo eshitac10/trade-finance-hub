@@ -16,7 +16,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Upload, FileText, Clock, Users, Tag, Calendar, 
   Download, Edit2, Trash2, Merge, Split, Search,
-  AlertCircle, ChevronRight, MessageSquare, Filter
+  AlertCircle, ChevronRight, MessageSquare, Filter, Copy,
+  TrendingUp, Activity, BarChart3, Sparkles
 } from 'lucide-react';
 import CreativeLoader from '@/components/CreativeLoader';
 import { formatDistanceToNow } from 'date-fns';
@@ -357,55 +358,78 @@ const ChatImport = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-primary opacity-5 rounded-full blur-3xl"></div>
+      </div>
+
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="professional-heading text-4xl font-bold mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+        <div className="mb-12 text-center animate-fade-in">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-primary/10 rounded-full mb-6 animate-scale-in">
+            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+            <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
+              AI-Powered Conversation Analysis
+            </span>
+          </div>
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
             Member Important Conversations
           </h1>
-          <p className="text-muted-foreground">
-            Upload WhatsApp chat exports and organize them into searchable events
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Upload WhatsApp chats and automatically extract key events and conversations with intelligent AI analysis
           </p>
         </div>
 
         {/* Upload Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+        <Card className="mb-8 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
+          <CardHeader className="relative">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <div className="p-3 bg-gradient-primary rounded-xl">
+                <Upload className="h-6 w-6 text-primary-foreground" />
+              </div>
               Upload Chat Export
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               Drag and drop your WhatsApp .txt or .zip file (max 50 MB)
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="file">Choose File</Label>
+          <CardContent className="space-y-6 relative">
+            <div className="grid gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="file" className="text-base font-semibold">Choose File</Label>
                 <Input
                   id="file"
                   type="file"
                   accept=".txt,.zip"
                   onChange={handleFileChange}
                   disabled={uploading}
+                  className="h-12 border-2 border-dashed hover:border-primary transition-all cursor-pointer"
                 />
               </div>
 
               {file && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  <span>{file.name}</span>
-                  <span>({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20 animate-fade-in">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{file.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
                 </div>
               )}
 
-              <div>
-                <Label htmlFor="timezone">Timezone</Label>
+              <div className="space-y-2">
+                <Label htmlFor="timezone" className="text-base font-semibold">Timezone</Label>
                 <Select value={timezone} onValueChange={setTimezone}>
-                  <SelectTrigger id="timezone">
+                  <SelectTrigger id="timezone" className="h-12">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -421,15 +445,18 @@ const ChatImport = () => {
               <Button 
                 onClick={handleUpload} 
                 disabled={!file || uploading}
-                className="w-full"
+                className="w-full h-12 text-base bg-gradient-primary hover:shadow-accent font-semibold rounded-xl"
               >
                 {processing ? (
                   <>
                     <CreativeLoader size="sm" className="mr-2" />
-                    Processing...
+                    Processing with AI...
                   </>
                 ) : (
-                  'Process File'
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Process File
+                  </>
                 )}
               </Button>
             </div>
@@ -455,79 +482,83 @@ const ChatImport = () => {
 
         {/* Imports List & Timeline */}
         {imports.length > 0 && (
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Imports Sidebar */}
-            <Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <Card className="lg:col-span-1 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
               <CardHeader>
-                <CardTitle>Your Imports</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 bg-gradient-primary rounded-lg">
+                    <FileText className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  Imported Chats
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[600px]">
-                  {imports.map((imp) => (
-                    <button
+                <ScrollArea className="h-[400px] pr-4">
+                  {imports.map((imp, idx) => (
+                    <Card
                       key={imp.id}
-                      onClick={() => handleSelectImport(imp.id)}
-                      className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
+                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 ${
                         selectedImport === imp.id 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-secondary hover:bg-secondary/80'
+                          ? 'border-primary bg-primary/5 shadow-accent' 
+                          : 'border-border hover:border-primary/50'
                       }`}
+                      onClick={() => handleSelectImport(imp.id)}
                     >
-                      <div className="font-medium truncate">{imp.filename}</div>
-                      <div className="text-sm opacity-80">
+                      <div className="font-semibold truncate mb-1">{imp.filename}</div>
+                      <div className="text-sm text-muted-foreground">
                         {imp.total_messages} messages
                       </div>
-                      <div className="text-xs opacity-60">
+                      <div className="text-xs text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(imp.upload_date), { addSuffix: true })}
                       </div>
-                    </button>
+                    </Card>
                   ))}
                 </ScrollArea>
               </CardContent>
             </Card>
 
             {/* Events Timeline */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+            <Card className="lg:col-span-2 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
+              <CardHeader className="relative">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <div className="p-2 bg-gradient-primary rounded-lg">
+                    <Activity className="h-5 w-5 text-primary-foreground" />
+                  </div>
                   Events Timeline
-                  {events.length > 0 && (
-                    <Badge variant="outline" className="ml-auto">
-                      {events.length} events
-                    </Badge>
-                  )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative">
                 {selectedImport ? (
-                  <ScrollArea className="h-[600px]">
+                  <ScrollArea className="h-[400px] pr-4">
                     {events.length > 0 ? (
-                      events.map((event) => (
-                        <Card 
+                      events.map((event, idx) => (
+                        <Card
                           key={event.id}
-                          className={`mb-4 cursor-pointer transition-all hover:shadow-lg ${
-                            selectedEvent === event.id 
-                              ? 'ring-2 ring-primary shadow-elegant bg-primary/5' 
-                              : 'hover:bg-secondary/50'
-                          }`}
                           onClick={() => handleSelectEvent(event.id)}
+                          className={`mb-4 p-5 cursor-pointer transition-all duration-300 hover:shadow-premium hover:-translate-y-1 group border-2 ${
+                            selectedEvent === event.id
+                              ? 'border-accent bg-gradient-to-r from-primary/10 to-accent/10 shadow-accent'
+                              : 'border-border hover:border-accent/50 bg-card/50 backdrop-blur-sm'
+                          }`}
                         >
-                          <CardHeader>
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1 min-w-0">
+                          <CardHeader className="p-0">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <CardTitle className="text-lg truncate">{event.title}</CardTitle>
-                                  {selectedEvent === event.id && (
-                                    <ChevronRight className="h-5 w-5 text-primary animate-pulse" />
-                                  )}
+                                  <div className="p-2 bg-gradient-primary rounded-lg">
+                                    <Calendar className="h-4 w-4 text-primary-foreground" />
+                                  </div>
+                                  <CardTitle className="text-base group-hover:text-accent transition-colors line-clamp-1">
+                                    {event.title.length > 50 ? event.title.substring(0, 50) + '...' : event.title}
+                                  </CardTitle>
                                 </div>
-                                <CardDescription className="flex items-center gap-2">
-                                  <Clock className="h-3 w-3" />
+                                <CardDescription className="flex items-center gap-2 text-sm">
+                                  <Clock className="h-3.5 w-3.5" />
                                   {new Date(event.start_datetime).toLocaleString()}
                                 </CardDescription>
                               </div>
-                              <div className="flex gap-1 flex-shrink-0">
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -536,6 +567,7 @@ const ChatImport = () => {
                                     setEditingEvent(event);
                                     setNewEventTitle(event.title);
                                   }}
+                                  className="h-8 w-8 p-0 hover:bg-primary/10"
                                 >
                                   <Edit2 className="h-4 w-4" />
                                 </Button>
@@ -546,6 +578,7 @@ const ChatImport = () => {
                                     e.stopPropagation();
                                     handleExportEvent(event, 'json');
                                   }}
+                                  className="h-8 w-8 p-0 hover:bg-primary/10"
                                 >
                                   <Download className="h-4 w-4" />
                                 </Button>
@@ -556,21 +589,26 @@ const ChatImport = () => {
                                     e.stopPropagation();
                                     handleDeleteEvent(event.id);
                                   }}
+                                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-3">
-                              <Badge variant="secondary" className="font-medium">
-                                <MessageSquare className="h-3 w-3 mr-1" />
+                            <div className="flex flex-wrap gap-2 mt-4">
+                              <Badge variant="secondary" className="font-medium px-3 py-1 bg-primary/10 hover:bg-primary/20 transition-colors">
+                                <MessageSquare className="h-3 w-3 mr-1.5" />
                                 {event.message_count} messages
                               </Badge>
                               {event.keywords.slice(0, 3).map((kw) => (
-                                <Badge key={kw} variant="outline">{kw}</Badge>
+                                <Badge key={kw} variant="outline" className="px-3 py-1 border-primary/30 hover:border-primary transition-colors">
+                                  {kw}
+                                </Badge>
                               ))}
                               {event.keywords.length > 3 && (
-                                <Badge variant="outline">+{event.keywords.length - 3}</Badge>
+                                <Badge variant="outline" className="border-accent/30">
+                                  +{event.keywords.length - 3} more
+                                </Badge>
                               )}
                             </div>
                           </CardHeader>
@@ -596,15 +634,18 @@ const ChatImport = () => {
 
         {/* Messages Viewer */}
         {selectedEvent && selectedEventData && (
-          <Card className="mt-6">
-            <CardHeader>
+          <Card className="mt-8 bg-card/90 backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none"></div>
+            <CardHeader className="relative">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    {selectedEventData.title}
-                  </CardTitle>
-                  <CardDescription className="mt-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2.5 bg-gradient-primary rounded-xl">
+                      <MessageSquare className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <CardTitle className="text-2xl">{selectedEventData.title}</CardTitle>
+                  </div>
+                  <CardDescription className="mt-2 text-base">
                     {filteredMessages.length} of {messages.length} messages
                   </CardDescription>
                 </div>
@@ -612,24 +653,39 @@ const ChatImport = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowStats(!showStats)}
+                  className="h-10 px-6 border-2 hover:border-primary hover:shadow-accent transition-all"
                 >
+                  <BarChart3 className="h-4 w-4 mr-2" />
                   {showStats ? 'Hide Stats' : 'Show Stats'}
                 </Button>
               </div>
 
               {showStats && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 p-4 bg-secondary/50 rounded-lg">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Total Messages</div>
-                    <div className="text-2xl font-bold">{messages.length}</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 p-6 bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 rounded-2xl border border-primary/20 animate-scale-in">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      Total Messages
+                    </div>
+                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      {messages.length}
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Participants</div>
-                    <div className="text-2xl font-bold">{uniqueAuthors.length}</div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                      <Users className="h-3.5 w-3.5" />
+                      Participants
+                    </div>
+                    <div className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                      {uniqueAuthors.length}
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Date Range</div>
-                    <div className="text-sm font-medium">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                      <Calendar className="h-3.5 w-3.5" />
+                      Date Range
+                    </div>
+                    <div className="text-sm font-semibold text-foreground">
                       {messages.length > 0 && (
                         <>
                           {new Date(messages[0].datetime_iso).toLocaleDateString()} - 
@@ -638,27 +694,30 @@ const ChatImport = () => {
                       )}
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Top Contributor</div>
-                    <div className="text-sm font-medium truncate">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                      <Activity className="h-3.5 w-3.5" />
+                      Top Contributor
+                    </div>
+                    <div className="text-sm font-semibold text-foreground truncate">
                       {Object.entries(messagesByAuthor).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}
                     </div>
                   </div>
                 </div>
               )}
               
-              <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     placeholder="Search messages..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-12 h-12 bg-background/50 border-2 focus:border-primary"
                   />
                 </div>
                 <Select value={filterAuthor} onValueChange={setFilterAuthor}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[240px] h-12 border-2">
                     <SelectValue placeholder="Filter by author" />
                   </SelectTrigger>
                   <SelectContent>
@@ -670,9 +729,8 @@ const ChatImport = () => {
                 </Select>
               </div>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px] pr-4">
-                {filteredMessages.length > 0 ? (
+            <CardContent className="relative">
+              <ScrollArea className="h-[500px] pr-4">{filteredMessages.length > 0 ? (
                   filteredMessages.map((msg, idx) => {
                     const isLongMessage = msg.text.length > 200;
                     const isExpanded = expandedMessages[msg.id];
@@ -683,17 +741,18 @@ const ChatImport = () => {
                     return (
                       <div 
                         key={msg.id} 
-                        className="mb-3 p-4 bg-secondary/80 hover:bg-secondary rounded-lg transition-colors group"
+                        className="mb-4 p-5 bg-gradient-to-br from-card/80 to-card/50 backdrop-blur-sm hover:from-primary/5 hover:to-accent/5 rounded-xl border-2 border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-elegant animate-fade-in"
+                        style={{ animationDelay: `${idx * 0.02}s` }}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                              <Users className="h-4 w-4 text-primary" />
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-elegant">
+                              <Users className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <div>
-                              <span className="font-semibold text-sm">{msg.author}</span>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
+                              <span className="font-semibold text-base">{msg.author}</span>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <Clock className="h-3.5 w-3.5" />
                                 {new Date(msg.datetime_iso).toLocaleString()}
                               </div>
                             </div>
@@ -701,14 +760,14 @@ const ChatImport = () => {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="opacity-0 group-hover:opacity-100 transition-all h-9 w-9 p-0 hover:bg-primary/10 hover:scale-110"
                             onClick={() => copyMessage(msg.text)}
                           >
-                            <Download className="h-4 w-4" />
+                            <Copy className="h-4 w-4" />
                           </Button>
                         </div>
                         
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed mb-2">
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed mb-3 text-foreground/90">
                           {displayText}
                         </p>
                         
@@ -716,10 +775,10 @@ const ChatImport = () => {
                           <Button
                             variant="link"
                             size="sm"
-                            className="h-auto p-0 text-xs"
+                            className="h-auto p-0 text-xs font-semibold hover:text-primary"
                             onClick={() => toggleMessageExpansion(msg.id)}
                           >
-                            {isExpanded ? 'Show less' : 'Show more'}
+                            {isExpanded ? '← Show less' : 'Show more →'}
                           </Button>
                         )}
                         
