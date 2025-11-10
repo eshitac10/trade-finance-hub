@@ -26,12 +26,12 @@ interface DetectedEvent {
 
 // Common WhatsApp timestamp patterns
 const TIMESTAMP_PATTERNS = [
-  // Format: [M/D/YY, h:mm:ss AM/PM] Author: Message
-  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]\s+(.+?):\s*(.*)$/,
-  // Format: M/D/YY, h:mm:ss AM/PM - Author: Message
-  /^(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[-–—]\s*(.+?):\s*(.*)$/,
+  // Format: [M/D/YY, h:mm[:ss] AM/PM] Author: Message (bracketed)
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s|\u202F|\u00A0)?(?:AM|PM|am|pm)?)\]\s+(.+?)\s*:\s*(.*)$/,
+  // Format: M/D/YY, h:mm[:ss] AM/PM - Author: Message (dash)
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s|\u202F|\u00A0)?(?:AM|PM|am|pm)?)\s*[-–—]\s*(.+?)\s*:\s*(.*)$/,
   // Format: YYYY-MM-DD HH:mm:ss - Author: Message
-  /^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s*[-–—]\s*(.+?):\s*(.*)$/,
+  /^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\s*[-–—]\s*(.+?)\s*:\s*(.*)$/,
 ];
 
 const EVENT_KEYWORDS = {
@@ -45,10 +45,18 @@ const EVENT_KEYWORDS = {
 };
 
 function parseWhatsAppLine(line: string, lineNumber: number): ParsedMessage | null {
+  // Normalize special unicode spaces and direction marks
+  const cleanedLine = line
+    .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "") // bidi and direction marks
+    .replace(/[\u202F\u00A0]/g, " "); // narrow/nbsp to normal space
+
   for (const pattern of TIMESTAMP_PATTERNS) {
-    const match = line.match(pattern);
+    const match = cleanedLine.match(pattern);
     if (match) {
-      const [, timestamp, author, text] = match;
+      const [, timestamp, authorRaw, textRaw] = match;
+
+      const author = authorRaw.replace(/[\u200E\u200F]/g, "").trim();
+      const text = textRaw.replace(/[\u200E\u200F]/g, "").trim();
       
       // Extract attachments
       const attachments: string[] = [];
@@ -63,8 +71,8 @@ function parseWhatsAppLine(line: string, lineNumber: number): ParsedMessage | nu
       return {
         messageId: `msg_${lineNumber}`,
         datetimeISO: parseTimestamp(timestamp),
-        author: author.trim(),
-        text: text.trim(),
+        author,
+        text,
         attachments,
         rawLine: line
       };
@@ -76,7 +84,7 @@ function parseWhatsAppLine(line: string, lineNumber: number): ParsedMessage | nu
 function parseTimestamp(timestamp: string): string {
   // Try to parse common formats
   const formats = [
-    /(\d{1,2})\/(\d{1,2})\/(\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM|am|pm)?/,
+    /(\d{1,2})\/(\d{1,2})\/(\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s|\u202F|\u00A0)?(AM|PM|am|pm)?/,
     /(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/
   ];
   
@@ -263,18 +271,19 @@ serve(async (req) => {
       messages.push(currentMessage);
     }
     
-    // Check parse success rate
-    const parseSuccessRate = messages.length / (lines.length - parseErrors);
-    if (parseSuccessRate < 0.95) {
-      return new Response(JSON.stringify({ 
-        error: "Low parse success rate. Please verify date format.",
-        parseSuccessRate,
-        sample: lines.slice(0, 20)
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+// Check parse success rate (only count lines we attempted to parse)
+const attempted = messages.length + parseErrors;
+const parseSuccessRate = attempted > 0 ? messages.length / attempted : 1;
+if (parseSuccessRate < 0.95) {
+  return new Response(JSON.stringify({ 
+    error: "Low parse success rate. Please verify date format.",
+    parseSuccessRate,
+    sample: lines.slice(0, 20)
+  }), {
+    status: 400,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
     
     // Create import record
     const { data: importRecord, error: importError } = await supabase
