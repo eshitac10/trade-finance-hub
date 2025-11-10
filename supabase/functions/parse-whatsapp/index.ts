@@ -241,44 +241,59 @@ serve(async (req) => {
     // Read file content
     let content = await file.text();
     
-    // Parse messages
-    const lines = content.split('\n');
-    const messages: ParsedMessage[] = [];
-    let currentMessage: ParsedMessage | null = null;
-    let parseErrors = 0;
-    
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) return;
-      
-      const parsed = parseWhatsAppLine(trimmedLine, index);
-      
-      if (parsed) {
-        if (currentMessage) {
-          messages.push(currentMessage);
-        }
-        currentMessage = parsed;
-      } else if (currentMessage) {
-        // Multi-line message continuation
-        currentMessage.text += '\n' + trimmedLine;
-        currentMessage.rawLine += '\n' + trimmedLine;
-      } else {
-        parseErrors++;
-      }
-    });
-    
+// Parse messages
+const lines = content.split('\n');
+const messages: ParsedMessage[] = [];
+let currentMessage: ParsedMessage | null = null;
+let parseErrors = 0;
+const failedLines: string[] = [];
+
+lines.forEach((line, index) => {
+  const trimmedLine = line.trim();
+  if (!trimmedLine) return;
+  
+  const parsed = parseWhatsAppLine(trimmedLine, index);
+  
+  if (parsed) {
     if (currentMessage) {
       messages.push(currentMessage);
     }
+    currentMessage = parsed;
+  } else if (currentMessage) {
+    // Multi-line message continuation
+    currentMessage.text += '\n' + trimmedLine;
+    currentMessage.rawLine += '\n' + trimmedLine;
+  } else {
+    // Only count as error if it's not a system message or blank
+    if (trimmedLine && !trimmedLine.startsWith('‎')) {
+      parseErrors++;
+      if (failedLines.length < 10) {
+        failedLines.push(`Line ${index}: ${trimmedLine.substring(0, 100)}`);
+      }
+    }
+  }
+});
+
+if (currentMessage) {
+  messages.push(currentMessage);
+}
+
+console.log(`Parse results: ${messages.length} messages, ${parseErrors} errors`);
+if (failedLines.length > 0) {
+  console.log('Failed lines:', failedLines);
+}
     
 // Check parse success rate (only count lines we attempted to parse)
 const attempted = messages.length + parseErrors;
 const parseSuccessRate = attempted > 0 ? messages.length / attempted : 1;
-if (parseSuccessRate < 0.95) {
+console.log(`Parse success rate: ${parseSuccessRate} (${messages.length}/${attempted})`);
+
+if (parseSuccessRate < 0.85) {
   return new Response(JSON.stringify({ 
     error: "Low parse success rate. Please verify date format.",
     parseSuccessRate,
-    sample: lines.slice(0, 20)
+    sample: lines.slice(0, 20),
+    failedLines
   }), {
     status: 400,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
