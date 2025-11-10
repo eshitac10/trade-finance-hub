@@ -117,7 +117,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
-                  className="hover:bg-[#C9A961]/20 transition-colors"
+                  className="hover:bg-[#C9A961]/20 transition-colors bg-[#1A0505]"
                 >
                   <img src={youtubeIcon} alt="YouTube" className="h-6 w-6" />
                 </Button>
@@ -216,7 +216,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         <Button
                           variant="ghost"
                           onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
-                          className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
+                          className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 bg-[#1A0505]"
                         >
                           <img src={youtubeIcon} alt="YouTube" className="h-5 w-5 mr-2" />
                           YouTube
