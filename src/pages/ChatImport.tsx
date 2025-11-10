@@ -158,11 +158,11 @@ const ChatImport = () => {
       return;
     }
 
-    // Validate file size
-    if (selectedFile.size > 50 * 1024 * 1024) {
+    // Validate file size (1GB max)
+    if (selectedFile.size > 1024 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50 MB",
+        description: "Maximum file size is 1 GB",
         variant: "destructive"
       });
       return;
@@ -395,7 +395,7 @@ const ChatImport = () => {
               Upload Chat Export
             </CardTitle>
             <CardDescription className="text-base">
-              Drag and drop your WhatsApp .txt or .zip file (max 50 MB)
+              Drag and drop your WhatsApp .txt or .zip file (max 1 GB)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 relative">
