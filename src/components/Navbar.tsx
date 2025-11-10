@@ -198,7 +198,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
               {/* Unauthenticated - Login/Signup centered with theme toggle on right */}
               <div className="hidden md:flex items-center justify-center flex-1 space-x-4">
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/auth")}
                   variant="outline"
                   className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold"
                 >
@@ -250,7 +250,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   <SheetContent className="w-64 bg-[#2B0808]/95 backdrop-blur-xl border-[#C9A961]/20">
                     <div className="flex flex-col space-y-4 mt-8">
                       <Button
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate("/auth")}
                         variant="outline"
                         className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold w-full"
                       >

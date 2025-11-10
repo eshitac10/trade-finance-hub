@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from "lucide-react";
-
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+import globeMustard from "@/assets/globe-mustard.png";
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -136,13 +136,15 @@ const Auth = () => {
       <div className="relative w-full max-w-md animate-fade-in">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-gradient-primary p-4 rounded-2xl shadow-elegant">
-              <Sparkles className="h-10 w-10 text-primary-foreground" />
-            </div>
+          <div className="flex items-center justify-center mb-6">
+            <img src={globeMustard} alt="Trade Finance World Globe" className="h-24 w-24 md:h-28 md:w-28 object-contain" />
           </div>
-          <h1 className="professional-heading text-4xl mb-2">Trade Finance World</h1>
-          <p className="banking-text text-muted-foreground">Join our global community</p>
+          <h1
+            className="professional-heading text-3xl md:text-4xl font-bold uppercase tracking-widest whitespace-nowrap text-foreground"
+            style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
+          >
+            TRADE FINANCE WORLD
+          </h1>
         </div>
 
         <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium">
