@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
-import globeMustard from "@/assets/globe-mustard.png";
+import globeLogo from "@/assets/globe-logo.png";
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -136,18 +136,18 @@ const Auth = () => {
       <div className="relative w-full max-w-md animate-fade-in">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <img src={globeMustard} alt="Trade Finance World Globe" className="h-24 w-24 md:h-28 md:w-28 object-contain" />
+          <div className="flex items-center justify-center gap-6 mb-6">
+            <img src={globeLogo} alt="Trade Finance World Globe" className="h-32 w-32 md:h-40 md:w-40 object-contain drop-shadow-2xl" />
+            <h1
+              className="professional-heading text-3xl md:text-4xl lg:text-5xl font-bold uppercase text-foreground tracking-[0.3em]"
+              style={{ fontFamily: '"Times New Roman", Times, serif' }}
+            >
+              TRADE FINANCE WORLD
+            </h1>
           </div>
-          <h1
-            className="professional-heading text-3xl md:text-4xl font-bold uppercase tracking-widest whitespace-nowrap text-foreground"
-            style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}
-          >
-            TRADE FINANCE WORLD
-          </h1>
         </div>
 
-        <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium">
+        <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium texture-overlay">
           <CardHeader>
             <CardTitle className="professional-heading text-2xl text-center">Welcome</CardTitle>
             <CardDescription className="banking-text text-center">
@@ -210,7 +210,7 @@ const Auth = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02]"
+                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02] btn-premium"
                   >
                     {loading ? (
                       <>
@@ -314,7 +314,7 @@ const Auth = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02]"
+                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02] btn-premium"
                   >
                     {loading ? (
                       <>

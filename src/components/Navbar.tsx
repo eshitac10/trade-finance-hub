@@ -58,7 +58,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <img src={tfwLogo} alt="TFW Logo" className="h-20 w-auto" />
+            <img src={tfwLogo} alt="TFW Logo" className="h-30 w-auto" />
           </div>
 
           {isAuthenticated ? (
@@ -71,13 +71,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
                 >
                   Home
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/articles")}
-                  className="banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
-                >
-                  Articles
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
