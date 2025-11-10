@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Youtube, LogOut, Sun, Moon, Menu, ChevronDown } from "lucide-react";
+import { LogOut, Sun, Moon, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import tfwLogo from "@/assets/tfw-full-logo.png";
+import youtubeIcon from "@/assets/youtube-icon.png";
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -57,7 +58,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex-shrink-0">
-            <img src={tfwLogo} alt="TFW Logo" className="h-16 w-auto" />
+            <img src={tfwLogo} alt="TFW Logo" className="h-20 w-auto" />
           </div>
 
           {isAuthenticated ? (
@@ -89,11 +90,14 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
-                    <DropdownMenuItem onClick={() => navigate("/webinars")}>
-                      Webinars
+                    <DropdownMenuItem onClick={() => navigate("/articles")}>
+                      Articles
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/submit-document")}>
                       Submit Document
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/chat-import")}>
+                      Member Important Conversations
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -108,11 +112,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
+                    <DropdownMenuItem onClick={() => navigate("/webinars")}>
+                      Webinars
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/events")}>
                       Upcoming Events
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/chat-import")}>
-                      Chat Import
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -124,9 +128,9 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
-                  className="text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 transition-colors"
+                  className="hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  <Youtube className="h-5 w-5" />
+                  <img src={youtubeIcon} alt="YouTube" className="h-6 w-6" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -190,10 +194,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         <p className="text-[#C9A961] text-xs px-3 font-bold">Resources</p>
                         <Button
                           variant="ghost"
-                          onClick={() => navigate("/webinars")}
+                          onClick={() => navigate("/articles")}
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
-                          Webinars
+                          Articles
                         </Button>
                         <Button
                           variant="ghost"
@@ -202,22 +206,29 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         >
                           Submit Document
                         </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/chat-import")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Member Important Conversations
+                        </Button>
                       </div>
                       <div className="space-y-2">
                         <p className="text-[#C9A961] text-xs px-3 font-bold">Events</p>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/webinars")}
+                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
+                        >
+                          Webinars
+                        </Button>
                         <Button
                           variant="ghost"
                           onClick={() => navigate("/events")}
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
                           Upcoming Events
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => navigate("/chat-import")}
-                          className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
-                        >
-                          Chat Import
                         </Button>
                       </div>
                       <div className="border-t border-[#C9A961]/20 pt-4">
@@ -226,7 +237,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
                           className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                         >
-                          <Youtube className="h-5 w-5 mr-2" />
+                          <img src={youtubeIcon} alt="YouTube" className="h-5 w-5 mr-2" />
                           YouTube
                         </Button>
                         <Button

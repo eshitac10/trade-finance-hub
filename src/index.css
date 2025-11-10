@@ -17,17 +17,17 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222 15% 15%;
 
-    /* Premium Maroon - HSBC/HDFC Inspired - Extra Darkened */
-    --primary: 0 75% 12%;
+    /* Premium Dark Maroon - Banking Aesthetic */
+    --primary: 0 85% 8%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 0 75% 15%;
-    --primary-light: 0 75% 95%;
+    --primary-hover: 0 85% 12%;
+    --primary-light: 0 85% 95%;
 
-    /* Refined Accent - Deep Red Variation - Darkened */
-    --accent: 0 75% 35%;
+    /* Refined Accent - Deep Maroon Variation */
+    --accent: 0 85% 25%;
     --accent-foreground: 0 0% 100%;
-    --accent-hover: 0 75% 38%;
-
+    --accent-hover: 0 85% 28%;
+    
     /* Sophisticated Secondary */
     --secondary: 0 5% 96%;
     --secondary-foreground: 222 15% 20%;
@@ -42,20 +42,20 @@ All colors MUST be HSL.
     --input: 0 10% 90%;
     --ring: 0 70% 18%;
 
-    /* Modern Gradients - Extra Darkened Maroon & Red Banking Aesthetic */
-    --gradient-primary: linear-gradient(135deg, hsl(0 75% 12%) 0%, hsl(0 75% 15%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(0 75% 35%) 0%, hsl(0 75% 38%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(0 75% 12%) 0%, hsl(0 75% 8%) 50%, hsl(0 70% 10%) 100%);
+    /* Modern Gradients - Dark Maroon Banking Aesthetic */
+    --gradient-primary: linear-gradient(135deg, hsl(0 85% 8%) 0%, hsl(0 85% 12%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(0 85% 25%) 0%, hsl(0 85% 28%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 85% 8%) 0%, hsl(0 85% 5%) 50%, hsl(0 80% 7%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 5% 98%) 100%);
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 5% 99%) 100%);
 
-    /* Premium Shadows - Extra Darkened Maroon Tinted Depth */
-    --shadow-soft: 0 2px 8px -2px hsl(0 75% 12% / 0.10);
-    --shadow-professional: 0 4px 12px -2px hsl(0 75% 12% / 0.15), 0 2px 6px -1px hsl(0 75% 12% / 0.08);
-    --shadow-elegant: 0 12px 32px -8px hsl(0 75% 12% / 0.22), 0 8px 16px -4px hsl(0 75% 12% / 0.10);
-    --shadow-premium: 0 24px 48px -12px hsl(0 75% 12% / 0.28), 0 16px 32px -8px hsl(0 75% 12% / 0.12);
-    --shadow-glow: 0 0 32px hsl(0 75% 12% / 0.18);
-    --shadow-accent: 0 8px 24px -4px hsl(0 75% 35% / 0.30);
+    /* Premium Shadows - Dark Maroon Tinted Depth */
+    --shadow-soft: 0 2px 8px -2px hsl(0 85% 8% / 0.10);
+    --shadow-professional: 0 4px 12px -2px hsl(0 85% 8% / 0.15), 0 2px 6px -1px hsl(0 85% 8% / 0.08);
+    --shadow-elegant: 0 12px 32px -8px hsl(0 85% 8% / 0.22), 0 8px 16px -4px hsl(0 85% 8% / 0.10);
+    --shadow-premium: 0 24px 48px -12px hsl(0 85% 8% / 0.28), 0 16px 32px -8px hsl(0 85% 8% / 0.12);
+    --shadow-glow: 0 0 32px hsl(0 85% 8% / 0.18);
+    --shadow-accent: 0 8px 24px -4px hsl(0 85% 25% / 0.30);
 
     /* Smooth Transitions - Premium Easing */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
