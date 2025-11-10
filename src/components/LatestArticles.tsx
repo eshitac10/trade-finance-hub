@@ -6,6 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Clock, FileText, TrendingUp } from 'lucide-react';
 import CreativeLoader from '@/components/CreativeLoader';
+import generatedArticle1 from '@/assets/generated-article-1.jpg';
+import generatedArticle2 from '@/assets/generated-article-2.jpg';
+import generatedArticle3 from '@/assets/generated-article-3.jpg';
+import generatedArticle4 from '@/assets/generated-article-4.jpg';
+import generatedArticle5 from '@/assets/generated-article-5.jpg';
+import generatedArticle6 from '@/assets/generated-article-6.jpg';
 
 interface Article {
   id: string;
@@ -14,6 +20,35 @@ interface Article {
   modified_time: string | null;
   mime_type: string;
 }
+
+const getArticleThumbnail = (article: Article): string | null => {
+  // Return AI thumbnail if it exists
+  if (article.ai_thumbnail) return article.ai_thumbnail;
+  
+  // Otherwise, use generated images based on article name patterns
+  const name = article.name.toLowerCase();
+  
+  if (name.includes('cargo') && (name.includes('delivery') || name.includes('bl'))) {
+    return generatedArticle1;
+  }
+  if (name.includes('casino') || name.includes('iot') || name.includes('hack')) {
+    return generatedArticle2;
+  }
+  if (name.includes('crypto') || name.includes('madras') || name.includes('judgment')) {
+    return generatedArticle3;
+  }
+  if (name.includes('cybercrime') || name.includes('prevention') || name.includes('handbook')) {
+    return generatedArticle4;
+  }
+  if (name.includes('data') && (name.includes('population') || name.includes('best') || name.includes('practice'))) {
+    return generatedArticle5;
+  }
+  if (name.includes('dgft') || (name.includes('trade') && name.includes('finance') && name.includes('study'))) {
+    return generatedArticle6;
+  }
+  
+  return null;
+};
 
 const LatestArticles = () => {
   const navigate = useNavigate();
@@ -86,9 +121,9 @@ const LatestArticles = () => {
             >
               {/* Article Image */}
               <div className="relative h-56 bg-gradient-to-br from-primary/20 to-accent/10 overflow-hidden">
-                {article.ai_thumbnail ? (
+                {getArticleThumbnail(article) ? (
                   <img
-                    src={article.ai_thumbnail}
+                    src={getArticleThumbnail(article)!}
                     alt={article.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
