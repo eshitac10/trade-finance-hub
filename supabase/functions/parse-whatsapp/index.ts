@@ -361,16 +361,25 @@ if (parseSuccessRate < 0.85) {
       };
     });
     
-    // Insert messages in batches
-    const batchSize = 500;
+    // Insert messages in batches with progress logging
+    const batchSize = 1000;
+    console.log(`Inserting ${messagesWithEvents.length} messages in batches of ${batchSize}`);
+    
     for (let i = 0; i < messagesWithEvents.length; i += batchSize) {
       const batch = messagesWithEvents.slice(i, i + batchSize);
+      console.log(`Inserting batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(messagesWithEvents.length / batchSize)}`);
+      
       const { error: msgError } = await supabase
         .from('whatsapp_messages')
         .insert(batch);
       
-      if (msgError) throw msgError;
+      if (msgError) {
+        console.error('Batch insert error:', msgError);
+        throw msgError;
+      }
     }
+    
+    console.log(`Successfully inserted all ${messagesWithEvents.length} messages`);
     
     return new Response(JSON.stringify({
       success: true,

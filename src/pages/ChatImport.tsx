@@ -132,9 +132,12 @@ const ChatImport = () => {
   const fetchMessages = async (eventId: string) => {
     setMessages([]); // Clear previous messages
     setSummary(""); // Clear previous summary
-    const { data, error } = await supabase
+    
+    console.log('Fetching messages for event:', eventId);
+    
+    const { data, error, count } = await supabase
       .from('whatsapp_messages')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('event_id', eventId)
       .order('datetime_iso', { ascending: true });
 
@@ -146,8 +149,16 @@ const ChatImport = () => {
         variant: "destructive"
       });
     } else {
-      console.log('Fetched messages:', data);
+      console.log('Fetched messages:', data?.length, 'Total count:', count);
       setMessages(data || []);
+      
+      if (data && data.length === 0 && count && count > 0) {
+        toast({
+          title: "No Messages Displayed",
+          description: `${count} messages found but filtering may be active`,
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -163,8 +174,13 @@ const ChatImport = () => {
 
     setLoadingSummary(true);
     try {
+      // For large conversations, only summarize first 1000 messages to avoid timeout
+      const messagesToSummarize = messages.slice(0, 1000);
+      
+      console.log(`Summarizing ${messagesToSummarize.length} of ${messages.length} messages`);
+      
       const { data, error } = await supabase.functions.invoke('summarize-conversation', {
-        body: { messages }
+        body: { messages: messagesToSummarize }
       });
 
       if (error) throw error;
@@ -172,7 +188,9 @@ const ChatImport = () => {
       setSummary(data.summary);
       toast({
         title: "Summary Generated",
-        description: "AI summary has been created successfully",
+        description: messages.length > 1000 
+          ? `Summary created from first 1000 of ${messages.length} messages`
+          : "AI summary has been created successfully",
       });
     } catch (error: any) {
       console.error('Summary error:', error);
@@ -218,6 +236,17 @@ const ChatImport = () => {
   const handleUpload = async () => {
     if (!file) return;
 
+    // Check file size (1GB max)
+    const maxSize = 1024 * 1024 * 1024; // 1GB
+    if (file.size > maxSize) {
+      toast({
+        title: "File Too Large",
+        description: "Maximum file size is 1GB",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setUploading(true);
     setProcessing(true);
 
@@ -228,6 +257,8 @@ const ChatImport = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('timezone', timezone);
+
+      console.log('Uploading file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-whatsapp`, {
         method: 'POST',
@@ -252,6 +283,7 @@ const ChatImport = () => {
       setShowSamplePreview(false);
       fetchImports();
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Upload failed",
@@ -542,7 +574,7 @@ const ChatImport = () => {
                       }`}
                       onClick={() => handleSelectImport(imp.id)}
                     >
-                      <div className="font-semibold truncate mb-1 pr-8">{imp.filename}</div>
+                      <div className="font-semibold mb-1 pr-8 break-words">{imp.filename}</div>
                       <div className="text-sm text-muted-foreground">
                         {imp.total_messages} messages
                       </div>

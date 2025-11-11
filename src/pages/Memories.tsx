@@ -206,7 +206,7 @@ const Memories = () => {
           user_id: currentUserId,
           image_url: publicUrl,
           caption: uploadCaption || null,
-          folder_id: selectedUploadFolder,
+          folder_id: selectedUploadFolder || null,
           file_type: isVideo ? 'video' : 'image'
         });
 
@@ -221,7 +221,9 @@ const Memories = () => {
       setUploadCaption("");
       setSelectedUploadFolder(null);
       setIsUploadDialogOpen(false);
-      fetchMemories();
+      // Refresh folders and memories
+      await fetchFolders();
+      await fetchMemories();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -394,29 +396,30 @@ const Memories = () => {
           <div className="flex gap-2">
             <Dialog open={newFolderDialogOpen} onOpenChange={setNewFolderDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-accent to-primary hover:shadow-lg text-accent-foreground font-bold">
-                  <FolderPlus className="h-4 w-4 mr-2" />
+                <Button className="bg-gradient-to-r from-accent to-primary hover:shadow-premium transition-all text-accent-foreground font-bold rounded-xl">
+                  <FolderPlus className="h-5 w-5 mr-2" />
                   New Folder
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+              <DialogContent className="bg-card/98 backdrop-blur-2xl border-accent/30 shadow-2xl rounded-2xl">
                 <DialogHeader>
-                  <DialogTitle className="professional-heading text-2xl">Create New Folder</DialogTitle>
+                  <DialogTitle className="professional-heading text-3xl bg-gradient-primary bg-clip-text text-transparent">Create New Folder</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="banking-text text-sm font-medium mb-2 block">Folder Name</Label>
+                <div className="space-y-6 pt-4">
+                  <div className="space-y-3">
+                    <Label className="banking-text text-base font-semibold">Folder Name</Label>
                     <Input
                       value={newFolderName}
                       onChange={(e) => setNewFolderName(e.target.value)}
-                      placeholder="Enter folder name..."
-                      className="border-border/60"
+                      placeholder="e.g., Family, Vacations, Events..."
+                      className="border-border/60 h-12 text-base rounded-xl focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <Button
                     onClick={handleCreateFolder}
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+                    className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all text-primary-foreground font-bold rounded-xl"
                   >
+                    <FolderPlus className="h-5 w-5 mr-2" />
                     Create Folder
                   </Button>
                 </div>
@@ -425,34 +428,40 @@ const Memories = () => {
 
             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all text-primary-foreground font-bold rounded-xl">
+                  <Plus className="h-5 w-5 mr-2" />
                   Upload
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+              <DialogContent className="bg-card/98 backdrop-blur-2xl border-accent/30 shadow-2xl rounded-2xl max-w-lg">
                 <DialogHeader>
-                  <DialogTitle className="professional-heading text-2xl">Upload Memory</DialogTitle>
+                  <DialogTitle className="professional-heading text-3xl bg-gradient-primary bg-clip-text text-transparent">Upload Memory</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label className="banking-text text-sm font-medium mb-2 block">Select Folder (Optional)</Label>
+                <div className="space-y-6 pt-4">
+                  <div className="space-y-3">
+                    <Label className="banking-text text-base font-semibold flex items-center gap-2">
+                      <Folder className="h-4 w-4" />
+                      Select Folder (Optional)
+                    </Label>
                     <select
                       value={selectedUploadFolder || ""}
                       onChange={(e) => setSelectedUploadFolder(e.target.value || null)}
-                      className="w-full px-3 py-2 border border-border/60 rounded-lg bg-background"
+                      className="w-full px-4 py-3 border border-border/60 rounded-xl bg-background/50 backdrop-blur-sm h-12 text-base focus:ring-2 focus:ring-primary/50 transition-all"
                     >
-                      <option value="">No Folder</option>
+                      <option value="">📂 No Folder (All Memories)</option>
                       {folders.map((folder) => (
                         <option key={folder.id} value={folder.id}>
-                          {folder.name}
+                          📁 {folder.name}
                         </option>
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <Label className="banking-text text-sm font-medium mb-2 block">File (Image or Video)</Label>
-                    <div className="border-2 border-dashed border-border/60 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                  <div className="space-y-3">
+                    <Label className="banking-text text-base font-semibold flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      File (Image or Video)
+                    </Label>
+                    <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
                       <input
                         type="file"
                         id="memory-upload"
@@ -461,34 +470,51 @@ const Memories = () => {
                         onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                       />
                       <label htmlFor="memory-upload" className="cursor-pointer">
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                          <Video className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex items-center justify-center gap-3 mb-3">
+                          <div className="p-3 bg-primary/10 rounded-full group-hover:scale-110 transition-transform">
+                            <ImageIcon className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="p-3 bg-accent/10 rounded-full group-hover:scale-110 transition-transform">
+                            <Video className="h-6 w-6 text-accent" />
+                          </div>
                         </div>
-                        <p className="banking-text text-sm text-foreground mb-1">
-                          {selectedFile ? selectedFile.name : "Click to upload image or video"}
+                        <p className="banking-text text-base text-foreground mb-2 font-medium">
+                          {selectedFile ? `✓ ${selectedFile.name}` : "Click to upload image or video"}
                         </p>
-                        <p className="banking-text text-xs text-muted-foreground">
-                          Max 500MB
+                        <p className="banking-text text-sm text-muted-foreground">
+                          Maximum file size: 500MB
                         </p>
                       </label>
                     </div>
                   </div>
-                  <div>
-                    <Label className="banking-text text-sm font-medium mb-2 block">Caption (Optional)</Label>
+                  <div className="space-y-3">
+                    <Label className="banking-text text-base font-semibold flex items-center gap-2">
+                      <Edit2 className="h-4 w-4" />
+                      Caption (Optional)
+                    </Label>
                     <Input
                       value={uploadCaption}
                       onChange={(e) => setUploadCaption(e.target.value)}
-                      placeholder="Add a caption..."
-                      className="border-border/60"
+                      placeholder="Add a memorable caption..."
+                      className="border-border/60 h-12 text-base rounded-xl focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <Button
                     onClick={handleFileUpload}
                     disabled={isUploading}
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+                    className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all text-primary-foreground font-bold rounded-xl"
                   >
-                    {isUploading ? "Uploading..." : "Upload"}
+                    {isUploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-5 w-5 mr-2" />
+                        Upload Memory
+                      </>
+                    )}
                   </Button>
                 </div>
               </DialogContent>
