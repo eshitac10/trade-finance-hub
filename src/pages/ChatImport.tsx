@@ -127,6 +127,7 @@ const ChatImport = () => {
   };
 
   const fetchMessages = async (eventId: string) => {
+    setMessages([]); // Clear previous messages
     const { data, error } = await supabase
       .from('whatsapp_messages')
       .select('*')
@@ -134,12 +135,14 @@ const ChatImport = () => {
       .order('datetime_iso', { ascending: true });
 
     if (error) {
+      console.error('Error fetching messages:', error);
       toast({
         title: "Error",
         description: "Failed to load messages",
         variant: "destructive"
       });
     } else {
+      console.log('Fetched messages:', data);
       setMessages(data || []);
     }
   };

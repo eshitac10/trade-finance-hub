@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, MapPin, Clock, Pencil, Trash2, Sparkles, CalendarDays } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, MapPin, Clock, Pencil, Trash2, Sparkles, CalendarDays, Share2, Copy } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -222,6 +222,51 @@ const Events = () => {
       event_time: "",
       location: "",
     });
+  };
+
+  const copyEventDetails = (event: Event) => {
+    const eventText = `
+📅 ${event.title}
+${event.description ? `\n${event.description}\n` : ''}
+📆 Date: ${format(new Date(event.event_date), "MMMM d, yyyy")}
+${event.event_time ? `🕐 Time: ${event.event_time}` : ''}
+${event.location ? `📍 Location: ${event.location}` : ''}
+    `.trim();
+
+    navigator.clipboard.writeText(eventText);
+    toast({
+      title: "Copied!",
+      description: "Event details copied to clipboard",
+    });
+  };
+
+  const shareEvent = async (event: Event) => {
+    const eventText = `
+📅 ${event.title}
+${event.description ? `\n${event.description}\n` : ''}
+📆 Date: ${format(new Date(event.event_date), "MMMM d, yyyy")}
+${event.event_time ? `🕐 Time: ${event.event_time}` : ''}
+${event.location ? `📍 Location: ${event.location}` : ''}
+    `.trim();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: event.title,
+          text: eventText,
+        });
+        toast({
+          title: "Shared!",
+          description: "Event shared successfully",
+        });
+      } catch (error) {
+        // User cancelled or sharing failed
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback to copy
+      copyEventDetails(event);
+    }
   };
 
   // Filter events by selected date
@@ -493,8 +538,33 @@ const Events = () => {
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareEvent(event);
+                            }}
+                            title="Share event"
+                          >
+                            <Share2 className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyEventDetails(event);
+                            }}
+                            title="Copy event details"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             className="h-7 w-7 p-0 hover:bg-primary/10"
                             onClick={() => handleEditEvent(event)}
+                            title="Edit event"
                           >
                             <Pencil className="h-3 w-3" />
                           </Button>
@@ -503,6 +573,7 @@ const Events = () => {
                             variant="ghost"
                             className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => handleDeleteEvent(event.id)}
+                            title="Delete event"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
