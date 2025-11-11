@@ -158,23 +158,19 @@ const ChatImport = () => {
       return;
     }
 
-    // Validate file size (1GB max)
-    if (selectedFile.size > 1024 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Maximum file size is 1 GB",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setFile(selectedFile);
 
-    // Show sample preview
-    const text = await selectedFile.text();
-    const lines = text.split('\n').slice(0, 20);
-    setSampleLines(lines);
-    setShowSamplePreview(true);
+    // Show sample preview for text files
+    if (selectedFile.name.endsWith('.txt')) {
+      try {
+        const text = await selectedFile.text();
+        const lines = text.split('\n').slice(0, 20);
+        setSampleLines(lines);
+        setShowSamplePreview(true);
+      } catch (error) {
+        console.error('Error reading file:', error);
+      }
+    }
   };
 
   const handleUpload = async () => {
