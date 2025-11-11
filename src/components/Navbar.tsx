@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import youtubeIcon from "@/assets/youtube-icon.png";
+
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -113,9 +113,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
-                  className="hover:bg-[#C9A961]/20 transition-colors bg-[#1A0505]"
+                  className="hover:bg-[#C9A961]/20 transition-colors"
                 >
-                  <img src={youtubeIcon} alt="YouTube" className="h-6 w-6" />
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#C9A961' }}>
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
                 </Button>
                 <Button
                   variant="ghost"
@@ -212,9 +214,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         <Button
                           variant="ghost"
                           onClick={() => handleSocialClick("https://www.youtube.com/@TradefinanceWorld")}
-                          className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 bg-[#1A0505]"
+                          className="justify-start w-full banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
                         >
-                          <img src={youtubeIcon} alt="YouTube" className="h-5 w-5 mr-2" />
+                          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
                           YouTube
                         </Button>
                         <Button

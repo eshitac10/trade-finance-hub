@@ -130,26 +130,31 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: Helvetica, Arial, sans-serif;
-    font-weight: bold;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
   }
 
   /* Premium Typography System */
   h1, h2, h3, h4, h5, h6 {
-    font-family: Helvetica, Arial, sans-serif;
-    font-weight: bold;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
     @apply tracking-tight;
   }
 
   .banking-text {
-    font-family: Helvetica, Arial, sans-serif;
-    font-weight: bold;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
   }
 
   .professional-heading {
-    font-family: Helvetica, Arial, sans-serif;
-    font-weight: bold;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
     @apply tracking-tight;
+  }
+  
+  .helvetica-bold {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 700;
   }
 
   /* Smooth Scrolling */

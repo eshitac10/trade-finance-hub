@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -73,6 +74,8 @@ const ChatImport = () => {
   const [sampleLines, setSampleLines] = useState<string[]>([]);
   const [expandedMessages, setExpandedMessages] = useState<ExpandedMessages>({});
   const [showStats, setShowStats] = useState(false);
+  const [summary, setSummary] = useState<string>("");
+  const [loadingSummary, setLoadingSummary] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -128,6 +131,7 @@ const ChatImport = () => {
 
   const fetchMessages = async (eventId: string) => {
     setMessages([]); // Clear previous messages
+    setSummary(""); // Clear previous summary
     const { data, error } = await supabase
       .from('whatsapp_messages')
       .select('*')
@@ -144,6 +148,41 @@ const ChatImport = () => {
     } else {
       console.log('Fetched messages:', data);
       setMessages(data || []);
+    }
+  };
+
+  const generateSummary = async () => {
+    if (!messages.length) {
+      toast({
+        title: "No Messages",
+        description: "Please select a conversation first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoadingSummary(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('summarize-conversation', {
+        body: { messages }
+      });
+
+      if (error) throw error;
+
+      setSummary(data.summary);
+      toast({
+        title: "Summary Generated",
+        description: "AI summary has been created successfully",
+      });
+    } catch (error: any) {
+      console.error('Summary error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate summary",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSummary(false);
     }
   };
 
@@ -667,7 +706,46 @@ const ChatImport = () => {
 
         {/* Messages Viewer */}
         {selectedEvent && selectedEventData && (
-          <Card className="mt-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+          <>
+            {/* AI Summary Card */}
+            <Card className="mt-8 border-gold/30 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 helvetica-bold">
+                    <Sparkles className="h-5 w-5 text-gold" />
+                    AI Smart Summary
+                  </CardTitle>
+                  <Button
+                    onClick={generateSummary}
+                    disabled={loadingSummary || messages.length === 0}
+                    className="bg-gradient-to-r from-primary via-accent to-gold hover:shadow-gold/50"
+                    size="sm"
+                  >
+                    {loadingSummary ? "Generating..." : "Generate Summary"}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingSummary ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                  </div>
+                ) : summary ? (
+                  <div className="bg-gradient-to-r from-primary/5 via-gold/10 to-accent/5 border border-gold/20 rounded-lg p-4">
+                    <p className="text-sm leading-relaxed banking-text">{summary}</p>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm italic text-center py-4">
+                    Click "Generate Summary" to get an AI-powered overview of this conversation
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Messages Card */}
+            <Card className="mt-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 dark:from-accent/10 dark:to-primary/10 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center justify-between">
@@ -676,7 +754,7 @@ const ChatImport = () => {
                     <div className="p-2.5 bg-gradient-primary rounded-xl">
                       <MessageSquare className="h-5 w-5 text-primary-foreground" />
                     </div>
-                    <CardTitle className="text-2xl">{selectedEventData.title}</CardTitle>
+                    <CardTitle className="text-2xl helvetica-bold">{selectedEventData.title}</CardTitle>
                   </div>
                   <CardDescription className="mt-2 text-base">
                     {filteredMessages.length} of {messages.length} messages
@@ -837,6 +915,7 @@ const ChatImport = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+          </>
         )}
 
         {/* Edit Event Dialog */}

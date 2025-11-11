@@ -125,12 +125,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-52 h-52 bg-accent/10 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-primary/5 rounded-full blur-2xl animate-float" />
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-accent/10"></div>
+      
+      {/* Animated decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float opacity-40" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/15 rounded-full blur-3xl animate-float-delayed opacity-30" />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-gold/10 rounded-full blur-2xl animate-float opacity-25" 
+             style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float-delayed opacity-20" />
+      </div>
+      
+      {/* Subtle grid pattern overlay */}
+      <div className="absolute inset-0 opacity-5" 
+           style={{ backgroundImage: 'linear-gradient(rgba(201, 169, 97, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 169, 97, 0.1) 1px, transparent 1px)', backgroundSize: '50px 50px' }}>
       </div>
 
       <div className="relative w-full max-w-6xl animate-fade-in">
@@ -138,15 +148,15 @@ const Index = () => {
           {/* Left Column - About TFW */}
           <div className="space-y-6 animate-slide-up">
             <div className="text-center lg:text-left">
-              <h1 className="professional-heading text-4xl sm:text-5xl md:text-6xl text-primary mb-6 animate-fade-up drop-shadow-lg">
-                TRADE FINANCE WORLD
+              <h1 className="helvetica-bold text-4xl sm:text-5xl md:text-6xl text-primary mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide">
+                Trade Finance World
               </h1>
-              <div className="h-1 w-24 bg-gradient-to-r from-primary to-accent rounded-full mb-6 mx-auto lg:mx-0"></div>
+              <div className="h-1 w-32 bg-gradient-to-r from-primary via-accent to-gold rounded-full mb-6 mx-auto lg:mx-0 shadow-gold"></div>
             </div>
 
-            <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium">
-              <CardContent className="p-8 space-y-4 text-sm sm:text-base leading-relaxed text-muted-foreground">
-                <p className="font-semibold text-foreground text-lg">
+            <Card className="bg-gradient-to-br from-card/98 to-card/90 backdrop-blur-xl border-gold/30 shadow-elegant hover:shadow-premium transition-all duration-500">
+              <CardContent className="p-8 space-y-4 text-sm sm:text-base leading-relaxed text-muted-foreground banking-text">
+                <p className="helvetica-bold text-foreground text-xl">
                   Welcome to Trade Finance World (TFW)
                 </p>
                 
@@ -158,37 +168,37 @@ const Index = () => {
                   While this is only a modest beginning, we look forward to widespread participation from across the business, banking, and academic communities.
                 </p>
 
-                <div className="my-6 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                <div className="my-6 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent"></div>
 
-                <p className="italic text-accent">
+                <p className="italic text-accent helvetica-bold">
                   The spirit of this platform lies in open, constructive discussions and the exchange of views, underpinned by bonhomie and mutual respect.
                 </p>
 
                 <p>
-                  Originally conceived as a trade finance group of bankers and corporate professionals, the community has since grown to include members from <span className="font-semibold text-foreground">FinTechs, Treasuries, Technology, Digitalisation, and Legal sectors</span>.
+                  Originally conceived as a trade finance group of bankers and corporate professionals, the community has since grown to include members from <span className="helvetica-bold text-foreground">FinTechs, Treasuries, Technology, Digitalisation, and Legal sectors</span>.
                 </p>
 
                 <p>
-                  We have distinguished members from across the globe, including professionals from <span className="font-semibold text-foreground">FEDAI, ICC, ITFA, ADB, BAFT, NSDL</span>, and even a distinguished representative from the <span className="font-semibold text-foreground">Reserve Bank of India</span>.
+                  We have distinguished members from across the globe, including professionals from <span className="helvetica-bold text-foreground">FEDAI, ICC, ITFA, ADB, BAFT, NSDL</span>, and even a distinguished representative from the <span className="helvetica-bold text-foreground">Reserve Bank of India</span>.
                 </p>
 
-                <div className="my-6 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                <div className="my-6 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent"></div>
 
-                <p className="text-xs text-muted-foreground/80">
-                  The platform is administered by <span className="font-semibold">Shudeep Ghosh, Priyanka Chaudhuri, and Pinaki Roy</span>.
+                <p className="text-xs text-muted-foreground/90">
+                  The platform is administered by <span className="helvetica-bold text-foreground">Shudeep Ghosh, Priyanka Chaudhuri, and Pinaki Roy</span>.
                 </p>
 
-                <p className="font-medium text-foreground">
+                <p className="helvetica-bold text-foreground">
                   This website serves as an extended hub for our collective knowledge.
                 </p>
 
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-4">
-                  <p className="text-center font-semibold text-primary italic">
+                <div className="bg-gradient-to-r from-primary/5 via-gold/10 to-accent/5 border border-gold/30 rounded-xl p-5 mt-4 shadow-gold hover:shadow-accent transition-all duration-300">
+                  <p className="text-center helvetica-bold text-primary italic text-base">
                     "TradeFinanceWorld (TFW) follows the Conference Room Philosophy — everyone is equal in the conference room."
                   </p>
                 </div>
 
-                <p className="text-center font-medium text-foreground pt-2">
+                <p className="text-center helvetica-bold text-foreground pt-2">
                   We welcome you on this journey of collaboration, learning, and shared wisdom in the dynamic world of trade finance.
                 </p>
               </CardContent>
@@ -197,10 +207,10 @@ const Index = () => {
 
           {/* Right Column - Login/Signup */}
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Card className="bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl border-border/60 shadow-premium sticky top-8">
+            <Card className="bg-gradient-to-br from-card/98 to-card/90 backdrop-blur-xl border-gold/30 shadow-elegant hover:shadow-premium transition-all duration-500 sticky top-8">
           <CardHeader className="space-y-6">
-            <CardTitle className="professional-heading text-2xl text-center">Welcome</CardTitle>
-            <CardDescription className="banking-text text-center">
+            <CardTitle className="helvetica-bold text-3xl text-center bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-transparent">Welcome</CardTitle>
+            <CardDescription className="banking-text text-center text-base">
               Login or create an account to get started
             </CardDescription>
           </CardHeader>
@@ -260,7 +270,7 @@ const Index = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02] btn-premium"
+                    className="w-full bg-gradient-to-r from-primary via-accent to-primary hover:shadow-elegant hover:shadow-gold/50 text-primary-foreground helvetica-bold py-6 rounded-xl transition-all duration-300 hover:scale-[1.02] btn-premium"
                   >
                     {loading ? (
                       <>
@@ -364,7 +374,7 @@ const Index = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-primary hover:shadow-elegant text-primary-foreground font-semibold py-6 rounded-xl transition-all hover:scale-[1.02] btn-premium"
+                    className="w-full bg-gradient-to-r from-primary via-accent to-primary hover:shadow-elegant hover:shadow-gold/50 text-primary-foreground helvetica-bold py-6 rounded-xl transition-all duration-300 hover:scale-[1.02] btn-premium"
                   >
                     {loading ? (
                       <>

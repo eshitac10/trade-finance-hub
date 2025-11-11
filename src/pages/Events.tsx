@@ -241,30 +241,24 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
   };
 
   const shareEvent = async (event: Event) => {
-    const eventText = `
-📅 ${event.title}
-${event.description ? `\n${event.description}\n` : ''}
-📆 Date: ${format(new Date(event.event_date), "MMMM d, yyyy")}
-${event.event_time ? `🕐 Time: ${event.event_time}` : ''}
-${event.location ? `📍 Location: ${event.location}` : ''}
-    `.trim();
-
+    const eventDetails = `📅 ${event.title}\n\n${event.description || ''}\n\n🗓️ Date: ${new Date(event.event_date).toLocaleDateString()}${event.event_time ? `\n⏰ Time: ${event.event_time}` : ''}${event.location ? `\n📍 Location: ${event.location}` : ''}`;
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: event.title,
-          text: eventText,
+          text: eventDetails,
         });
         toast({
-          title: "Shared!",
-          description: "Event shared successfully",
+          title: "Shared Successfully",
+          description: "Event details have been shared",
         });
-      } catch (error) {
-        // User cancelled or sharing failed
-        console.log('Share cancelled');
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          copyEventDetails(event);
+        }
       }
     } else {
-      // Fallback to copy
       copyEventDetails(event);
     }
   };
