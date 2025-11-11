@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import EventCarousel from '@/components/EventCarousel';
+
 import AnimatedCounter from '@/components/AnimatedCounter';
 import LatestArticles from '@/components/LatestArticles';
 import { Button } from '@/components/ui/button';
@@ -138,20 +138,6 @@ const DashboardHome = () => {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Event Carousel Section with Enhanced Spacing */}
-        <section className="py-24">
-          <div className="text-center mb-16 space-y-4 animate-fade-up">
-            <h2 className="professional-heading text-4xl md:text-5xl text-primary mb-5">
-              Recent Events & Gatherings
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Bringing together industry leaders and professionals from across the globe
-            </p>
-          </div>
-          <div className="animate-scale-in">
-            <EventCarousel />
-          </div>
-        </section>
 
         {/* Value Propositions with Premium Design */}
         <section className="py-24">
