@@ -82,12 +82,25 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <ChevronDown className="ml-1 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
-                    <DropdownMenuItem onClick={() => navigate("/articles")}>Articles</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/chat-import")}>
+                  <DropdownMenuContent className="bg-gradient-to-br from-card/98 to-card/95 backdrop-blur-xl border-accent/30 shadow-premium z-50 min-w-[240px] p-2">
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/articles")}
+                      className="banking-text cursor-pointer rounded-lg px-4 py-3 hover:bg-primary/10 hover:text-accent transition-all duration-300 focus:bg-primary/10 focus:text-accent"
+                    >
+                      Articles
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/chat-import")}
+                      className="banking-text cursor-pointer rounded-lg px-4 py-3 hover:bg-primary/10 hover:text-accent transition-all duration-300 focus:bg-primary/10 focus:text-accent"
+                    >
                       Member Important Conversations
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/memories")}>Memories</DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/memories")}
+                      className="banking-text cursor-pointer rounded-lg px-4 py-3 hover:bg-primary/10 hover:text-accent transition-all duration-300 focus:bg-primary/10 focus:text-accent"
+                    >
+                      Memories
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <DropdownMenu>
@@ -100,9 +113,19 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <ChevronDown className="ml-1 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-background/95 backdrop-blur-xl border-border z-50">
-                    <DropdownMenuItem onClick={() => navigate("/webinars")}>Webinars</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/events")}>Upcoming Events</DropdownMenuItem>
+                  <DropdownMenuContent className="bg-gradient-to-br from-card/98 to-card/95 backdrop-blur-xl border-accent/30 shadow-premium z-50 min-w-[240px] p-2">
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/webinars")}
+                      className="banking-text cursor-pointer rounded-lg px-4 py-3 hover:bg-primary/10 hover:text-accent transition-all duration-300 focus:bg-primary/10 focus:text-accent"
+                    >
+                      TFW Past Webinars
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate("/events")}
+                      className="banking-text cursor-pointer rounded-lg px-4 py-3 hover:bg-primary/10 hover:text-accent transition-all duration-300 focus:bg-primary/10 focus:text-accent"
+                    >
+                      Upcoming Webinars/Events
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -200,14 +223,14 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           onClick={() => navigate("/webinars")}
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
-                          Webinars
+                          TFW Past Webinars
                         </Button>
                         <Button
                           variant="ghost"
                           onClick={() => navigate("/events")}
                           className="justify-start w-full banking-text text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20 pl-6"
                         >
-                          Upcoming Events
+                          Upcoming Webinars/Events
                         </Button>
                       </div>
                       <div className="border-t border-[#C9A961]/20 pt-4">

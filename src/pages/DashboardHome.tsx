@@ -166,29 +166,7 @@ const DashboardHome = () => {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-10">
-            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.1s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-accent/5 rounded-full blur-2xl"></div>
-              
-              <div className="relative z-10">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary via-primary-hover to-accent rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700 shadow-elegant group-hover:shadow-accent">
-                  <Users className="h-12 w-12 text-primary-foreground" />
-                </div>
-                <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
-                <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
-                  Expert Network
-                </h3>
-                <p className="text-muted-foreground leading-relaxed text-base mb-6">
-                  Connect with leading professionals in trade finance and banking. Build meaningful relationships that drive your career forward.
-                </p>
-                <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <span className="text-sm font-semibold">Explore Network</span>
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
-                </div>
-              </div>
-            </div>
+          <div className="grid md:grid-cols-2 gap-10">
             
             <div 
               onClick={() => navigate('/articles')}

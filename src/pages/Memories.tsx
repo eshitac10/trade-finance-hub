@@ -8,9 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit2, Folder, FolderPlus, Image as ImageIcon, Video } from "lucide-react";
+import { Plus, Trash2, Edit2, Folder, FolderPlus, Image as ImageIcon, Video, MoveHorizontal } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
+import memoriesPattern from "@/assets/memories-pattern-bg.jpg";
+import memoriesHero from "@/assets/memories-hero.jpg";
 
 interface Memory {
   id: string;
@@ -48,6 +50,9 @@ const Memories = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadCaption, setUploadCaption] = useState("");
   const [selectedUploadFolder, setSelectedUploadFolder] = useState<string | null>(null);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [targetFolder, setTargetFolder] = useState<string | null>(null);
+  const [editFolderId, setEditFolderId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -93,8 +98,6 @@ const Memories = () => {
 
       if (selectedFolder) {
         query = query.eq('folder_id', selectedFolder);
-      } else if (selectedFolder === null) {
-        query = query.is('folder_id', null);
       }
 
       const { data, error } = await query;
@@ -233,6 +236,7 @@ const Memories = () => {
   const handleEdit = (memory: Memory) => {
     setSelectedMemory(memory);
     setNewCaption(memory.caption || "");
+    setEditFolderId(memory.folder_id);
     setEditDialogOpen(true);
   };
 
@@ -242,14 +246,17 @@ const Memories = () => {
     try {
       const { error } = await supabase
         .from('memories')
-        .update({ caption: newCaption })
+        .update({ 
+          caption: newCaption,
+          folder_id: editFolderId
+        })
         .eq('id', selectedMemory.id);
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Caption updated successfully",
+        description: "Memory updated successfully",
       });
 
       setEditDialogOpen(false);
@@ -257,7 +264,40 @@ const Memories = () => {
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update caption",
+        description: error.message || "Failed to update memory",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveMemory = (memory: Memory) => {
+    setSelectedMemory(memory);
+    setTargetFolder(memory.folder_id);
+    setMoveDialogOpen(true);
+  };
+
+  const handleMoveConfirm = async () => {
+    if (!selectedMemory) return;
+
+    try {
+      const { error } = await supabase
+        .from('memories')
+        .update({ folder_id: targetFolder })
+        .eq('id', selectedMemory.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Memory moved successfully",
+      });
+
+      setMoveDialogOpen(false);
+      fetchMemories();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to move memory",
         variant: "destructive",
       });
     }
@@ -331,10 +371,22 @@ const Memories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Background Graphics */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <img src={memoriesPattern} alt="" className="w-full h-full object-cover" />
+      </div>
+      
+      <div className="absolute top-0 left-0 w-full h-96 opacity-10 pointer-events-none">
+        <img src={memoriesHero} alt="" className="w-full h-full object-cover mix-blend-overlay" />
+      </div>
+      
+      <div className="absolute top-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float-delayed"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <h1 className="professional-heading text-5xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Memories
@@ -527,6 +579,14 @@ const Memories = () => {
                       </Button>
                       <Button
                         size="sm"
+                        variant="secondary"
+                        onClick={() => handleMoveMemory(memory)}
+                        className="bg-background/90 backdrop-blur-sm"
+                      >
+                        <MoveHorizontal className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         onClick={() => handleDeleteConfirm(memory)}
                         className="bg-destructive/90 backdrop-blur-sm"
@@ -550,20 +610,70 @@ const Memories = () => {
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
             <DialogHeader>
-              <DialogTitle className="professional-heading text-2xl">Edit Caption</DialogTitle>
+              <DialogTitle className="professional-heading text-2xl">Edit Memory</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <Input
-                value={newCaption}
-                onChange={(e) => setNewCaption(e.target.value)}
-                placeholder="Enter caption..."
-                className="border-border/60"
-              />
+              <div>
+                <Label className="banking-text text-sm font-medium mb-2 block">Caption</Label>
+                <Input
+                  value={newCaption}
+                  onChange={(e) => setNewCaption(e.target.value)}
+                  placeholder="Enter caption..."
+                  className="border-border/60"
+                />
+              </div>
+              <div>
+                <Label className="banking-text text-sm font-medium mb-2 block">Move to Folder</Label>
+                <select
+                  value={editFolderId || ""}
+                  onChange={(e) => setEditFolderId(e.target.value || null)}
+                  className="w-full px-3 py-2 border border-border/60 rounded-lg bg-background"
+                >
+                  <option value="">No Folder</option>
+                  {folders.map((folder) => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <Button
                 onClick={handleUpdateCaption}
                 className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
               >
-                Update Caption
+                Update Memory
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Move Dialog */}
+        <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+            <DialogHeader>
+              <DialogTitle className="professional-heading text-2xl">Move to Folder</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="banking-text text-sm font-medium mb-2 block">Select Folder</Label>
+                <select
+                  value={targetFolder || ""}
+                  onChange={(e) => setTargetFolder(e.target.value || null)}
+                  className="w-full px-3 py-2 border border-border/60 rounded-lg bg-background"
+                >
+                  <option value="">No Folder</option>
+                  {folders.map((folder) => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button
+                onClick={handleMoveConfirm}
+                className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+              >
+                Move Memory
               </Button>
             </div>
           </DialogContent>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+import loginGraphic from "@/assets/login-graphic.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -129,6 +130,11 @@ const Index = () => {
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-accent/10"></div>
       
+      {/* Login graphic overlay */}
+      <div className="absolute inset-0 opacity-20">
+        <img src={loginGraphic} alt="" className="w-full h-full object-cover mix-blend-overlay" />
+      </div>
+      
       {/* Animated decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float opacity-40" />
@@ -143,12 +149,12 @@ const Index = () => {
            style={{ backgroundImage: 'linear-gradient(rgba(201, 169, 97, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(201, 169, 97, 0.1) 1px, transparent 1px)', backgroundSize: '50px 50px' }}>
       </div>
 
-      <div className="relative w-full max-w-6xl animate-fade-in">
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
+      <div className="relative w-full max-w-7xl animate-fade-in">
+        <div className="grid lg:grid-cols-[1.2fr,1fr] gap-8 items-start">
           {/* Left Column - About TFW */}
           <div className="space-y-6 animate-slide-up">
             <div className="text-center lg:text-left">
-              <h1 className="helvetica-bold text-4xl sm:text-5xl md:text-6xl text-primary mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide">
+              <h1 className="helvetica-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide whitespace-nowrap">
                 Trade Finance World
               </h1>
               <div className="h-1 w-32 bg-gradient-to-r from-primary via-accent to-gold rounded-full mb-6 mx-auto lg:mx-0 shadow-gold"></div>
