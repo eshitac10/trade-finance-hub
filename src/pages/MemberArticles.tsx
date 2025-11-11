@@ -229,8 +229,23 @@ const MemberArticles = () => {
     return title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const openArticle = (articleId: string) => {
-    navigate(`/article/${articleId}`);
+  const openArticle = async (article: Article) => {
+    if (article.source === 'google_drive') {
+      const googleArticle = article as GoogleDriveArticle;
+      if (googleArticle.web_view_link) {
+        window.open(googleArticle.web_view_link, '_blank');
+      }
+    } else {
+      const userArticle = article as UserArticle;
+      // Get the file from storage
+      const { data } = supabase.storage
+        .from('articles')
+        .getPublicUrl(userArticle.file_path);
+      
+      if (data.publicUrl) {
+        window.open(data.publicUrl, '_blank');
+      }
+    }
   };
 
   return (
@@ -422,7 +437,7 @@ const MemberArticles = () => {
                 >
                   <div 
                     className="cursor-pointer"
-                    onClick={() => openArticle(article.id)}
+                    onClick={() => openArticle(article)}
                   >
                     <div className="relative h-48 bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 overflow-hidden">
                       {thumbnail ? (

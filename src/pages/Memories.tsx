@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Upload, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Trash2, Edit2, Folder, FolderPlus, Image as ImageIcon, Video } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
 
 interface Memory {
   id: string;
@@ -16,40 +18,86 @@ interface Memory {
   image_url: string;
   caption: string | null;
   created_at: string;
+  folder_id: string | null;
+  file_type: string;
+}
+
+interface MemoryFolder {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
 }
 
 const Memories = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [memories, setMemories] = useState<Memory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [folders, setFolders] = useState<MemoryFolder[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  const [editCaption, setEditCaption] = useState('');
-  const [userId, setUserId] = useState<string | null>(null);
+  const [newCaption, setNewCaption] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadCaption, setUploadCaption] = useState("");
+  const [selectedUploadFolder, setSelectedUploadFolder] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
-    fetchMemories();
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (currentUserId) {
+      fetchFolders();
+      fetchMemories();
+    }
+  }, [currentUserId, selectedFolder]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      navigate('/auth');
+      navigate("/");
       return;
     }
-    setUserId(session.user.id);
+    setCurrentUserId(session.user.id);
+  };
+
+  const fetchFolders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('memory_folders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setFolders(data || []);
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
   };
 
   const fetchMemories = async () => {
     try {
-      const { data, error } = await supabase
+      setIsLoading(true);
+      let query = supabase
         .from('memories')
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (selectedFolder) {
+        query = query.eq('folder_id', selectedFolder);
+      } else if (selectedFolder === null) {
+        query = query.is('folder_id', null);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setMemories(data || []);
@@ -61,31 +109,87 @@ const Memories = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !userId) return;
-
-    if (!file.type.startsWith('image/')) {
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
       toast({
-        title: "Invalid file",
-        description: "Please upload an image file",
+        title: "Error",
+        description: "Please enter a folder name",
         variant: "destructive",
       });
       return;
     }
 
-    setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase
+        .from('memory_folders')
+        .insert({
+          name: newFolderName,
+          user_id: currentUserId
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Folder created successfully",
+      });
+
+      setNewFolderName("");
+      setNewFolderDialogOpen(false);
+      fetchFolders();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create folder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      toast({
+        title: "Error",
+        description: "Please select a file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    if (selectedFile.size > maxSize) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 500MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const isVideo = selectedFile.type.startsWith('video/');
+    const isImage = selectedFile.type.startsWith('image/');
+
+    if (!isVideo && !isImage) {
+      toast({
+        title: "Error",
+        description: "Please select an image or video file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${currentUserId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('memories')
-        .upload(fileName, file);
+        .upload(fileName, selectedFile);
 
       if (uploadError) throw uploadError;
 
@@ -93,38 +197,42 @@ const Memories = () => {
         .from('memories')
         .getPublicUrl(fileName);
 
-      const { error: dbError } = await supabase
+      const { error: insertError } = await supabase
         .from('memories')
         .insert({
-          user_id: userId,
+          user_id: currentUserId,
           image_url: publicUrl,
-          caption: null,
+          caption: uploadCaption || null,
+          folder_id: selectedUploadFolder,
+          file_type: isVideo ? 'video' : 'image'
         });
 
-      if (dbError) throw dbError;
+      if (insertError) throw insertError;
 
       toast({
-        title: "Success",
-        description: "Memory uploaded successfully",
+        title: "Success!",
+        description: `${isVideo ? 'Video' : 'Image'} uploaded successfully`,
       });
 
+      setSelectedFile(null);
+      setUploadCaption("");
+      setSelectedUploadFolder(null);
+      setIsUploadDialogOpen(false);
       fetchMemories();
-    } catch (error) {
-      console.error('Error uploading memory:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to upload memory",
+        description: error.message || "Failed to upload file",
         variant: "destructive",
       });
     } finally {
-      setUploading(false);
-      e.target.value = '';
+      setIsUploading(false);
     }
   };
 
   const handleEdit = (memory: Memory) => {
     setSelectedMemory(memory);
-    setEditCaption(memory.caption || '');
+    setNewCaption(memory.caption || "");
     setEditDialogOpen(true);
   };
 
@@ -134,23 +242,22 @@ const Memories = () => {
     try {
       const { error } = await supabase
         .from('memories')
-        .update({ caption: editCaption })
+        .update({ caption: newCaption })
         .eq('id', selectedMemory.id);
 
       if (error) throw error;
 
       toast({
-        title: "Success",
+        title: "Success!",
         description: "Caption updated successfully",
       });
 
       setEditDialogOpen(false);
       fetchMemories();
-    } catch (error) {
-      console.error('Error updating caption:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update caption",
+        description: error.message || "Failed to update caption",
         variant: "destructive",
       });
     }
@@ -165,31 +272,59 @@ const Memories = () => {
     if (!selectedMemory) return;
 
     try {
-      const fileName = selectedMemory.image_url.split('/').slice(-2).join('/');
+      const urlPath = selectedMemory.image_url.split('/memories/')[1];
       
-      await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('memories')
-        .remove([fileName]);
+        .remove([urlPath]);
 
-      const { error } = await supabase
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
         .from('memories')
         .delete()
         .eq('id', selectedMemory.id);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
 
       toast({
-        title: "Success",
+        title: "Success!",
         description: "Memory deleted successfully",
       });
 
       setDeleteDialogOpen(false);
       fetchMemories();
-    } catch (error) {
-      console.error('Error deleting memory:', error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to delete memory",
+        description: error.message || "Failed to delete memory",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      const { error } = await supabase
+        .from('memory_folders')
+        .delete()
+        .eq('id', folderId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Folder deleted successfully",
+      });
+
+      if (selectedFolder === folderId) {
+        setSelectedFolder(null);
+      }
+      fetchFolders();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete folder",
         variant: "destructive",
       });
     }
@@ -199,127 +334,262 @@ const Memories = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-primary">Memories</h1>
-          
-          <div className="relative">
-            <input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileUpload}
-              disabled={uploading}
-            />
-            <label htmlFor="file-upload">
-              <Button
-                disabled={uploading}
-                className="cursor-pointer"
-                asChild
-              >
-                <span>
-                  <Upload className="mr-2 h-4 w-4" />
-                  {uploading ? 'Uploading...' : 'Upload Memory'}
-                </span>
-              </Button>
-            </label>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            Memories
+          </h1>
+          <div className="flex gap-2">
+            <Dialog open={newFolderDialogOpen} onOpenChange={setNewFolderDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-accent to-primary hover:shadow-lg text-accent-foreground font-bold">
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                  New Folder
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+                <DialogHeader>
+                  <DialogTitle className="professional-heading text-2xl">Create New Folder</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="banking-text text-sm font-medium mb-2 block">Folder Name</Label>
+                    <Input
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      placeholder="Enter folder name..."
+                      className="border-border/60"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleCreateFolder}
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+                  >
+                    Create Folder
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+                <DialogHeader>
+                  <DialogTitle className="professional-heading text-2xl">Upload Memory</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label className="banking-text text-sm font-medium mb-2 block">Select Folder (Optional)</Label>
+                    <select
+                      value={selectedUploadFolder || ""}
+                      onChange={(e) => setSelectedUploadFolder(e.target.value || null)}
+                      className="w-full px-3 py-2 border border-border/60 rounded-lg bg-background"
+                    >
+                      <option value="">No Folder</option>
+                      {folders.map((folder) => (
+                        <option key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="banking-text text-sm font-medium mb-2 block">File (Image or Video)</Label>
+                    <div className="border-2 border-dashed border-border/60 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                      <input
+                        type="file"
+                        id="memory-upload"
+                        className="hidden"
+                        accept="image/*,video/*"
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      />
+                      <label htmlFor="memory-upload" className="cursor-pointer">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                          <Video className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                        <p className="banking-text text-sm text-foreground mb-1">
+                          {selectedFile ? selectedFile.name : "Click to upload image or video"}
+                        </p>
+                        <p className="banking-text text-xs text-muted-foreground">
+                          Max 500MB
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="banking-text text-sm font-medium mb-2 block">Caption (Optional)</Label>
+                    <Input
+                      value={uploadCaption}
+                      onChange={(e) => setUploadCaption(e.target.value)}
+                      placeholder="Add a caption..."
+                      className="border-border/60"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleFileUpload}
+                    disabled={isUploading}
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+                  >
+                    {isUploading ? "Uploading..." : "Upload"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
-        {loading ? (
+        {/* Folder Navigation */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          <Button
+            variant={selectedFolder === null ? "default" : "outline"}
+            onClick={() => setSelectedFolder(null)}
+            className="flex items-center gap-2"
+          >
+            <Folder className="h-4 w-4" />
+            All Memories
+          </Button>
+          {folders.map((folder) => (
+            <div key={folder.id} className="flex items-center gap-1">
+              <Button
+                variant={selectedFolder === folder.id ? "default" : "outline"}
+                onClick={() => setSelectedFolder(folder.id)}
+                className="flex items-center gap-2"
+              >
+                <Folder className="h-4 w-4" />
+                {folder.name}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteFolder(folder.id)}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <div className="aspect-square bg-muted animate-pulse" />
-              </Card>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-lg" />
             ))}
           </div>
         ) : memories.length === 0 ? (
-          <div className="text-center py-20">
-            <ImageIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-semibold text-muted-foreground mb-2">No memories yet</h2>
-            <p className="text-muted-foreground">Upload your first memory to get started</p>
-          </div>
+          <Card className="bg-card/50 backdrop-blur-xl border-border/60 text-center py-16">
+            <CardContent>
+              <div className="h-20 w-20 rounded-full bg-muted/50 mx-auto mb-4 flex items-center justify-center">
+                <ImageIcon className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h3 className="professional-heading text-xl font-semibold mb-2">No Memories Yet</h3>
+              <p className="banking-text text-muted-foreground">
+                Upload your first photo or video to get started
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {memories.map((memory) => (
-              <Card key={memory.id} className="overflow-hidden group">
-                <CardContent className="p-0 relative">
-                  <img
-                    src={memory.image_url}
-                    alt={memory.caption || 'Memory'}
-                    className="w-full aspect-square object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-                    {memory.user_id === userId && (
-                      <>
-                        <Button
-                          size="icon"
-                          variant="secondary"
-                          onClick={() => handleEdit(memory)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          onClick={() => handleDeleteConfirm(memory)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                  {memory.caption && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-4">
-                      <p className="text-sm">{memory.caption}</p>
+              <Card
+                key={memory.id}
+                className="bg-card dark:bg-card backdrop-blur-xl border-border/60 overflow-hidden hover:shadow-premium transition-all duration-300 group"
+              >
+                <div className="relative">
+                  {memory.file_type === 'video' ? (
+                    <video
+                      src={memory.image_url}
+                      controls
+                      className="w-full h-64 object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={memory.image_url}
+                      alt={memory.caption || "Memory"}
+                      className="w-full h-64 object-cover"
+                    />
+                  )}
+                  {currentUserId === memory.user_id && (
+                    <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(memory)}
+                        className="bg-background/90 backdrop-blur-sm"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteConfirm(memory)}
+                        className="bg-destructive/90 backdrop-blur-sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   )}
-                </CardContent>
+                </div>
+                {memory.caption && (
+                  <CardContent className="p-4">
+                    <p className="banking-text text-sm text-muted-foreground">{memory.caption}</p>
+                  </CardContent>
+                )}
               </Card>
             ))}
           </div>
         )}
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+            <DialogHeader>
+              <DialogTitle className="professional-heading text-2xl">Edit Caption</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                value={newCaption}
+                onChange={(e) => setNewCaption(e.target.value)}
+                placeholder="Enter caption..."
+                className="border-border/60"
+              />
+              <Button
+                onClick={handleUpdateCaption}
+                className="w-full bg-gradient-to-r from-primary to-accent hover:shadow-lg text-primary-foreground font-bold"
+              >
+                Update Caption
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="professional-heading text-2xl">Delete Memory</AlertDialogTitle>
+              <AlertDialogDescription className="banking-text">
+                Are you sure you want to delete this memory? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Caption</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="Add a caption..."
-              value={editCaption}
-              onChange={(e) => setEditCaption(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateCaption}>
-              Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this memory.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

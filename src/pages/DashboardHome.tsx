@@ -190,7 +190,11 @@ const DashboardHome = () => {
               </div>
             </div>
             
-            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.2s' }}>
+            <div 
+              onClick={() => navigate('/articles')}
+              className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
+              style={{ animationDelay: '0.2s' }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-accent/10 to-primary/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl"></div>
@@ -213,7 +217,11 @@ const DashboardHome = () => {
               </div>
             </div>
             
-            <div className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm" style={{ animationDelay: '0.3s' }}>
+            <div 
+              onClick={() => navigate('/events')}
+              className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
+              style={{ animationDelay: '0.3s' }}
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               <div className="absolute -top-20 -right-20 w-56 h-56 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-3xl group-hover:scale-150 group-hover:rotate-45 transition-all duration-1000"></div>
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-accent/5 rounded-full blur-2xl"></div>
@@ -232,52 +240,6 @@ const DashboardHome = () => {
                 <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <span className="text-sm font-semibold">Discover Events</span>
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Additional Benefits with Premium Card Design */}
-        <section className="py-24 bg-gradient-to-br from-secondary/60 via-secondary/40 to-secondary/60 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 rounded-3xl relative overflow-hidden">
-          {/* Enhanced Background Graphics */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary to-accent rounded-full blur-3xl animate-float"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-accent to-primary rounded-full blur-3xl animate-float-delayed"></div>
-          </div>
-          <div className="absolute inset-0 opacity-5">
-            <img src={tradePatternBg} alt="" className="w-full h-full object-cover" />
-          </div>
-          
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid md:grid-cols-3 gap-10">
-              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
-                  <TrendingUp className="h-10 w-10 text-primary-foreground" />
-                </div>
-                <div>
-                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Industry Insights</h4>
-                  <p className="text-muted-foreground text-base leading-relaxed">Access real-time market analysis and expert commentary on emerging trends</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
-                <div className="w-20 h-20 bg-gradient-to-br from-accent to-primary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
-                  <Shield className="h-10 w-10 text-accent-foreground" />
-                </div>
-                <div>
-                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Trusted Community</h4>
-                  <p className="text-muted-foreground text-base leading-relaxed">Join a vetted network of verified professionals and institutions</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-5 p-8 rounded-2xl bg-background/60 backdrop-blur-md border border-border/60 hover:border-primary/50 hover:shadow-elegant transition-all duration-500 hover:-translate-y-3 hover:bg-background/80 group">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-professional group-hover:shadow-accent">
-                  <Award className="h-10 w-10 text-primary-foreground" />
-                </div>
-                <div>
-                  <h4 className="professional-heading text-xl text-primary mb-3 group-hover:text-accent transition-colors">Professional Development</h4>
-                  <p className="text-muted-foreground text-base leading-relaxed">Elevate your expertise with certifications and specialized training programs</p>
                 </div>
               </div>
             </div>

@@ -242,7 +242,7 @@ const Webinars = () => {
           <div className="flex items-center justify-between max-w-7xl mx-auto mb-6">
             <div className="flex-1">
               <h1 className="professional-heading text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                TFW Webinars
+                TFW Past Webinars
               </h1>
               <p className="banking-text text-xl sm:text-2xl text-muted-foreground max-w-3xl flex items-center justify-center gap-2 mx-auto">
                 <Sparkles className="h-5 w-5 text-accent" />

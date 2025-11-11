@@ -290,7 +290,7 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                     <CalendarDays className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                   </div>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    TFW Events Calendar
+                    Upcoming Webinars/Events
                   </h1>
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground ml-0 sm:ml-16 flex items-center gap-2">
@@ -513,7 +513,7 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
           <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <div className="h-1 w-12 bg-gradient-to-r from-primary to-accent rounded-full"></div>
-              All Upcoming Events
+              All Upcoming Webinars/Events
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {events
