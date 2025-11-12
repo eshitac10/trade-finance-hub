@@ -55,6 +55,8 @@ const MemberArticles = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGeneratingThumbnail, setIsGeneratingThumbnail] = useState(false);
+  const [generatedThumbnail, setGeneratedThumbnail] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -108,6 +110,42 @@ const MemberArticles = () => {
     }
   };
 
+  const handleGenerateThumbnail = async () => {
+    if (!newArticleTitle.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a title first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingThumbnail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-article-thumbnail', {
+        body: { title: newArticleTitle }
+      });
+
+      if (error) throw error;
+
+      if (data?.thumbnail) {
+        setGeneratedThumbnail(data.thumbnail);
+        toast({
+          title: "Success!",
+          description: "AI thumbnail generated successfully",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate thumbnail",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingThumbnail(false);
+    }
+  };
+
   const handleUploadArticle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newArticleTitle.trim() || !selectedFile) {
@@ -124,11 +162,40 @@ const MemberArticles = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      let thumbnailToUse = generatedThumbnail;
+
+      // If we have a generated thumbnail, upload it to storage
+      if (generatedThumbnail) {
+        try {
+          // Convert base64 to blob
+          const base64Response = await fetch(generatedThumbnail);
+          const blob = await base64Response.blob();
+          
+          const thumbnailFileName = `${user.id}/thumbnails/${Date.now()}.png`;
+          const { error: thumbError } = await supabase.storage
+            .from('articles')
+            .upload(thumbnailFileName, blob, {
+              contentType: 'image/png',
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (!thumbError) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('articles')
+              .getPublicUrl(thumbnailFileName);
+            thumbnailToUse = publicUrl;
+          }
+        } catch (thumbErr) {
+          console.error('Error uploading thumbnail:', thumbErr);
+        }
+      }
+
       // Upload file to storage
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
-      const { error: uploadError, data: uploadData } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('articles')
         .upload(fileName, selectedFile, {
           cacheControl: '3600',
@@ -153,7 +220,7 @@ const MemberArticles = () => {
           file_name: selectedFile.name,
           file_size: selectedFile.size,
           mime_type: selectedFile.type,
-          thumbnail_url: publicUrl
+          thumbnail_url: thumbnailToUse || publicUrl
         });
 
       if (insertError) throw insertError;
@@ -166,6 +233,7 @@ const MemberArticles = () => {
       setNewArticleTitle("");
       setNewArticleDescription("");
       setSelectedFile(null);
+      setGeneratedThumbnail(null);
       setIsDialogOpen(false);
       fetchArticles();
     } catch (error: any) {
@@ -285,6 +353,30 @@ const MemberArticles = () => {
                       className="border-border/60"
                       required
                     />
+                  </div>
+                  
+                  <div>
+                    <Label className="banking-text text-sm font-medium mb-2 block">AI Thumbnail (Optional)</Label>
+                    <div className="space-y-3">
+                      <Button
+                        type="button"
+                        onClick={handleGenerateThumbnail}
+                        disabled={isGeneratingThumbnail || !newArticleTitle.trim()}
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:shadow-lg"
+                      >
+                        {isGeneratingThumbnail ? "Generating..." : "Generate AI Thumbnail"}
+                      </Button>
+                      {generatedThumbnail && (
+                        <div className="border-2 border-green-500/50 rounded-lg p-3 bg-green-500/5">
+                          <img 
+                            src={generatedThumbnail} 
+                            alt="Generated thumbnail" 
+                            className="w-full h-32 object-cover rounded"
+                          />
+                          <p className="text-xs text-green-600 mt-2 text-center">✓ Thumbnail will be used for this article</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <Label className="banking-text text-sm font-medium mb-2 block">Description (Optional)</Label>

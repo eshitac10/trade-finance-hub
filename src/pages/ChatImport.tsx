@@ -49,6 +49,16 @@ interface WhatsAppMessage {
   author: string;
   text: string;
   attachments: string[];
+  year?: number;
+  month?: number;
+  week?: number;
+}
+
+interface MessageGroup {
+  year: number;
+  month: number;
+  label: string;
+  count: number;
 }
 
 interface ExpandedMessages {

@@ -2,3 +2,9 @@ project_id = "obstbgbmdbfouuoyjusi"
 
 [functions.parse-whatsapp]
 verify_jwt = true
+
+[functions.generate-article-thumbnail]
+verify_jwt = true
+
+[functions.fetch-google-drive]
+verify_jwt = false
