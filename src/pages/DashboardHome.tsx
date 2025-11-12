@@ -169,7 +169,7 @@ const DashboardHome = () => {
           <div className="grid md:grid-cols-2 gap-10">
             
             <div 
-              onClick={() => navigate('/articles')}
+              onClick={() => navigate('/webinars')}
               className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
               style={{ animationDelay: '0.2s' }}
             >
@@ -183,13 +183,13 @@ const DashboardHome = () => {
                 </div>
                 <div className="h-1 w-16 bg-gradient-to-r from-accent to-primary rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
                 <h3 className="professional-heading text-2xl text-primary mb-5 group-hover:text-accent transition-colors duration-500">
-                  Educational Resources
+                  Past Webinars
                 </h3>
                 <p className="text-muted-foreground leading-relaxed text-base mb-6">
-                  Access exclusive articles, webinars, and industry insights. Stay ahead with cutting-edge knowledge and best practices.
+                  Watch recordings of our exclusive webinars and expert discussions. Learn from industry leaders and gain valuable insights.
                 </p>
                 <div className="flex items-center text-accent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <span className="text-sm font-semibold">View Resources</span>
+                  <span className="text-sm font-semibold">Browse Webinars</span>
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-2 transition-transform" />
                 </div>
               </div>

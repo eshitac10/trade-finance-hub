@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Signup from "./pages/Signup";
 import DashboardHome from "./pages/DashboardHome";
 import MemberArticles from "./pages/MemberArticles";
+import ArticlesGoogleDrive from "./pages/ArticlesGoogleDrive";
 import ArticleDetail from "./pages/ArticleDetail";
 import TopicDetail from "./pages/TopicDetail";
 import Webinars from "./pages/Webinars";
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<DashboardHome />} />
-          <Route path="/articles" element={<MemberArticles />} />
+          <Route path="/articles" element={<ArticlesGoogleDrive />} />
           <Route path="/article/:id" element={<ArticleDetail />} />
           <Route path="/forum/topic/:topicId" element={<TopicDetail />} />
           <Route path="/webinars" element={<Webinars />} />

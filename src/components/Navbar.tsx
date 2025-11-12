@@ -185,13 +185,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       >
                         Home
                       </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate("/articles")}
-                        className="justify-start banking-text font-bold text-[#C9A961] hover:text-white hover:bg-[#C9A961]/20"
-                      >
-                        Articles
-                      </Button>
                       <div className="space-y-2">
                         <p className="text-[#C9A961] text-xs px-3 font-bold">Resources</p>
                         <Button

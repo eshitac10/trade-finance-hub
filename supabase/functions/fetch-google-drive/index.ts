@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const GOOGLE_DRIVE_FOLDER_ID = "14Ii-JQoy5k8NPSvLRowCjaOEBpcp6UWP";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -24,10 +22,14 @@ serve(async (req) => {
       );
     }
 
+    // Get folder ID from request body, with fallback to default memories folder
+    const body = await req.json().catch(() => ({}));
+    const folderId = body.folderId || "14Ii-JQoy5k8NPSvLRowCjaOEBpcp6UWP";
+
     // Fetch all items from Google Drive folder (including subfolders)
     const url =
       `https://www.googleapis.com/drive/v3/files` +
-      `?q='${GOOGLE_DRIVE_FOLDER_ID}'+in+parents` +
+      `?q='${folderId}'+in+parents` +
       `&fields=files(id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,createdTime,modifiedTime)` +
       `&key=${apiKey}`;
 
