@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, summaryType = 'medium', systemPrompt } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -22,6 +22,15 @@ serve(async (req) => {
     const conversationText = messages
       .map((msg: any) => `[${msg.author}]: ${msg.text}`)
       .join('\n');
+
+    // Use custom system prompt if provided, otherwise use default
+    const defaultPrompts = {
+      short: "You are a professional summarizer for trade finance discussions. Create a very brief 1-2 line summary highlighting the main topic and key outcome.",
+      medium: "You are a professional summarizer for trade finance discussions. Create a 3-5 bullet point summary covering key topics, decisions, and action items. Include main participants where relevant.",
+      long: "You are a professional summarizer for trade finance discussions. Create a detailed 150-250 word summary. Include: main topics discussed, key decisions made, action items identified, important participants, relevant dates, and any concerns or follow-ups. Structure it clearly with paragraphs."
+    };
+
+    const systemContent = systemPrompt || defaultPrompts[summaryType as keyof typeof defaultPrompts] || defaultPrompts.medium;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -34,7 +43,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a professional summarizer for trade finance discussions. Create concise, insightful summaries that capture key topics, decisions, and important points. Keep summaries under 200 words and highlight main themes."
+            content: systemContent
           },
           {
             role: "user",

@@ -86,6 +86,18 @@ const ChatImport = () => {
   const [showStats, setShowStats] = useState(false);
   const [summary, setSummary] = useState<string>("");
   const [loadingSummary, setLoadingSummary] = useState(false);
+  
+  // New state for enhanced features
+  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
+  const [groupBy, setGroupBy] = useState<'none' | 'year' | 'month' | 'week'>('none');
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+  const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
+  const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [sortBy, setSortBy] = useState<'date' | 'relevance'>('date');
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -139,17 +151,23 @@ const ChatImport = () => {
     }
   };
 
-  const fetchMessages = async (eventId: string) => {
-    setMessages([]); // Clear previous messages
-    setSummary(""); // Clear previous summary
+  const fetchMessages = async (eventId: string, page = 0, pageSize = 100) => {
+    if (page === 0) {
+      setMessages([]); // Clear only on first page
+      setSummary(""); // Clear previous summary
+    }
     
-    console.log('Fetching messages for event:', eventId);
+    console.log('Fetching messages for event:', eventId, 'page:', page);
+    
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
     
     const { data, error, count } = await supabase
       .from('whatsapp_messages')
       .select('*', { count: 'exact' })
       .eq('event_id', eventId)
-      .order('datetime_iso', { ascending: true });
+      .order('datetime_iso', { ascending: false }) // Newest first
+      .range(from, to);
 
     if (error) {
       console.error('Error fetching messages:', error);
@@ -160,23 +178,33 @@ const ChatImport = () => {
       });
     } else {
       console.log('Fetched messages:', data?.length, 'Total count:', count);
-      setMessages(data || []);
       
-      if (data && data.length === 0 && count && count > 0) {
-        toast({
-          title: "No Messages Displayed",
-          description: `${count} messages found but filtering may be active`,
-          variant: "destructive"
-        });
+      // Add year, month, week to each message
+      const enrichedMessages = (data || []).map(msg => {
+        const date = new Date(msg.datetime_iso);
+        return {
+          ...msg,
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+          week: Math.ceil(date.getDate() / 7)
+        };
+      });
+      
+      if (page === 0) {
+        setMessages(enrichedMessages);
+      } else {
+        setMessages(prev => [...prev, ...enrichedMessages]);
       }
     }
   };
 
-  const generateSummary = async () => {
-    if (!messages.length) {
+  const generateSummary = async (length: 'short' | 'medium' | 'long' = summaryLength, messageSubset?: WhatsAppMessage[]) => {
+    const msgsToSummarize = messageSubset || filteredMessages;
+    
+    if (!msgsToSummarize.length) {
       toast({
         title: "No Messages",
-        description: "Please select a conversation first",
+        description: "Please select a conversation or date range first",
         variant: "destructive",
       });
       return;
@@ -184,13 +212,23 @@ const ChatImport = () => {
 
     setLoadingSummary(true);
     try {
-      // For large conversations, only summarize first 1000 messages to avoid timeout
-      const messagesToSummarize = messages.slice(0, 1000);
+      // Limit to 1000 messages to avoid timeout
+      const messagesToSummarize = msgsToSummarize.slice(0, 1000);
       
-      console.log(`Summarizing ${messagesToSummarize.length} of ${messages.length} messages`);
+      console.log(`Generating ${length} summary for ${messagesToSummarize.length} of ${msgsToSummarize.length} messages`);
+      
+      const systemPrompts = {
+        short: "Create a very brief 1-2 line summary highlighting the main topic and key outcome.",
+        medium: "Create a 3-5 bullet point summary covering key topics, decisions, and action items. Include main participants.",
+        long: "Create a detailed 150-250 word summary. Include: main topics discussed, key decisions made, action items identified, important participants, relevant dates, and any concerns or follow-ups. Structure it clearly."
+      };
       
       const { data, error } = await supabase.functions.invoke('summarize-conversation', {
-        body: { messages: messagesToSummarize }
+        body: { 
+          messages: messagesToSummarize,
+          summaryType: length,
+          systemPrompt: systemPrompts[length]
+        }
       });
 
       if (error) throw error;
@@ -198,9 +236,9 @@ const ChatImport = () => {
       setSummary(data.summary);
       toast({
         title: "Summary Generated",
-        description: messages.length > 1000 
-          ? `Summary created from first 1000 of ${messages.length} messages`
-          : "AI summary has been created successfully",
+        description: msgsToSummarize.length > 1000 
+          ? `${length.charAt(0).toUpperCase() + length.slice(1)} summary from first 1000 of ${msgsToSummarize.length} messages`
+          : `${length.charAt(0).toUpperCase() + length.slice(1)} summary generated successfully`,
       });
     } catch (error: any) {
       console.error('Summary error:', error);
@@ -397,13 +435,76 @@ const ChatImport = () => {
     });
   };
 
-  const filteredMessages = messages.filter(m => {
+  // Apply filters
+  const getFilteredMessagesByDate = () => {
+    const now = new Date();
+    let filtered = messages;
+    
+    switch (dateFilter) {
+      case 'today':
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        filtered = messages.filter(m => new Date(m.datetime_iso) >= today);
+        break;
+      case 'week':
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        filtered = messages.filter(m => new Date(m.datetime_iso) >= weekAgo);
+        break;
+      case 'month':
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        filtered = messages.filter(m => new Date(m.datetime_iso) >= monthAgo);
+        break;
+      case 'custom':
+        if (customDateRange.start && customDateRange.end) {
+          const start = new Date(customDateRange.start);
+          const end = new Date(customDateRange.end);
+          filtered = messages.filter(m => {
+            const msgDate = new Date(m.datetime_iso);
+            return msgDate >= start && msgDate <= end;
+          });
+        }
+        break;
+    }
+    
+    return filtered;
+  };
+
+  const filteredMessages = getFilteredMessagesByDate().filter(m => {
     const matchesSearch = searchTerm === '' || 
       m.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesAuthor = filterAuthor === 'all' || m.author === filterAuthor;
     return matchesSearch && matchesAuthor;
   });
+  
+  // Group messages by time period
+  const getGroupedMessages = () => {
+    if (groupBy === 'none') return null;
+    
+    const groups: Record<string, WhatsAppMessage[]> = {};
+    
+    filteredMessages.forEach(msg => {
+      let key = '';
+      const date = new Date(msg.datetime_iso);
+      
+      switch (groupBy) {
+        case 'year':
+          key = date.getFullYear().toString();
+          break;
+        case 'month':
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          break;
+        case 'week':
+          const weekNum = Math.ceil(date.getDate() / 7);
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-W${weekNum}`;
+          break;
+      }
+      
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(msg);
+    });
+    
+    return groups;
+  };
 
   const uniqueAuthors = [...new Set(messages.map(m => m.author))];
 
@@ -757,14 +858,26 @@ const ChatImport = () => {
                     <Sparkles className="h-5 w-5 text-gold" />
                     AI Smart Summary
                   </CardTitle>
-                  <Button
-                    onClick={generateSummary}
-                    disabled={loadingSummary || messages.length === 0}
-                    className="bg-gradient-to-r from-primary via-accent to-gold hover:shadow-gold/50"
-                    size="sm"
-                  >
-                    {loadingSummary ? "Generating..." : "Generate Summary"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Select value={summaryLength} onValueChange={(v: 'short' | 'medium' | 'long') => setSummaryLength(v)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="short">Short</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="long">Long</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      onClick={() => generateSummary()}
+                      disabled={loadingSummary || messages.length === 0}
+                      className="bg-gradient-to-r from-primary via-accent to-gold hover:shadow-gold/50"
+                      size="sm"
+                    >
+                      {loadingSummary ? "Generating..." : "Generate Summary"}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -859,99 +972,349 @@ const ChatImport = () => {
                 </div>
               )}
               
-              <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    placeholder="Search messages..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-12 bg-background/50 border-2 focus:border-primary"
-                  />
+              {/* Advanced Filters */}
+              <div className="space-y-4 mt-6 p-6 bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl border border-border/50">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search messages..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-12 h-12 bg-background/50 border-2 focus:border-primary"
+                    />
+                  </div>
+                  <Select value={filterAuthor} onValueChange={setFilterAuthor}>
+                    <SelectTrigger className="w-full sm:w-[240px] h-12 border-2">
+                      <SelectValue placeholder="Filter by author" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All authors</SelectItem>
+                      {uniqueAuthors.map((author) => (
+                        <SelectItem key={author} value={author}>{author}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={filterAuthor} onValueChange={setFilterAuthor}>
-                  <SelectTrigger className="w-full sm:w-[240px] h-12 border-2">
-                    <SelectValue placeholder="Filter by author" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All authors</SelectItem>
-                    {uniqueAuthors.map((author) => (
-                      <SelectItem key={author} value={author}>{author}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                
+                {/* Date Filter & Grouping */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Select value={dateFilter} onValueChange={(v: any) => setDateFilter(v)}>
+                    <SelectTrigger className="w-full sm:w-[200px] h-11 border-2">
+                      <SelectValue placeholder="Date range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">Last 7 days</SelectItem>
+                      <SelectItem value="month">Last 30 days</SelectItem>
+                      <SelectItem value="custom">Custom range</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={groupBy} onValueChange={(v: any) => setGroupBy(v)}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-11 border-2">
+                      <SelectValue placeholder="Group by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No grouping</SelectItem>
+                      <SelectItem value="year">By Year</SelectItem>
+                      <SelectItem value="month">By Month</SelectItem>
+                      <SelectItem value="week">By Week</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-11 border-2">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date">Date (Newest)</SelectItem>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Custom Date Range */}
+                {dateFilter === 'custom' && (
+                  <div className="flex gap-3 animate-fade-in">
+                    <div className="flex-1">
+                      <Label className="text-xs mb-1 block">Start Date</Label>
+                      <Input
+                        type="date"
+                        value={customDateRange.start}
+                        onChange={(e) => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
+                        className="h-11"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-xs mb-1 block">End Date</Label>
+                      <Input
+                        type="date"
+                        value={customDateRange.end}
+                        onChange={(e) => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
+                        className="h-11"
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Filter Summary */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {searchTerm && (
+                      <Badge variant="secondary" className="font-mono">
+                        Search: {searchTerm}
+                      </Badge>
+                    )}
+                    {filterAuthor !== 'all' && (
+                      <Badge variant="secondary">
+                        Author: {filterAuthor}
+                      </Badge>
+                    )}
+                    {dateFilter !== 'all' && (
+                      <Badge variant="secondary">
+                        {dateFilter === 'custom' ? `${customDateRange.start} to ${customDateRange.end}` : dateFilter}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setFilterAuthor('all');
+                      setDateFilter('all');
+                      setCustomDateRange({ start: '', end: '' });
+                      setGroupBy('none');
+                    }}
+                    className="text-xs"
+                  >
+                    Clear all filters
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="relative">
-              <ScrollArea className="h-[500px] pr-4">{filteredMessages.length > 0 ? (
-                  filteredMessages.map((msg, idx) => {
-                    const isLongMessage = msg.text.length > 200;
-                    const isExpanded = expandedMessages[msg.id];
-                    const displayText = isLongMessage && !isExpanded 
-                      ? msg.text.substring(0, 200) + '...' 
-                      : msg.text;
-
-                    return (
-                      <div 
-                        key={msg.id} 
-                        className="mb-4 p-5 bg-gradient-to-br from-card/80 to-card/50 backdrop-blur-sm hover:from-primary/5 hover:to-accent/5 rounded-xl border-2 border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-elegant animate-fade-in"
-                        style={{ animationDelay: `${idx * 0.02}s` }}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-elegant">
-                              <Users className="h-5 w-5 text-primary-foreground" />
-                            </div>
-                            <div>
-                              <span className="font-semibold text-base">{msg.author}</span>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                <Clock className="h-3.5 w-3.5" />
-                                {new Date(msg.datetime_iso).toLocaleString()}
+              <ScrollArea className="h-[600px] pr-4">
+                {filteredMessages.length > 0 ? (
+                  <>
+                    {/* Grouped View */}
+                    {groupBy !== 'none' && (() => {
+                      const grouped = getGroupedMessages();
+                      if (!grouped) return null;
+                      
+                      return Object.entries(grouped).sort((a, b) => b[0].localeCompare(a[0])).map(([key, msgs]) => {
+                        const isExpanded = expandedGroups[key] ?? true;
+                        const groupDate = new Date(msgs[0].datetime_iso);
+                        let groupLabel = '';
+                        
+                        switch (groupBy) {
+                          case 'year':
+                            groupLabel = groupDate.getFullYear().toString();
+                            break;
+                          case 'month':
+                            groupLabel = groupDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                            break;
+                          case 'week':
+                            groupLabel = `Week ${Math.ceil(groupDate.getDate() / 7)} - ${groupDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`;
+                            break;
+                        }
+                        
+                        return (
+                          <div key={key} className="mb-6 animate-fade-in">
+                            <div 
+                              className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl border-2 border-primary/20 cursor-pointer hover:border-primary/40 transition-all mb-3"
+                              onClick={() => setExpandedGroups(prev => ({ ...prev, [key]: !isExpanded }))}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Calendar className="h-5 w-5 text-primary" />
+                                <h3 className="font-bold text-lg">{groupLabel}</h3>
+                                <Badge variant="secondary" className="ml-2">
+                                  {msgs.length} messages
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    generateSummary(summaryLength, msgs);
+                                  }}
+                                  className="h-8 text-xs"
+                                >
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  Summarize
+                                </Button>
+                                <ChevronRight className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                               </div>
                             </div>
+                            
+                            {isExpanded && (
+                              <div className="space-y-3 ml-4 pl-4 border-l-2 border-primary/20">
+                                {msgs.map((msg, idx) => {
+                                  const isLongMessage = msg.text.length > 200;
+                                  const isMsgExpanded = expandedMessages[msg.id];
+                                  const displayText = isLongMessage && !isMsgExpanded 
+                                    ? msg.text.substring(0, 200) + '...' 
+                                    : msg.text;
+
+                                  return (
+                                    <div 
+                                      key={msg.id} 
+                                      className="p-4 bg-gradient-to-br from-card/80 to-card/50 backdrop-blur-sm hover:from-primary/5 hover:to-accent/5 rounded-xl border border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-elegant"
+                                    >
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center shadow-sm">
+                                            <Users className="h-4 w-4 text-primary-foreground" />
+                                          </div>
+                                          <div>
+                                            <span className="font-semibold text-sm">{msg.author}</span>
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                              <Clock className="h-3 w-3" />
+                                              {new Date(msg.datetime_iso).toLocaleString()}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="opacity-0 group-hover:opacity-100 transition-all h-7 w-7 p-0 hover:bg-primary/10"
+                                          onClick={() => copyMessage(msg.text)}
+                                        >
+                                          <Copy className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      
+                                      <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground/90">
+                                        {displayText}
+                                      </p>
+                                      
+                                      {isLongMessage && (
+                                        <Button
+                                          variant="link"
+                                          size="sm"
+                                          className="h-auto p-0 text-xs font-semibold hover:text-primary mt-2"
+                                          onClick={() => toggleMessageExpansion(msg.id)}
+                                        >
+                                          {isMsgExpanded ? '← Show less' : 'Show more →'}
+                                        </Button>
+                                      )}
+                                      
+                                      {msg.attachments?.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                          {msg.attachments.map((att, i) => (
+                                            <Badge key={i} variant="outline" className="gap-1 text-xs">
+                                              <FileText className="h-2.5 w-2.5" />
+                                              {att}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="opacity-0 group-hover:opacity-100 transition-all h-9 w-9 p-0 hover:bg-primary/10 hover:scale-110"
-                            onClick={() => copyMessage(msg.text)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
+                        );
+                      });
+                    })()}
+                    
+                    {/* List View (no grouping) */}
+                    {groupBy === 'none' && filteredMessages.map((msg, idx) => {
+                      const isLongMessage = msg.text.length > 200;
+                      const isExpanded = expandedMessages[msg.id];
+                      const displayText = isLongMessage && !isExpanded 
+                        ? msg.text.substring(0, 200) + '...' 
+                        : msg.text;
+
+                      return (
+                        <div 
+                          key={msg.id} 
+                          className="mb-4 p-5 bg-gradient-to-br from-card/80 to-card/50 backdrop-blur-sm hover:from-primary/5 hover:to-accent/5 rounded-xl border-2 border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-elegant animate-fade-in"
+                          style={{ animationDelay: `${idx * 0.02}s` }}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-elegant">
+                                <Users className="h-5 w-5 text-primary-foreground" />
+                              </div>
+                              <div>
+                                <span className="font-semibold text-base">{msg.author}</span>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {new Date(msg.datetime_iso).toLocaleString()}
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="opacity-0 group-hover:opacity-100 transition-all h-9 w-9 p-0 hover:bg-primary/10 hover:scale-110"
+                              onClick={() => copyMessage(msg.text)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <p className="text-sm whitespace-pre-wrap leading-relaxed mb-3 text-foreground/90">
+                            {displayText}
+                          </p>
+                          
+                          {isLongMessage && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-xs font-semibold hover:text-primary"
+                              onClick={() => toggleMessageExpansion(msg.id)}
+                            >
+                              {isExpanded ? '← Show less' : 'Show more →'}
+                            </Button>
+                          )}
+                          
+                          {msg.attachments?.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {msg.attachments.map((att, i) => (
+                                <Badge key={i} variant="outline" className="gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  {att}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        
-                        <p className="text-sm whitespace-pre-wrap leading-relaxed mb-3 text-foreground/90">
-                          {displayText}
-                        </p>
-                        
-                        {isLongMessage && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="h-auto p-0 text-xs font-semibold hover:text-primary"
-                            onClick={() => toggleMessageExpansion(msg.id)}
-                          >
-                            {isExpanded ? '← Show less' : 'Show more →'}
-                          </Button>
-                        )}
-                        
-                        {msg.attachments.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {msg.attachments.map((att, i) => (
-                              <Badge key={i} variant="outline" className="gap-1">
-                                <FileText className="h-3 w-3" />
-                                {att}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                      );
+                    })}
+                    
+                    {/* Empty State for filters */}
+                    {filteredMessages.length === 0 && messages.length > 0 && (
+                      <div className="text-center text-muted-foreground py-12">
+                        <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p className="text-lg font-semibold mb-2">No messages match your filters</p>
+                        <p className="text-sm">Try adjusting your search or date range</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => {
+                            setSearchTerm('');
+                            setFilterAuthor('all');
+                            setDateFilter('all');
+                          }}
+                        >
+                          Clear all filters
+                        </Button>
                       </div>
-                    );
-                  })
+                    )}
+                  </>
                 ) : (
                   <div className="text-center text-muted-foreground py-12">
-                    <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No messages match your filters</p>
+                    <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-lg font-semibold mb-2">No messages found</p>
+                    <p className="text-sm">This event doesn't have any messages yet</p>
                   </div>
                 )}
               </ScrollArea>
