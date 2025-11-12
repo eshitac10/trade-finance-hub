@@ -170,7 +170,7 @@ const LatestArticles = () => {
         <div className="text-center animate-fade-up" style={{ animationDelay: '0.6s' }}>
           <Button
             size="lg"
-            onClick={() => navigate('/member-articles')}
+            onClick={() => navigate('/articles')}
             className="bg-gradient-to-r from-primary to-accent hover:shadow-premium text-primary-foreground font-semibold px-10 py-6 text-lg rounded-xl transition-all duration-500 hover:-translate-y-1 hover:scale-105 group"
           >
             View All Articles
