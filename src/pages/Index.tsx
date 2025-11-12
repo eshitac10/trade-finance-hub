@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import loginGraphic from "@/assets/login-graphic.jpg";
 
 const Index = () => {
@@ -20,11 +20,6 @@ const Index = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Signup state
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupFullName, setSignupFullName] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
@@ -42,6 +37,11 @@ const Index = () => {
     setLoading(true);
 
     try {
+      // Hardcoded admin credentials check
+      if (loginEmail !== "admin@tfworld.com" || loginPassword !== "admin123") {
+        throw new Error("Invalid credentials");
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
@@ -66,64 +66,6 @@ const Index = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (signupPassword !== confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (signupPassword.length < 6) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: signupEmail,
-        password: signupPassword,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: signupFullName,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Account Created!",
-        description: "Your account has been created successfully. You can now log in.",
-      });
-
-      // Switch to login tab
-      setLoginEmail(signupEmail);
-      setSignupEmail("");
-      setSignupPassword("");
-      setSignupFullName("");
-      setConfirmPassword("");
-    } catch (error: any) {
-      toast({
-        title: "Signup Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const scrollToLogin = () => {
     const loginSection = document.getElementById('login-section');
@@ -233,19 +175,11 @@ const Index = () => {
             <CardHeader className="space-y-4 sm:space-y-6">
               <CardTitle className="helvetica-bold text-2xl sm:text-3xl text-center bg-gradient-to-r from-primary via-accent to-gold bg-clip-text text-transparent">Welcome</CardTitle>
               <CardDescription className="banking-text text-center text-sm sm:text-base">
-                Login or create an account to get started
+                Login to access Trade Finance World
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-
-                {/* Login Tab */}
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email" className="banking-text font-semibold">
                         Email
@@ -307,112 +241,6 @@ const Index = () => {
                       )}
                     </Button>
                   </form>
-                </TabsContent>
-
-                {/* Signup Tab */}
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="banking-text font-semibold">
-                        Full Name
-                      </Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="signup-name"
-                          type="text"
-                          placeholder="John Doe"
-                          value={signupFullName}
-                          onChange={(e) => setSignupFullName(e.target.value)}
-                          className="pl-10 border-2 border-border/60 rounded-xl hover:border-primary/50 transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="banking-text font-semibold">
-                        Email
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          placeholder="your.email@example.com"
-                          value={signupEmail}
-                          onChange={(e) => setSignupEmail(e.target.value)}
-                          className="pl-10 border-2 border-border/60 rounded-xl hover:border-primary/50 transition-all"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="banking-text font-semibold">
-                        Password
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="signup-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
-                          className="pl-10 pr-10 border-2 border-border/60 rounded-xl hover:border-primary/50 transition-all"
-                          required
-                          minLength={6}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="banking-text font-semibold">
-                        Confirm Password
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="confirm-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="pl-10 border-2 border-border/60 rounded-xl hover:border-primary/50 transition-all"
-                          required
-                          minLength={6}
-                        />
-                      </div>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-gradient-to-r from-primary via-accent to-primary hover:shadow-elegant hover:shadow-gold/50 text-primary-foreground helvetica-bold py-6 rounded-xl transition-all duration-300 hover:scale-[1.02] btn-premium"
-                    >
-                      {loading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2" />
-                          Creating account...
-                        </>
-                      ) : (
-                        <>
-                          Create Account
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
             </CardContent>
           </Card>
         </div>
