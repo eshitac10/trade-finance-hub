@@ -238,162 +238,248 @@ serve(async (req) => {
       });
     }
 
-    // Read file content
-    let content = await file.text();
-    
-// Parse messages
-const lines = content.split('\n');
-const messages: ParsedMessage[] = [];
-let currentMessage: ParsedMessage | null = null;
-let parseErrors = 0;
-const failedLines: string[] = [];
+    // Stream-parse file content to avoid loading into memory and CPU spikes
+    const reader = file.stream().getReader();
+    const decoder = new TextDecoder();
 
-lines.forEach((line, index) => {
-  const trimmedLine = line.trim();
-  if (!trimmedLine) return;
-  
-  const parsed = parseWhatsAppLine(trimmedLine, index);
-  
-  if (parsed) {
-    if (currentMessage) {
-      messages.push(currentMessage);
-    }
-    currentMessage = parsed;
-  } else if (currentMessage) {
-    // Multi-line message continuation
-    currentMessage.text += '\n' + trimmedLine;
-    currentMessage.rawLine += '\n' + trimmedLine;
-  } else {
-    // Only count as error if it's not a system message or blank
-    if (trimmedLine && !trimmedLine.startsWith('‎')) {
-      parseErrors++;
-      if (failedLines.length < 10) {
-        failedLines.push(`Line ${index}: ${trimmedLine.substring(0, 100)}`);
-      }
-    }
-  }
-});
-
-if (currentMessage) {
-  messages.push(currentMessage);
-}
-
-console.log(`Parse results: ${messages.length} messages, ${parseErrors} errors`);
-if (failedLines.length > 0) {
-  console.log('Failed lines:', failedLines);
-}
-    
-// Check parse success rate (only count lines we attempted to parse)
-const attempted = messages.length + parseErrors;
-const parseSuccessRate = attempted > 0 ? messages.length / attempted : 1;
-console.log(`Parse success rate: ${parseSuccessRate} (${messages.length}/${attempted})`);
-
-if (parseSuccessRate < 0.85) {
-  return new Response(JSON.stringify({ 
-    error: "Low parse success rate. Please verify date format.",
-    parseSuccessRate,
-    sample: lines.slice(0, 20),
-    failedLines
-  }), {
-    status: 400,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-    
-    // Create import record
+    // Create import record early (processing state)
     const { data: importRecord, error: importError } = await supabase
       .from('whatsapp_imports')
       .insert({
         user_id: user.id,
         filename: file.name,
         file_size: file.size,
-        status: 'completed',
-        total_messages: messages.length,
+        status: 'processing',
+        total_messages: 0,
         timezone,
         date_format: 'auto-detected'
       })
       .select()
       .single();
-    
+
     if (importError) throw importError;
-    
-    // Detect events
-    const detectedEvents = detectEvents(messages);
-    
-    // Insert events
-    const eventsToInsert = detectedEvents.map(event => ({
-      import_id: importRecord.id,
-      user_id: user.id,
-      title: event.title,
-      start_datetime: event.startDatetime,
-      end_datetime: event.endDatetime,
-      message_count: event.messageCount,
-      keywords: event.keywords,
-      confidence_score: event.confidenceScore,
-      tags: []
-    }));
-    
-    const { data: insertedEvents, error: eventsError } = await supabase
-      .from('whatsapp_events')
-      .insert(eventsToInsert)
-      .select();
-    
-    if (eventsError) throw eventsError;
-    
-    // Assign messages to events
-    const messagesWithEvents = messages.map(msg => {
-      const msgTime = new Date(msg.datetimeISO).getTime();
-      const assignedEvent = insertedEvents?.find(event => {
-        const start = new Date(event.start_datetime).getTime();
-        const end = new Date(event.end_datetime).getTime();
-        return msgTime >= start && msgTime <= end;
-      });
-      
-      return {
+
+    let buffer = '';
+    let lineNumber = 0;
+
+    let currentMessage: ParsedMessage | null = null;
+    let parseErrors = 0;
+    const failedLines: string[] = [];
+
+    // Batch insert to reduce memory/CPU usage
+    const batchSize = 300;
+    const messageBatch: Array<{
+      import_id: string;
+      event_id: string | null;
+      message_id: string;
+      datetime_iso: string;
+      author: string;
+      text: string;
+      attachments: string[];
+      raw_line: string;
+    }> = [];
+
+    let insertedCount = 0;
+
+    async function insertBatch() {
+      if (messageBatch.length === 0) return;
+      const batch = messageBatch.splice(0, messageBatch.length);
+      const { error: batchError } = await supabase
+        .from('whatsapp_messages')
+        .insert(batch);
+      if (batchError) {
+        console.error('Batch insert error:', batchError);
+        // continue; partial errors do not fail the entire import
+      } else {
+        insertedCount += batch.length;
+        // Yield to event loop to avoid CPU spikes
+        await new Promise((r) => setTimeout(r, 0));
+      }
+    }
+
+    // Streaming-friendly event detection (message bursts)
+    type BurstMsg = { datetimeISO: string; text: string };
+    type EventRange = { startDatetime: string; endDatetime: string; messageCount: number; keywords: string[] };
+
+    let currentBurst: BurstMsg[] = [];
+    const detectedEventRanges: EventRange[] = [];
+
+    function finalizeBurstIfNeeded() {
+      if (currentBurst.length >= 5) {
+        const allText = currentBurst.map(m => m.text.toLowerCase()).join(' ');
+        let foundKeywords: string[] = [];
+        for (const [, keywords] of Object.entries(EVENT_KEYWORDS)) {
+          for (const keyword of keywords) {
+            if (allText.includes(keyword)) { foundKeywords.push(keyword); break; }
+          }
+          if (foundKeywords.length) break;
+        }
+        detectedEventRanges.push({
+          startDatetime: currentBurst[0].datetimeISO,
+          endDatetime: currentBurst[currentBurst.length - 1].datetimeISO,
+          messageCount: currentBurst.length,
+          keywords: [...new Set(foundKeywords)]
+        });
+      }
+      currentBurst = [];
+    }
+
+    function handleFinalizedMessage(msg: ParsedMessage) {
+      // Build row and push to batch
+      messageBatch.push({
         import_id: importRecord.id,
-        event_id: assignedEvent?.id || null,
+        event_id: null, // will be assigned after events are inserted
         message_id: msg.messageId,
         datetime_iso: msg.datetimeISO,
         author: msg.author,
         text: msg.text,
         attachments: msg.attachments,
-        raw_line: msg.rawLine
-      };
-    });
-    
-    // Insert messages in batches synchronously to ensure all messages are saved
-    const batchSize = 1000;
-    console.log(`Inserting ${messagesWithEvents.length} messages in batches of ${batchSize}`);
-    
-    const totalBatches = Math.ceil(messagesWithEvents.length / batchSize);
-    let insertedCount = 0;
-    
-    for (let i = 0; i < messagesWithEvents.length; i += batchSize) {
-      const batch = messagesWithEvents.slice(i, i + batchSize);
-      const batchNum = Math.floor(i / batchSize) + 1;
-      
-      console.log(`Inserting batch ${batchNum}/${totalBatches} (${batch.length} messages)`);
-      
-      const { error: batchError } = await supabase
-        .from('whatsapp_messages')
-        .insert(batch);
-      
-      if (batchError) {
-        console.error(`Batch ${batchNum} insert error:`, batchError);
-        // Continue with next batch even if one fails
+        raw_line: msg.rawLine,
+      });
+
+      // Update burst
+      const last = currentBurst[currentBurst.length - 1];
+      if (!last) {
+        currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
       } else {
-        insertedCount += batch.length;
-        console.log(`Batch ${batchNum}/${totalBatches} completed - ${insertedCount}/${messagesWithEvents.length} messages inserted`);
+        const timeDiff = new Date(msg.datetimeISO).getTime() - new Date(last.datetimeISO).getTime();
+        if (timeDiff <= 10 * 60 * 1000) {
+          currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
+        } else {
+          finalizeBurstIfNeeded();
+          currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
+        }
       }
     }
-    
-    console.log(`Message insertion completed: ${insertedCount}/${messagesWithEvents.length} messages inserted`);
-    
+
+    // Stream read loop
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split(/\r?\n/);
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) { lineNumber++; continue; }
+        const parsed = parseWhatsAppLine(trimmedLine, lineNumber);
+        if (parsed) {
+          if (currentMessage) {
+            handleFinalizedMessage(currentMessage);
+            if (messageBatch.length >= batchSize) {
+              await insertBatch();
+            }
+          }
+          currentMessage = parsed;
+        } else if (currentMessage) {
+          // Multi-line continuation
+          currentMessage.text += '\n' + trimmedLine;
+          currentMessage.rawLine += '\n' + trimmedLine;
+        } else {
+          // Count as error if not a system/blank
+          parseErrors++;
+          if (failedLines.length < 10) {
+            failedLines.push(`Line ${lineNumber}: ${trimmedLine.substring(0, 100)}`);
+          }
+        }
+        lineNumber++;
+      }
+    }
+
+    // Flush remainder buffer
+    if (buffer.length) {
+      const trimmedLine = buffer.trim();
+      if (trimmedLine) {
+        const parsed = parseWhatsAppLine(trimmedLine, lineNumber);
+        if (parsed) {
+          if (currentMessage) handleFinalizedMessage(currentMessage);
+          currentMessage = parsed;
+        } else if (currentMessage) {
+          currentMessage.text += '\n' + trimmedLine;
+          currentMessage.rawLine += '\n' + trimmedLine;
+        } else {
+          parseErrors++;
+          if (failedLines.length < 10) failedLines.push(`Line ${lineNumber}: ${trimmedLine.substring(0, 100)}`);
+        }
+      }
+    }
+
+    // Flush last message
+    if (currentMessage) handleFinalizedMessage(currentMessage);
+
+    // Finish burst detection and insert last batch
+    finalizeBurstIfNeeded();
+    await insertBatch();
+
+    const attempted = insertedCount + parseErrors; // approximate attempt count
+    const parseSuccessRate = attempted > 0 ? insertedCount / attempted : 1;
+    console.log(`Stream parse inserted: ${insertedCount} messages, errors: ${parseErrors}`);
+    if (failedLines.length > 0) console.log('Failed lines:', failedLines);
+
+    // Insert events based on detected ranges
+    const eventsToInsert = detectedEventRanges.map((range) => {
+      // Determine title type from keywords
+      let detectedType = 'Conversation';
+      for (const [eventType, keywords] of Object.entries(EVENT_KEYWORDS)) {
+        if (keywords.some(k => range.keywords.includes(k))) {
+          detectedType = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+          break;
+        }
+      }
+      return {
+        import_id: importRecord.id,
+        user_id: user.id,
+        title: `${detectedType} - ${new Date(range.startDatetime).toLocaleDateString()}`,
+        start_datetime: range.startDatetime,
+        end_datetime: range.endDatetime,
+        message_count: range.messageCount,
+        keywords: range.keywords,
+        confidence_score: range.keywords.length ? 0.8 : 0.5,
+        tags: [] as string[],
+      };
+    });
+
+    let insertedEvents: any[] = [];
+    if (eventsToInsert.length) {
+      const { data: evts, error: eventsError } = await supabase
+        .from('whatsapp_events')
+        .insert(eventsToInsert)
+        .select();
+      if (eventsError) {
+        console.error('Events insert error:', eventsError);
+      } else {
+        insertedEvents = evts ?? [];
+      }
+    }
+
+    // Assign messages to events using range updates to avoid re-reading all messages
+    for (let i = 0; i < insertedEvents.length; i++) {
+      const evt = insertedEvents[i];
+      const range = detectedEventRanges[i];
+      const { error: updateErr } = await supabase
+        .from('whatsapp_messages')
+        .update({ event_id: evt.id })
+        .eq('import_id', importRecord.id)
+        .gte('datetime_iso', range.startDatetime)
+        .lte('datetime_iso', range.endDatetime);
+      if (updateErr) console.error('Event assignment error:', updateErr);
+      // Yield
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    // Finalize import record
+    const { error: updateImportErr } = await supabase
+      .from('whatsapp_imports')
+      .update({ status: 'completed', total_messages: insertedCount })
+      .eq('id', importRecord.id);
+    if (updateImportErr) console.error('Import update error:', updateImportErr);
+
     return new Response(JSON.stringify({
       success: true,
       importId: importRecord.id,
-      totalMessages: messages.length,
-      eventsDetected: detectedEvents.length,
+      totalMessages: insertedCount,
+      eventsDetected: insertedEvents.length,
       parseSuccessRate
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
