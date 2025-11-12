@@ -355,6 +355,34 @@ const ChatImport = () => {
     fetchMessages(eventId);
   };
 
+  const handleDeleteImport = async (importId: string) => {
+    if (!confirm("Delete this failed import? You can then re-upload the file with the fixed parser.")) return;
+    
+    const { error } = await supabase
+      .from('whatsapp_imports')
+      .delete()
+      .eq('id', importId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete import",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Import deleted. Re-upload your file to process it with the fixed parser."
+      });
+      if (selectedImport === importId) {
+        setSelectedImport(null);
+        setSelectedEvent(null);
+        setMessages([]);
+      }
+      fetchImports();
+    }
+  };
+
   const handleDeleteEvent = async (eventId: string) => {
     const { error } = await supabase
       .from('whatsapp_events')
@@ -681,11 +709,20 @@ const ChatImport = () => {
                       className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group ${
                         selectedImport === imp.id 
                           ? 'border-primary bg-primary/5 shadow-accent' 
+                          : imp.total_messages === 0
+                          ? 'border-destructive/50 bg-destructive/5'
                           : 'border-border hover:border-primary/50'
                       }`}
                       onClick={() => handleSelectImport(imp.id)}
                     >
-                      <div className="font-semibold mb-1 pr-8 break-words">{imp.filename}</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="font-semibold pr-8 break-words flex-1">{imp.filename}</div>
+                        {imp.total_messages === 0 && (
+                          <Badge variant="destructive" className="text-xs shrink-0">
+                            Failed
+                          </Badge>
+                        )}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {imp.total_messages} messages
                       </div>
@@ -696,33 +733,11 @@ const ChatImport = () => {
                         size="sm"
                         variant="ghost"
                         className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.stopPropagation();
-                          const { error } = await supabase
-                            .from('whatsapp_imports')
-                            .delete()
-                            .eq('id', imp.id);
-                          
-                          if (error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to delete import",
-                              variant: "destructive"
-                            });
-                          } else {
-                            toast({
-                              title: "Deleted",
-                              description: "Import deleted successfully",
-                            });
-                            fetchImports();
-                            if (selectedImport === imp.id) {
-                              setSelectedImport(null);
-                              setEvents([]);
-                              setSelectedEvent(null);
-                              setMessages([]);
-                            }
-                          }
+                          handleDeleteImport(imp.id);
                         }}
+                        title={imp.total_messages === 0 ? "Delete failed import & re-upload" : "Delete import"}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
