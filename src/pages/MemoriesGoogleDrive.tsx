@@ -3,8 +3,9 @@ import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Image as ImageIcon, Video, ExternalLink } from "lucide-react";
+import { Loader2, Image as ImageIcon, Video, FileText, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface DriveFile {
   id: string;
@@ -23,6 +24,11 @@ const MemoriesGoogleDrive = () => {
 
   useEffect(() => {
     fetchDriveFiles();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchDriveFiles, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDriveFiles = async () => {
@@ -49,12 +55,26 @@ const MemoriesGoogleDrive = () => {
 
   const isImage = (mimeType: string) => mimeType.startsWith('image/');
   const isVideo = (mimeType: string) => mimeType.startsWith('video/');
+  const isDocument = (mimeType: string) => 
+    mimeType.includes('pdf') || 
+    mimeType.includes('document') || 
+    mimeType.includes('word') || 
+    mimeType.includes('text') ||
+    mimeType.includes('sheet') ||
+    mimeType.includes('presentation');
 
   const getThumbnail = (file: DriveFile) => {
     if (file.thumbnailLink) {
       return file.thumbnailLink.replace('=s220', '=s800');
     }
     return null;
+  };
+
+  const openFile = (file: DriveFile) => {
+    const url = file.webViewLink || file.webContentLink;
+    if (url) {
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -65,15 +85,27 @@ const MemoriesGoogleDrive = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6 sm:mb-8 animate-fade-in">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent helvetica-bold">
                   Memories
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground mt-2">
-                  Connected to Google Drive Folder
+                  Connected to Google Drive Folder • Auto-refreshes every 30 seconds
                 </p>
               </div>
+              <Button 
+                onClick={fetchDriveFiles}
+                disabled={loading}
+                variant="outline"
+                className="border-primary/20 hover:bg-primary/5"
+              >
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Refreshing...</>
+                ) : (
+                  'Refresh Now'
+                )}
+              </Button>
             </div>
             
             <div className="h-1 w-24 bg-gradient-to-r from-primary via-accent to-gold rounded-full shadow-gold"></div>
@@ -92,50 +124,68 @@ const MemoriesGoogleDrive = () => {
               {files.map((file, index) => (
                 <Card 
                   key={file.id}
-                  className="group relative overflow-hidden border-border/50 shadow-lg bg-card/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  className="group relative overflow-hidden border-border/50 shadow-lg bg-card/80 backdrop-blur-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                   style={{ animationDelay: `${index * 0.05}s` }}
                   onClick={() => {
                     if (isImage(file.mimeType)) {
                       const thumbnail = getThumbnail(file);
                       if (thumbnail) setSelectedImage(thumbnail);
-                    } else if (isVideo(file.mimeType) && file.webViewLink) {
-                      window.open(file.webViewLink, '_blank');
+                    } else {
+                      openFile(file);
                     }
                   }}
                 >
-                  <div className="aspect-square relative overflow-hidden">
+                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-background to-accent/5">
                     {isImage(file.mimeType) && getThumbnail(file) && (
                       <img
                         src={getThumbnail(file)!}
                         alt={file.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     )}
                     
                     {isVideo(file.mimeType) && (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                        <Video className="h-16 w-16 text-primary/40" />
+                      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex flex-col items-center justify-center gap-3">
+                        <div className="p-4 rounded-full bg-background/50 backdrop-blur-sm">
+                          <Video className="h-12 w-12 text-primary" />
+                        </div>
+                        <span className="text-xs text-muted-foreground font-medium">Click to play</span>
+                      </div>
+                    )}
+
+                    {isDocument(file.mimeType) && (
+                      <div className="w-full h-full bg-gradient-to-br from-accent/10 to-primary/10 flex flex-col items-center justify-center gap-3">
+                        <div className="p-4 rounded-full bg-background/50 backdrop-blur-sm">
+                          <FileText className="h-12 w-12 text-accent" />
+                        </div>
+                        <span className="text-xs text-muted-foreground font-medium px-4 text-center">Click to open</span>
                       </div>
                     )}
 
                     {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
                       <div className="p-4 w-full">
-                        <p className="text-white text-sm font-semibold truncate">{file.name}</p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <p className="text-white text-sm font-semibold truncate mb-2">{file.name}</p>
+                        <div className="flex items-center gap-2">
                           {isImage(file.mimeType) && (
-                            <span className="text-xs text-white/80 flex items-center gap-1">
+                            <span className="text-xs text-white/90 flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full backdrop-blur-sm">
                               <ImageIcon className="h-3 w-3" />
                               Image
                             </span>
                           )}
                           {isVideo(file.mimeType) && (
-                            <span className="text-xs text-white/80 flex items-center gap-1">
+                            <span className="text-xs text-white/90 flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full backdrop-blur-sm">
                               <Video className="h-3 w-3" />
                               Video
                             </span>
                           )}
-                          <ExternalLink className="h-3 w-3 text-white/60 ml-auto" />
+                          {isDocument(file.mimeType) && (
+                            <span className="text-xs text-white/90 flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                              <FileText className="h-3 w-3" />
+                              Document
+                            </span>
+                          )}
+                          <ExternalLink className="h-3 w-3 text-white/80 ml-auto" />
                         </div>
                       </div>
                     </div>
