@@ -14,6 +14,7 @@ interface DriveFile {
   thumbnailLink?: string;
   webContentLink?: string;
   webViewLink?: string;
+  coverImage?: string;
 }
 
 const MemoriesGoogleDrive = () => {
@@ -55,6 +56,7 @@ const MemoriesGoogleDrive = () => {
 
   const isImage = (mimeType: string) => mimeType.startsWith('image/');
   const isVideo = (mimeType: string) => mimeType.startsWith('video/');
+  const isFolder = (mimeType: string) => mimeType === 'application/vnd.google-apps.folder';
   const isDocument = (mimeType: string) => 
     mimeType.includes('pdf') || 
     mimeType.includes('document') || 
@@ -136,6 +138,32 @@ const MemoriesGoogleDrive = () => {
                   }}
                 >
                   <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-background to-accent/5">
+                    {isFolder(file.mimeType) && (
+                      <div className="w-full h-full relative">
+                        {file.coverImage ? (
+                          <img
+                            src={file.coverImage.replace('=s220', '=s800')}
+                            alt={file.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-gold/20 to-primary/20 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="p-5 rounded-full bg-background/50 backdrop-blur-sm inline-block mb-2">
+                                <svg className="h-16 w-16 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                              </div>
+                              <p className="text-xs text-muted-foreground font-medium">Folder</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute top-2 left-2 bg-gold/90 backdrop-blur-sm px-2 py-1 rounded-full">
+                          <span className="text-xs font-semibold text-primary-foreground">📁 Folder</span>
+                        </div>
+                      </div>
+                    )}
+                    
                     {isImage(file.mimeType) && getThumbnail(file) && (
                       <img
                         src={getThumbnail(file)!}
@@ -167,6 +195,11 @@ const MemoriesGoogleDrive = () => {
                       <div className="p-4 w-full">
                         <p className="text-white text-sm font-semibold truncate mb-2">{file.name}</p>
                         <div className="flex items-center gap-2">
+                          {isFolder(file.mimeType) && (
+                            <span className="text-xs text-white/90 flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full backdrop-blur-sm">
+                              📁 Folder
+                            </span>
+                          )}
                           {isImage(file.mimeType) && (
                             <span className="text-xs text-white/90 flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full backdrop-blur-sm">
                               <ImageIcon className="h-3 w-3" />

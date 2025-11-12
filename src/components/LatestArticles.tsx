@@ -17,15 +17,23 @@ interface Article {
   id: string;
   name: string;
   ai_thumbnail: string | null;
+  thumbnail: string | null;
   modified_time: string | null;
   mime_type: string;
 }
 
-const getArticleThumbnail = (article: Article): string | null => {
-  // Return AI thumbnail if it exists
-  if (article.ai_thumbnail) return article.ai_thumbnail;
+const getArticleThumbnail = (article: Article): string => {
+  // First priority: AI-generated thumbnail
+  if (article.ai_thumbnail) {
+    return article.ai_thumbnail;
+  }
+
+  // Second priority: Google Drive thumbnail  
+  if (article.thumbnail) {
+    return article.thumbnail;
+  }
   
-  // Otherwise, use generated images based on article name patterns
+  // Third priority: Fallback to generated images based on article name patterns
   const name = article.name.toLowerCase();
   
   if (name.includes('cargo') && (name.includes('delivery') || name.includes('bl'))) {
@@ -47,7 +55,8 @@ const getArticleThumbnail = (article: Article): string | null => {
     return generatedArticle6;
   }
   
-  return null;
+  // Default fallback - use first generated image
+  return generatedArticle1;
 };
 
 const LatestArticles = () => {
@@ -64,12 +73,17 @@ const LatestArticles = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('google_drive_articles')
-        .select('id, name, ai_thumbnail, modified_time, mime_type')
+        .select('id, name, ai_thumbnail, thumbnail_link, modified_time, mime_type')
         .order('modified_time', { ascending: false })
         .limit(6);
 
       if (error) throw error;
-      setArticles(data || []);
+      // Map thumbnail_link to thumbnail property for consistency
+      const articlesWithThumbnails = (data || []).map(article => ({
+        ...article,
+        thumbnail: article.thumbnail_link || null
+      }));
+      setArticles(articlesWithThumbnails);
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {
@@ -121,17 +135,11 @@ const LatestArticles = () => {
             >
               {/* Article Image */}
               <div className="relative h-56 bg-gradient-to-br from-primary/20 to-accent/10 overflow-hidden">
-                {getArticleThumbnail(article) ? (
-                  <img
-                    src={getArticleThumbnail(article)!}
-                    alt={article.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FileText className="h-20 w-20 text-primary/40" />
-                  </div>
-                )}
+                <img
+                  src={getArticleThumbnail(article)}
+                  alt={article.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute top-4 right-4">
                   <Badge className="bg-background/90 backdrop-blur-sm text-foreground border-border/60 shadow-soft">

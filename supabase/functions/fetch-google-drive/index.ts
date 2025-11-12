@@ -24,7 +24,7 @@ serve(async (req) => {
       );
     }
 
-    // Fetch files from Google Drive public folder
+    // Fetch all items from Google Drive folder (including subfolders)
     const url =
       `https://www.googleapis.com/drive/v3/files` +
       `?q='${GOOGLE_DRIVE_FOLDER_ID}'+in+parents` +
@@ -40,6 +40,34 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+    
+    // For folders, fetch their first image as cover
+    const itemsWithCovers = await Promise.all((data.files || []).map(async (file: any) => {
+      if (file.mimeType === 'application/vnd.google-apps.folder') {
+        try {
+          // Fetch first image from folder
+          const folderUrl =
+            `https://www.googleapis.com/drive/v3/files` +
+            `?q='${file.id}'+in+parents+and+(mimeType+contains+'image/')` +
+            `&fields=files(id,thumbnailLink)` +
+            `&pageSize=1` +
+            `&key=${apiKey}`;
+          
+          const folderResponse = await fetch(folderUrl);
+          if (folderResponse.ok) {
+            const folderData = await folderResponse.json();
+            if (folderData.files && folderData.files.length > 0) {
+              file.coverImage = folderData.files[0].thumbnailLink;
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching folder cover:', err);
+        }
+      }
+      return file;
+    }));
+
+    data.files = itemsWithCovers;
 
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
