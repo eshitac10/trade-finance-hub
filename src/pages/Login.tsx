@@ -40,6 +40,11 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      // Restrict to admin credentials only
+      if (email !== "admin@tfworld.com" || password !== "admin123") {
+        throw new Error("Invalid credentials");
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -378,17 +383,6 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="banking-text text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <button
-                  onClick={() => navigate("/signup")}
-                  className="text-[#C9A961] hover:text-[#2B0808] transition-colors font-semibold"
-                >
-                  Sign up
-                </button>
-              </p>
-            </div>
           </Card>
         </div>
       )}
