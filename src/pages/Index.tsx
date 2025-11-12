@@ -159,11 +159,21 @@ const Index = () => {
       <div className="relative w-full max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16 space-y-12 sm:space-y-16 animate-fade-in">
         {/* About Section */}
         <div className="space-y-6 sm:space-y-8 animate-slide-up">
-          <div className="text-center">
+          <div className="text-center space-y-6">
             <h1 className="helvetica-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-primary mb-4 sm:mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide whitespace-nowrap">
               Trade Finance World
             </h1>
             <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-primary via-accent to-gold rounded-full mb-6 mx-auto shadow-gold"></div>
+            
+            {/* Login Button - Before About Content */}
+            <Button 
+              onClick={scrollToLogin}
+              size="lg"
+              className="bg-gradient-to-r from-primary via-accent to-primary hover:shadow-elegant hover:shadow-gold/50 text-primary-foreground helvetica-bold px-8 py-6 rounded-xl transition-all duration-300 hover:scale-105 btn-premium text-base sm:text-lg"
+            >
+              Login to Continue
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
 
           <Card className="bg-gradient-to-br from-card/98 to-card/90 backdrop-blur-xl border-gold/30 shadow-elegant hover:shadow-premium transition-all duration-500">
@@ -215,18 +225,6 @@ const Index = () => {
               </p>
             </CardContent>
           </Card>
-
-          {/* Login Button */}
-          <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <Button 
-              onClick={scrollToLogin}
-              size="lg"
-              className="bg-gradient-to-r from-primary via-accent to-primary hover:shadow-elegant hover:shadow-gold/50 text-primary-foreground helvetica-bold px-8 py-6 rounded-xl transition-all duration-300 hover:scale-105 btn-premium text-base sm:text-lg"
-            >
-              Login to Continue
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
         </div>
 
         {/* Login Section */}
