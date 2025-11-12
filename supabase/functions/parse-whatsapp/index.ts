@@ -361,55 +361,33 @@ if (parseSuccessRate < 0.85) {
       };
     });
     
-    // For large files, insert messages in background to avoid timeout
+    // Insert messages in batches synchronously to ensure all messages are saved
     const batchSize = 1000;
     console.log(`Inserting ${messagesWithEvents.length} messages in batches of ${batchSize}`);
     
-    // Insert first batch immediately (for preview)
-    const firstBatch = messagesWithEvents.slice(0, batchSize);
-    const { error: firstBatchError } = await supabase
-      .from('whatsapp_messages')
-      .insert(firstBatch);
+    const totalBatches = Math.ceil(messagesWithEvents.length / batchSize);
+    let insertedCount = 0;
     
-    if (firstBatchError) {
-      console.error('First batch insert error:', firstBatchError);
-      throw firstBatchError;
+    for (let i = 0; i < messagesWithEvents.length; i += batchSize) {
+      const batch = messagesWithEvents.slice(i, i + batchSize);
+      const batchNum = Math.floor(i / batchSize) + 1;
+      
+      console.log(`Inserting batch ${batchNum}/${totalBatches} (${batch.length} messages)`);
+      
+      const { error: batchError } = await supabase
+        .from('whatsapp_messages')
+        .insert(batch);
+      
+      if (batchError) {
+        console.error(`Batch ${batchNum} insert error:`, batchError);
+        // Continue with next batch even if one fails
+      } else {
+        insertedCount += batch.length;
+        console.log(`Batch ${batchNum}/${totalBatches} completed - ${insertedCount}/${messagesWithEvents.length} messages inserted`);
+      }
     }
     
-    console.log(`Inserted first batch of ${firstBatch.length} messages`);
-    
-    // Insert remaining batches asynchronously
-    if (messagesWithEvents.length > batchSize) {
-      console.log(`Scheduling background insertion of remaining ${messagesWithEvents.length - batchSize} messages`);
-      
-      // Use background task for remaining batches
-      const insertRemainingBatches = async () => {
-        for (let i = batchSize; i < messagesWithEvents.length; i += batchSize) {
-          const batch = messagesWithEvents.slice(i, i + batchSize);
-          const batchNum = Math.floor(i / batchSize) + 1;
-          const totalBatches = Math.ceil(messagesWithEvents.length / batchSize);
-          
-          console.log(`Background: Inserting batch ${batchNum}/${totalBatches} (${batch.length} messages)`);
-          
-          const { error: msgError } = await supabase
-            .from('whatsapp_messages')
-            .insert(batch);
-          
-          if (msgError) {
-            console.error(`Background batch ${batchNum} insert error:`, msgError);
-            // Continue with next batch even if one fails
-          } else {
-            console.log(`Background: Batch ${batchNum}/${totalBatches} completed`);
-          }
-        }
-        console.log('Background message insertion completed');
-      };
-      
-      // Start background insertion
-      insertRemainingBatches().catch(err => {
-        console.error('Background insertion error:', err);
-      });
-    }
+    console.log(`Message insertion completed: ${insertedCount}/${messagesWithEvents.length} messages inserted`);
     
     return new Response(JSON.stringify({
       success: true,
