@@ -308,34 +308,80 @@ const ChatImport = () => {
 
       console.log('Uploading file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-whatsapp`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: formData,
+      // Use built-in invoke to handle auth and headers properly
+      const { data: result, error: invokeError } = await supabase.functions.invoke('parse-whatsapp', {
+        body: formData as any,
       });
 
-      const result = await response.json();
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Upload failed');
+      }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Upload failed');
+      // If the function responds immediately and continues processing, poll for completion
+      const importId: string | undefined = (result as any)?.importId;
+
+      // Helper: poll import status until completed (max ~60s)
+      const pollImportStatus = async (id: string) => {
+        const start = Date.now();
+        let lastStatus = 'processing';
+        while (Date.now() - start < 60000) { // 60s max
+          const { data: imp, error } = await supabase
+            .from('whatsapp_imports')
+            .select('status, total_messages')
+            .eq('id', id)
+            .single();
+          if (error) break;
+          if (imp) lastStatus = imp.status;
+          if (imp?.status === 'completed') return true;
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        console.warn('Polling timed out. Last status:', lastStatus);
+        return false;
+      };
+
+      if (importId) {
+        const done = await pollImportStatus(importId);
+        if (!done) {
+          toast({
+            title: 'Still processing',
+            description: 'We will load events as soon as processing completes.',
+          });
+        }
       }
 
       toast({
-        title: "Success!",
-        description: `Processed ${result.totalMessages} messages and detected ${result.eventsDetected} events`,
+        title: 'Upload started',
+        description: importId
+          ? `Import ${importId.slice(0, 8)}… ready. Loading events…`
+          : 'Processing complete.',
       });
 
       setFile(null);
       setShowSamplePreview(false);
-      fetchImports();
+
+      // Refresh imports list and auto-select the latest/current import
+      await fetchImports();
+      if (importId) {
+        setSelectedImport(importId);
+        // Fetch events for this import and auto-select the newest one
+        const { data: evts } = await supabase
+          .from('whatsapp_events')
+          .select('*')
+          .eq('import_id', importId)
+          .order('start_datetime', { ascending: false });
+        setEvents(evts || []);
+        if (evts && evts.length > 0) {
+          const first = evts[0];
+          setSelectedEvent(first.id);
+          await fetchMessages(first.id);
+        }
+      }
     } catch (error) {
       console.error('Upload error:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Upload failed",
-        variant: "destructive"
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Upload failed',
+        variant: 'destructive',
       });
     } finally {
       setUploading(false);
