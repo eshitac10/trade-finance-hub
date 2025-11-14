@@ -151,8 +151,10 @@ const ChatImport = () => {
         description: "Failed to load events",
         variant: "destructive"
       });
+      return [] as WhatsAppEvent[];
     } else {
       setEvents(data || []);
+      return (data || []) as WhatsAppEvent[];
     }
   };
 
@@ -200,6 +202,50 @@ const ChatImport = () => {
       } else {
         setMessages(prev => [...prev, ...enrichedMessages]);
       }
+    }
+  };
+
+  // Fallback: fetch recent messages for an import when no events are detected
+  const fetchMessagesByImport = async (importId: string, page = 0, pageSize = 100) => {
+    if (page === 0) {
+      setMessages([]);
+      setSummary("");
+    }
+
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
+      .from('whatsapp_messages')
+      .select('*', { count: 'exact' })
+      .eq('import_id', importId)
+      .order('datetime_iso', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error fetching messages by import:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load messages",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const enrichedMessages = (data || []).map(msg => {
+      const date = new Date(msg.datetime_iso);
+      return {
+        ...msg,
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        week: Math.ceil(date.getDate() / 7)
+      };
+    });
+
+    if (page === 0) {
+      setMessages(enrichedMessages);
+    } else {
+      setMessages(prev => [...prev, ...enrichedMessages]);
     }
   };
 
@@ -415,6 +461,9 @@ const ChatImport = () => {
           const first = evts[0];
           setSelectedEvent(first.id);
           await fetchMessages(first.id);
+        } else {
+          // No events detected for this import; load recent messages directly
+          await fetchMessagesByImport(importId);
         }
       }
     } catch (error) {
@@ -430,11 +479,15 @@ const ChatImport = () => {
     }
   };
 
-  const handleSelectImport = (importId: string) => {
+  const handleSelectImport = async (importId: string) => {
     setSelectedImport(importId);
     setSelectedEvent(null);
     setMessages([]);
-    fetchEvents(importId);
+    const evts = await fetchEvents(importId);
+    if (!evts || evts.length === 0) {
+      // No events detected, load messages directly by import as a fallback
+      await fetchMessagesByImport(importId);
+    }
   };
 
   const handleSelectEvent = (eventId: string) => {
