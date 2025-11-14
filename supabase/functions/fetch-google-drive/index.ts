@@ -22,9 +22,32 @@ serve(async (req) => {
       );
     }
 
-    // Get folder ID from request body, with fallback to default memories folder
+    // Get folder ID or file ID from request body
     const body = await req.json().catch(() => ({}));
     const folderId = body.folderId || "14Ii-JQoy5k8NPSvLRowCjaOEBpcp6UWP";
+    const fileId = body.fileId;
+
+    // If fileId is provided, fetch single file metadata
+    if (fileId) {
+      const fileUrl =
+        `https://www.googleapis.com/drive/v3/files/${fileId}` +
+        `?fields=id,name,mimeType,thumbnailLink,webContentLink,webViewLink,iconLink,createdTime,modifiedTime` +
+        `&key=${apiKey}`;
+      
+      const response = await fetch(fileUrl, { headers: { 'Accept': 'application/json' } });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Google Drive API error:', response.status, text);
+        throw new Error(`Google Drive API error: ${response.status} ${text}`);
+      }
+
+      const fileData = await response.json();
+      
+      return new Response(JSON.stringify({ file: fileData }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
 
     // Fetch all items from Google Drive folder (including subfolders)
     const url =
