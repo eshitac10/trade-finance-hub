@@ -31,6 +31,7 @@ const Webinars = () => {
   const [newWebinarUrl, setNewWebinarUrl] = useState("");
   const [newWebinarDescription, setNewWebinarDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gDriveVideo, setGDriveVideo] = useState<any>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -43,7 +44,23 @@ const Webinars = () => {
     
     checkAuth();
     loadWebinars();
+    fetchGDriveVideo();
   }, [navigate]);
+
+  const fetchGDriveVideo = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-google-drive', {
+        body: { fileId: '18d_fdnYzrpgf62R6ETTm6sn_5NAjWUD-' }
+      });
+
+      if (error) throw error;
+      if (data?.file) {
+        setGDriveVideo(data.file);
+      }
+    } catch (error) {
+      console.error('Error fetching Google Drive video:', error);
+    }
+  };
 
   const loadWebinars = () => {
     const defaultWebinars: Webinar[] = [
@@ -319,6 +336,41 @@ const Webinars = () => {
       {/* Webinars Grid */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Google Drive Video Section */}
+          {gDriveVideo && (
+            <div className="mb-12">
+              <h2 className="professional-heading text-3xl font-bold mb-6 text-center">Featured from Google Drive</h2>
+              <Card className="group relative overflow-hidden border-border/60 bg-card/50 backdrop-blur-sm hover:shadow-2xl hover:border-accent/50 transition-all duration-500">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="professional-heading text-xl font-semibold">{gDriveVideo.name}</h3>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(gDriveVideo.webViewLink, '_blank')}
+                      className="border-accent/50 hover:bg-accent/10"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open in Drive
+                    </Button>
+                  </div>
+                  {gDriveVideo.mimeType?.includes('video') && (
+                    <div className="aspect-video bg-muted/50 rounded-lg flex items-center justify-center">
+                      <video
+                        controls
+                        className="w-full h-full rounded-lg"
+                        src={gDriveVideo.webContentLink}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <h2 className="professional-heading text-3xl font-bold mb-8 text-center">All Webinars</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {webinars.map((webinar, index) => (
               <Card
