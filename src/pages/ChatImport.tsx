@@ -479,14 +479,19 @@ const ChatImport = () => {
     }
   };
 
+
   const handleSelectImport = async (importId: string) => {
     setSelectedImport(importId);
     setSelectedEvent(null);
     setMessages([]);
+    setSummary("");
+    
     const evts = await fetchEvents(importId);
     if (!evts || evts.length === 0) {
-      // No events detected, load messages directly by import as a fallback
       await fetchMessagesByImport(importId);
+    } else if (evts.length > 0) {
+      setSelectedEvent(evts[0].id);
+      await fetchMessages(evts[0].id);
     }
   };
 

@@ -31,7 +31,8 @@ const Webinars = () => {
   const [newWebinarUrl, setNewWebinarUrl] = useState("");
   const [newWebinarDescription, setNewWebinarDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [gDriveVideo, setGDriveVideo] = useState<any>(null);
+  const [gDriveVideos, setGDriveVideos] = useState<any[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -44,21 +45,34 @@ const Webinars = () => {
     
     checkAuth();
     loadWebinars();
-    fetchGDriveVideo();
+    fetchGDriveVideos();
   }, [navigate]);
 
-  const fetchGDriveVideo = async () => {
+  const fetchGDriveVideos = async () => {
+    setLoadingVideos(true);
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-google-drive', {
-        body: { fileId: '18d_fdnYzrpgf62R6ETTm6sn_5NAjWUD-' }
-      });
+      // Extract file IDs from the Google Drive links
+      const fileIds = [
+        '1HAPaEe1On_dlEBQezBr3r6o-cEZau20m',
+        '1MbYPNi2zjSXpe6SN64K-n1K_IKr4Xd3K'
+      ];
 
-      if (error) throw error;
-      if (data?.file) {
-        setGDriveVideo(data.file);
-      }
+      const videoPromises = fileIds.map(fileId =>
+        supabase.functions.invoke('fetch-google-drive', {
+          body: { fileId }
+        })
+      );
+
+      const results = await Promise.all(videoPromises);
+      const videos = results
+        .filter(result => !result.error && result.data?.file)
+        .map(result => result.data.file);
+
+      setGDriveVideos(videos);
     } catch (error) {
-      console.error('Error fetching Google Drive video:', error);
+      console.error('Error fetching Google Drive videos:', error);
+    } finally {
+      setLoadingVideos(false);
     }
   };
 
@@ -240,70 +254,62 @@ const Webinars = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
+    <>
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-background blur-3xl"></div>
-        <div className="relative max-w-7xl mx-auto text-center animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="p-3 bg-gradient-to-br from-primary to-accent rounded-xl shadow-lg">
-              <Video className="h-10 w-10 text-primary-foreground" />
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-16 animate-fade-in">
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+              Past Webinars
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore our collection of trade finance webinars and insights
+            </p>
           </div>
-          <h1 className="professional-heading text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            TFW Past Webinars
-          </h1>
-          <p className="banking-text text-xl sm:text-2xl text-muted-foreground max-w-3xl flex items-center justify-center gap-2 mx-auto">
-            <Sparkles className="h-5 w-5 text-accent" />
-            Access our comprehensive library of trade finance webinars and educational content
-          </p>
-        </div>
-      </section>
 
-      {/* Google Drive Video Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          {gDriveVideo ? (
-            <Card className="group relative overflow-hidden border-border/60 bg-card/50 backdrop-blur-sm hover:shadow-2xl hover:border-accent/50 transition-all duration-500">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="professional-heading text-xl font-semibold">{gDriveVideo.name}</h3>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(gDriveVideo.webViewLink, '_blank')}
-                    className="border-accent/50 hover:bg-accent/10"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open in Drive
-                  </Button>
-                </div>
-                {gDriveVideo.mimeType?.includes('video') && (
-                  <div className="aspect-video bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
-                    <video
-                      controls
-                      className="w-full h-full rounded-lg"
-                      src={gDriveVideo.webContentLink}
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {loadingVideos ? (
+            <div className="mb-12 text-center text-muted-foreground">
+              Loading webinars from Google Drive...
+            </div>
           ) : (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4 animate-pulse" />
-                <p className="text-muted-foreground">Loading video...</p>
-              </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-12">
+              {gDriveVideos.map((video, index) => (
+                <Card key={video.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20">
+                  <CardContent className="p-6">
+                    <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-4">
+                      <iframe
+                        src={`https://drive.google.com/file/d/${video.id}/preview`}
+                        width="100%"
+                        height="100%"
+                        allow="autoplay"
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-1">{video.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Webinar {index + 1}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(video.webViewLink, '_blank')}
+                        className="ml-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 };
 
