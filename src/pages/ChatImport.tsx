@@ -389,37 +389,50 @@ const ChatImport = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Not authenticated');
 
+      // Prepare multipart form data
       const formData = new FormData();
       formData.append('file', file);
       formData.append('timezone', timezone);
 
       console.log('Uploading file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
 
-      // Use built-in invoke to handle auth and headers properly
-      const { data: result, error: invokeError } = await supabase.functions.invoke('parse-whatsapp', {
-        body: formData as any,
-      });
+      let importId: string | undefined;
 
-      if (invokeError) {
-        throw new Error(invokeError.message || 'Upload failed');
+      // Attempt 1: multipart upload via invoke (preferred)
+      try {
+        const { data: result, error: invokeError } = await supabase.functions.invoke('parse-whatsapp', {
+          body: formData as any,
+        });
+        if (invokeError) throw invokeError;
+        importId = (result as any)?.importId;
+      } catch (err) {
+        console.warn('Multipart upload failed, falling back to JSON upload:', err);
+        // Attempt 2: JSON upload with raw text (compatible with large files)
+        const fileText = await file.text();
+        const { data: result2, error: jsonError } = await supabase.functions.invoke('parse-whatsapp', {
+          body: {
+            fileContent: fileText,
+            filename: file.name,
+            timezone,
+          },
+        });
+        if (jsonError) throw jsonError;
+        importId = (result2 as any)?.importId;
       }
 
-      // If the function responds immediately and continues processing, poll for completion
-      const importId: string | undefined = (result as any)?.importId;
-
-      // Helper: poll import status until completed (max ~60s)
+      // Poll import status (up to 5 minutes for large files)
       const pollImportStatus = async (id: string) => {
         const start = Date.now();
         let lastStatus = 'processing';
-        while (Date.now() - start < 60000) { // 60s max
+        while (Date.now() - start < 300000) { // 5 minutes
           const { data: imp, error } = await supabase
             .from('whatsapp_imports')
             .select('status, total_messages')
             .eq('id', id)
-            .single();
+            .maybeSingle();
           if (error) break;
-          if (imp) lastStatus = imp.status;
-          if (imp?.status === 'completed') return true;
+          if (imp) lastStatus = (imp as any).status;
+          if ((imp as any)?.status === 'completed') return true;
           await new Promise(r => setTimeout(r, 2000));
         }
         console.warn('Polling timed out. Last status:', lastStatus);
