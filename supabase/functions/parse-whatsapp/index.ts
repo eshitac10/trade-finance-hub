@@ -221,9 +221,30 @@ serve(async (req) => {
       });
     }
 
-    const formData = await req.formData();
-    const file = formData.get("file") as File;
-    const timezone = formData.get("timezone") as string || "UTC";
+    // Accept both multipart/form-data and JSON (fallback)
+    const contentType = req.headers.get("content-type") || "";
+    let file: File | undefined;
+    let timezone: string = "UTC";
+    let filename = "upload.txt";
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const f = formData.get("file");
+      if (f && typeof f !== "string") file = f as File;
+      timezone = (formData.get("timezone") as string) || "UTC";
+      filename = (formData.get("filename") as string) || (file?.name ?? filename);
+    } else {
+      const body = await req.json().catch(() => null);
+      if (body && typeof body === "object") {
+        if (body.fileContent && typeof body.fileContent === "string") {
+          // Create a File from the raw text to reuse the same streaming code path
+          file = new File([body.fileContent], body.filename || "upload.txt", { type: "text/plain" });
+        }
+        timezone = body?.timezone || "UTC";
+        filename = body?.filename || (file?.name ?? filename);
+      }
+    }
+
     
     if (!file) {
       return new Response(JSON.stringify({ error: "No file provided" }), {
