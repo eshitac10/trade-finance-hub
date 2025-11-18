@@ -104,7 +104,7 @@ const LatestArticles = () => {
   if (articles.length === 0) return null;
 
   return (
-    <section className="py-20 bg-gradient-subtle relative overflow-hidden">
+    <section className="py-20 bg-card/60 dark:bg-card/80 relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-accent/5 to-primary/5 rounded-full blur-3xl animate-float-delayed" />
@@ -116,7 +116,7 @@ const LatestArticles = () => {
             <TrendingUp className="h-4 w-4 mr-2" />
             Featured Content
           </Badge>
-          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 text-foreground">
+          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 text-red-500 dark:text-red-400">
             Latest Articles
           </h2>
           <p className="banking-text text-lg text-muted-foreground max-w-2xl mx-auto">
