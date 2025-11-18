@@ -261,9 +261,7 @@ serve(async (req) => {
       });
     }
 
-    // Stream-parse file content to avoid loading into memory and CPU spikes
-    const reader = file.stream().getReader();
-    const decoder = new TextDecoder();
+    console.log('Processing file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
 
     // Create import record early (processing state)
     const { data: importRecord, error: importError } = await supabase
@@ -281,6 +279,25 @@ serve(async (req) => {
       .single();
 
     if (importError) throw importError;
+
+    console.log('Created import record:', importRecord.id);
+
+    // Return immediately for large files to avoid timeout
+    // Processing will continue in the background
+    if (file.size > 10 * 1024 * 1024) { // > 10MB
+      console.log('Large file detected, returning importId immediately and processing in background');
+      
+      // Start background processing
+      EdgeRuntime.waitUntil(processFileInBackground(file, importRecord, user.id, timezone, supabase));
+      
+      return new Response(JSON.stringify({
+        success: true,
+        importId: importRecord.id,
+        message: 'Processing started in background'
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let buffer = '';
     let lineNumber = 0;
