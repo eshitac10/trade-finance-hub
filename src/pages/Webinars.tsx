@@ -51,24 +51,19 @@ const Webinars = () => {
   const fetchGDriveVideos = async () => {
     setLoadingVideos(true);
     try {
-      // Extract file IDs from the Google Drive links
-      const fileIds = [
-        '1HAPaEe1On_dlEBQezBr3r6o-cEZau20m',
-        '1MbYPNi2zjSXpe6SN64K-n1K_IKr4Xd3K'
-      ];
+      // TFW 2nd Webinar: Discussion On CBDCs
+      const fileId = '1MbYPNi2zjSXpe6SN64K-n1K_IKr4Xd3K';
 
-      const videoPromises = fileIds.map(fileId =>
-        supabase.functions.invoke('fetch-google-drive', {
-          body: { fileId }
-        })
-      );
+      const { data, error } = await supabase.functions.invoke('fetch-google-drive', {
+        body: { fileId }
+      });
 
-      const results = await Promise.all(videoPromises);
-      const videos = results
-        .filter(result => !result.error && result.data?.file)
-        .map(result => result.data.file);
-
-      setGDriveVideos(videos);
+      if (!error && data?.file) {
+        setGDriveVideos([{
+          ...data.file,
+          name: 'TFW 2nd Webinar: Discussion On CBDCs'
+        }]);
+      }
     } catch (error) {
       console.error('Error fetching Google Drive videos:', error);
     } finally {
@@ -77,65 +72,8 @@ const Webinars = () => {
   };
 
   const loadWebinars = () => {
-    const defaultWebinars: Webinar[] = [
-      {
-        id: "1",
-        title: "Trade Finance Week Webinar",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/kNltHVO5bnY/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=kNltHVO5bnY",
-        description: "Comprehensive insights into trade finance industry trends and developments"
-      },
-      {
-        id: "2",
-        title: "Trade Finance Insights",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/bbQH1a-QlEk/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=bbQH1a-QlEk",
-        description: "Expert analysis on global trade finance markets and opportunities"
-      },
-      {
-        id: "3",
-        title: "Trade Finance Innovation",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/3tLP4qmcHnY/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=3tLP4qmcHnY",
-        description: "Exploring innovative solutions transforming trade finance operations"
-      },
-      {
-        id: "4",
-        title: "Banking & Trade Finance",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/5YNt6cD_Riw/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=5YNt6cD_Riw",
-        description: "Deep dive into banking solutions for international trade"
-      },
-      {
-        id: "5",
-        title: "Trade Finance Strategies",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/fi5KKNZFnAE/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=fi5KKNZFnAE",
-        description: "Strategic approaches to managing trade finance portfolios"
-      },
-      {
-        id: "6",
-        title: "Digital Trade Finance",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/RsQHDdN1aZ4/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=RsQHDdN1aZ4",
-        description: "Digital transformation in trade finance and banking sectors"
-      },
-      {
-        id: "7",
-        title: "Trade Finance Excellence",
-        date: "2024",
-        thumbnail: "https://img.youtube.com/vi/8pf-VdRZBuU/maxresdefault.jpg",
-        videoUrl: "https://www.youtube.com/watch?v=8pf-VdRZBuU",
-        description: "Best practices and excellence standards in trade finance"
-      }
-    ];
-
+    const defaultWebinars: Webinar[] = [];
+    
     const savedWebinars = localStorage.getItem('webinars');
     if (savedWebinars) {
       setWebinars(JSON.parse(savedWebinars));

@@ -116,7 +116,7 @@ const LatestArticles = () => {
             <TrendingUp className="h-4 w-4 mr-2" />
             Featured Content
           </Badge>
-          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 text-foreground">
             Latest Articles
           </h2>
           <p className="banking-text text-lg text-muted-foreground max-w-2xl mx-auto">
