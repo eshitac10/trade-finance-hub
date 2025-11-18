@@ -60,20 +60,19 @@ serve(async (req) => {
         if (match) {
           const [, datePart, timePart, author, text] = match;
           
-          // Parse date (supports DD/MM/YYYY and MM/DD/YYYY)
+          // Parse date - MM/DD/YYYY or MM/DD/YY format (WhatsApp standard)
           const dateParts = datePart.split('/');
-          let day: number, month: number, year: number;
+          let month: number, day: number, year: number;
+          
+          month = parseInt(dateParts[0]); // First part is month
+          day = parseInt(dateParts[1]);   // Second part is day
           
           if (dateParts[2].length === 4) {
-            // DD/MM/YYYY or MM/DD/YYYY format
-            day = parseInt(dateParts[0]);
-            month = parseInt(dateParts[1]);
-            year = parseInt(dateParts[2]);
+            year = parseInt(dateParts[2]); // Full year
           } else {
-            // DD/MM/YY or MM/DD/YY format
-            day = parseInt(dateParts[0]);
-            month = parseInt(dateParts[1]);
-            year = parseInt(dateParts[2]) + 2000;
+            // 2-digit year - convert to 4-digit
+            const yy = parseInt(dateParts[2]);
+            year = yy > 50 ? 1900 + yy : 2000 + yy;
           }
 
           messages.push({
