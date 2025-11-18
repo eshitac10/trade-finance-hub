@@ -510,62 +510,91 @@ const ChatImport = () => {
         importId = (result2 as any)?.importId;
       }
 
-      // Poll import status (up to 5 minutes for large files)
+      // Poll import status with better timeout handling
       const pollImportStatus = async (id: string) => {
         const start = Date.now();
-        let lastStatus = 'processing';
-        while (Date.now() - start < 300000) { // 5 minutes
+        const timeout = 120000; // 2 minutes max polling
+        let attempts = 0;
+        
+        while (Date.now() - start < timeout) {
+          attempts++;
           const { data: imp, error } = await supabase
             .from('whatsapp_imports')
             .select('status, total_messages')
             .eq('id', id)
-            .maybeSingle();
-          if (error) break;
-          if (imp) lastStatus = (imp as any).status;
-          if ((imp as any)?.status === 'completed') return true;
+            .single();
+            
+          if (error) {
+            console.error('Error polling status:', error);
+            break;
+          }
+          
+          console.log(`Poll attempt ${attempts}: status=${imp?.status}, messages=${imp?.total_messages}`);
+          
+          if (imp?.status === 'completed' && imp?.total_messages > 0) {
+            return { success: true, messages: imp.total_messages };
+          }
+          
+          if (imp?.status === 'failed') {
+            return { success: false, error: 'Processing failed' };
+          }
+          
+          // Wait 2 seconds before next poll
           await new Promise(r => setTimeout(r, 2000));
         }
-        console.warn('Polling timed out. Last status:', lastStatus);
-        return false;
+        
+        console.warn('Polling timed out after', attempts, 'attempts');
+        return { success: false, error: 'Processing timeout - will continue in background' };
       };
 
       if (importId) {
-        const done = await pollImportStatus(importId);
-        if (!done) {
+        const result = await pollImportStatus(importId);
+        
+        if (result.success) {
           toast({
-            title: 'Still processing',
-            description: 'We will load events as soon as processing completes.',
+            title: 'Processing complete!',
+            description: `Successfully processed ${result.messages} messages`,
+          });
+        } else {
+          toast({
+            title: 'Processing in background',
+            description: result.error || 'Your file is being processed. Refresh in a minute to see results.',
+            variant: 'default',
           });
         }
       }
 
-      toast({
-        title: 'Upload started',
-        description: importId
-          ? `Import ${importId.slice(0, 8)}… ready. Loading events…`
-          : 'Processing complete.',
-      });
 
       setFile(null);
       setShowSamplePreview(false);
+      setYearlyChunks([]); // Clear yearly chunks
 
-      // Refresh imports list and auto-select the latest/current import
+      // Refresh imports list
       await fetchImports();
+      
+      // Auto-select and load the newly imported data
       if (importId) {
         setSelectedImport(importId);
-        // Fetch events for this import and auto-select the newest one
+        
+        // Fetch events for this import
         const { data: evts } = await supabase
           .from('whatsapp_events')
           .select('*')
           .eq('import_id', importId)
           .order('start_datetime', { ascending: false });
-        setEvents(evts || []);
+          
         if (evts && evts.length > 0) {
-          const first = evts[0];
-          setSelectedEvent(first.id);
-          await fetchMessages(first.id);
+          setEvents(evts);
+          const firstEvent = evts[0];
+          setSelectedEvent(firstEvent.id);
+          await fetchMessages(firstEvent.id);
+          
+          toast({
+            title: 'Import complete!',
+            description: `Found ${evts.length} conversations with ${evts.reduce((sum, e) => sum + (e.message_count || 0), 0)} messages`,
+          });
         } else {
-          // No events detected for this import; load recent messages directly
+          // No events detected, load all messages from this import
           await fetchMessagesByImport(importId);
         }
       }
