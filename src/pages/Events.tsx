@@ -521,7 +521,7 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                 .map((event, index) => (
                   <Card 
                     key={event.id} 
-                    className="group border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-2xl hover:border-primary/30 transition-all duration-300 hover:scale-[1.03] animate-scale-in relative overflow-hidden"
+                    className="group border-border/50 bg-gradient-to-br from-card to-card/50 hover:shadow-2xl hover:border-primary/30 transition-all duration-300 hover:scale-[1.03] animate-scale-in relative overflow-hidden min-h-[280px] flex flex-col"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -529,18 +529,6 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg group-hover:text-primary transition-colors">{event.title}</CardTitle>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              shareEvent(event);
-                            }}
-                            title="Share event"
-                          >
-                            <Share2 className="h-3 w-3" />
-                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
@@ -577,14 +565,14 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                         {format(new Date(event.event_date), "MMMM d, yyyy")}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="relative">
+                    <CardContent className="relative flex-1 flex flex-col">
                       {event.description && (
-                        <p className="text-sm text-muted-foreground mb-3">
+                        <p className="text-sm text-muted-foreground mb-4 flex-1">
                           {event.description}
                         </p>
                       )}
                       
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-sm mt-auto">
                         {event.event_time && (
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="h-4 w-4" />
