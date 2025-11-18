@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plus, MapPin, Clock, Pencil, Trash2, Sparkles, CalendarDays, Share2, Copy } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, MapPin, Clock, Pencil, Trash2, Sparkles, CalendarDays, Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +47,7 @@ const Events = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+  const [eventDate, setEventDate] = useState<Date | undefined>(new Date());
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -191,6 +194,7 @@ const Events = () => {
   const handleEditEvent = (event: Event) => {
     setIsEditMode(true);
     setEditingEventId(event.id);
+    setEventDate(new Date(event.event_date));
     setNewEvent({
       title: event.title,
       description: event.description || "",
@@ -215,6 +219,7 @@ const Events = () => {
     setIsDialogOpen(false);
     setIsEditMode(false);
     setEditingEventId(null);
+    setEventDate(new Date());
     setNewEvent({
       title: "",
       description: "",
@@ -238,29 +243,6 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
       title: "Copied!",
       description: "Event details copied to clipboard",
     });
-  };
-
-  const shareEvent = async (event: Event) => {
-    const eventDetails = `📅 ${event.title}\n\n${event.description || ''}\n\n🗓️ Date: ${new Date(event.event_date).toLocaleDateString()}${event.event_time ? `\n⏰ Time: ${event.event_time}` : ''}${event.location ? `\n📍 Location: ${event.location}` : ''}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: eventDetails,
-        });
-        toast({
-          title: "Shared Successfully",
-          description: "Event details have been shared",
-        });
-      } catch (error: any) {
-        if (error.name !== 'AbortError') {
-          copyEventDetails(event);
-        }
-      }
-    } else {
-      copyEventDetails(event);
-    }
   };
 
   // Filter events by selected date
@@ -344,45 +326,74 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                       }
                       placeholder="Event description"
                       rows={3}
+                      className="resize-none"
                     />
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="event_date">Date *</Label>
-                      <Input
-                        id="event_date"
-                        type="date"
-                        value={newEvent.event_date}
-                        onChange={(e) =>
-                          setNewEvent({ ...newEvent, event_date: e.target.value })
-                        }
-                      />
+                      <Label>Event Date *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !eventDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {eventDate ? format(eventDate, "PPP") : <span>Pick a date</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={eventDate}
+                            onSelect={(date) => {
+                              setEventDate(date);
+                              if (date) {
+                                setNewEvent({ ...newEvent, event_date: format(date, "yyyy-MM-dd") });
+                              }
+                            }}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="event_time">Time</Label>
-                      <Input
-                        id="event_time"
-                        type="time"
-                        value={newEvent.event_time}
-                        onChange={(e) =>
-                          setNewEvent({ ...newEvent, event_time: e.target.value })
-                        }
-                      />
+                      <Label htmlFor="event_time">Event Time</Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                          id="event_time"
+                          type="time"
+                          value={newEvent.event_time}
+                          onChange={(e) =>
+                            setNewEvent({ ...newEvent, event_time: e.target.value })
+                          }
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={newEvent.location}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, location: e.target.value })
-                      }
-                      placeholder="Event location"
-                    />
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <Input
+                        id="location"
+                        value={newEvent.location}
+                        onChange={(e) =>
+                          setNewEvent({ ...newEvent, location: e.target.value })
+                        }
+                        placeholder="Event location or virtual link"
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
                 </div>
                 
