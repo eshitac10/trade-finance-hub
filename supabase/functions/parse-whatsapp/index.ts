@@ -191,6 +191,205 @@ function detectEvents(messages: ParsedMessage[]): DetectedEvent[] {
   return events;
 }
 
+async function processFileInBackground(
+  file: File,
+  importRecord: any,
+  userId: string,
+  timezone: string,
+  supabase: any
+) {
+  console.log('Starting background processing for import:', importRecord.id);
+  
+  const reader = file.stream().getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let lineNumber = 0;
+  let currentMessage: ParsedMessage | null = null;
+  let parseErrors = 0;
+  
+  const batchSize = 500;
+  const messageBatch: Array<{
+    import_id: string;
+    event_id: string | null;
+    message_id: string;
+    datetime_iso: string;
+    author: string;
+    text: string;
+    attachments: string[];
+    raw_line: string;
+  }> = [];
+  
+  let insertedCount = 0;
+  
+  async function insertBatch() {
+    if (messageBatch.length === 0) return;
+    const batch = messageBatch.splice(0, messageBatch.length);
+    const { error: batchError } = await supabase
+      .from('whatsapp_messages')
+      .insert(batch);
+    if (!batchError) {
+      insertedCount += batch.length;
+      console.log(`Inserted ${insertedCount} messages so far...`);
+    }
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  
+  type BurstMsg = { datetimeISO: string; text: string };
+  type EventRange = { startDatetime: string; endDatetime: string; messageCount: number; keywords: string[] };
+  
+  let currentBurst: BurstMsg[] = [];
+  const detectedEventRanges: EventRange[] = [];
+  
+  function finalizeBurstIfNeeded() {
+    if (currentBurst.length >= 5) {
+      const allText = currentBurst.map(m => m.text.toLowerCase()).join(' ');
+      let foundKeywords: string[] = [];
+      for (const [, keywords] of Object.entries(EVENT_KEYWORDS)) {
+        for (const keyword of keywords) {
+          if (allText.includes(keyword)) { foundKeywords.push(keyword); break; }
+        }
+        if (foundKeywords.length) break;
+      }
+      detectedEventRanges.push({
+        startDatetime: currentBurst[0].datetimeISO,
+        endDatetime: currentBurst[currentBurst.length - 1].datetimeISO,
+        messageCount: currentBurst.length,
+        keywords: [...new Set(foundKeywords)]
+      });
+    }
+    currentBurst = [];
+  }
+  
+  function handleFinalizedMessage(msg: ParsedMessage) {
+    messageBatch.push({
+      import_id: importRecord.id,
+      event_id: null,
+      message_id: msg.messageId,
+      datetime_iso: msg.datetimeISO,
+      author: msg.author,
+      text: msg.text,
+      attachments: msg.attachments,
+      raw_line: msg.rawLine,
+    });
+    
+    const last = currentBurst[currentBurst.length - 1];
+    if (!last) {
+      currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
+    } else {
+      const timeDiff = new Date(msg.datetimeISO).getTime() - new Date(last.datetimeISO).getTime();
+      if (timeDiff <= 10 * 60 * 1000) {
+        currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
+      } else {
+        finalizeBurstIfNeeded();
+        currentBurst.push({ datetimeISO: msg.datetimeISO, text: msg.text });
+      }
+    }
+  }
+  
+  // Stream read loop
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() ?? '';
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) { lineNumber++; continue; }
+      const parsed = parseWhatsAppLine(trimmedLine, lineNumber);
+      if (parsed) {
+        if (currentMessage) {
+          handleFinalizedMessage(currentMessage);
+          if (messageBatch.length >= batchSize) {
+            await insertBatch();
+          }
+        }
+        currentMessage = parsed;
+      } else if (currentMessage) {
+        currentMessage.text += '\n' + trimmedLine;
+        currentMessage.rawLine += '\n' + trimmedLine;
+      } else {
+        parseErrors++;
+      }
+      lineNumber++;
+    }
+  }
+  
+  // Flush remainder
+  if (buffer.length) {
+    const trimmedLine = buffer.trim();
+    if (trimmedLine) {
+      const parsed = parseWhatsAppLine(trimmedLine, lineNumber);
+      if (parsed) {
+        if (currentMessage) handleFinalizedMessage(currentMessage);
+        currentMessage = parsed;
+      } else if (currentMessage) {
+        currentMessage.text += '\n' + trimmedLine;
+        currentMessage.rawLine += '\n' + trimmedLine;
+      }
+    }
+  }
+  
+  if (currentMessage) handleFinalizedMessage(currentMessage);
+  finalizeBurstIfNeeded();
+  await insertBatch();
+  
+  console.log(`Background processing complete: ${insertedCount} messages inserted`);
+  
+  // Insert events
+  const eventsToInsert = detectedEventRanges.map((range) => {
+    let detectedType = 'Conversation';
+    for (const [eventType, keywords] of Object.entries(EVENT_KEYWORDS)) {
+      if (keywords.some(k => range.keywords.includes(k))) {
+        detectedType = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+        break;
+      }
+    }
+    return {
+      import_id: importRecord.id,
+      user_id: userId,
+      title: `${detectedType} - ${new Date(range.startDatetime).toLocaleDateString()}`,
+      start_datetime: range.startDatetime,
+      end_datetime: range.endDatetime,
+      message_count: range.messageCount,
+      keywords: range.keywords,
+      confidence_score: range.keywords.length ? 0.8 : 0.5,
+      tags: [] as string[],
+    };
+  });
+  
+  let insertedEvents: any[] = [];
+  if (eventsToInsert.length) {
+    const { data: evts } = await supabase
+      .from('whatsapp_events')
+      .insert(eventsToInsert)
+      .select();
+    insertedEvents = evts ?? [];
+  }
+  
+  // Assign messages to events
+  for (let i = 0; i < insertedEvents.length; i++) {
+    const evt = insertedEvents[i];
+    const range = detectedEventRanges[i];
+    await supabase
+      .from('whatsapp_messages')
+      .update({ event_id: evt.id })
+      .eq('import_id', importRecord.id)
+      .gte('datetime_iso', range.startDatetime)
+      .lte('datetime_iso', range.endDatetime);
+    await new Promise((r) => setTimeout(r, 0));
+  }
+  
+  // Finalize import
+  await supabase
+    .from('whatsapp_imports')
+    .update({ status: 'completed', total_messages: insertedCount })
+    .eq('id', importRecord.id);
+    
+  console.log('Background processing finished successfully');
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -288,7 +487,10 @@ serve(async (req) => {
       console.log('Large file detected, returning importId immediately and processing in background');
       
       // Start background processing
-      EdgeRuntime.waitUntil(processFileInBackground(file, importRecord, user.id, timezone, supabase));
+      processFileInBackground(file, importRecord, user.id, timezone, supabase).catch(async (error) => {
+        console.error('Background processing error:', error);
+        await supabase.from('whatsapp_imports').update({ status: 'failed' }).eq('id', importRecord.id);
+      });
       
       return new Response(JSON.stringify({
         success: true,
@@ -299,6 +501,9 @@ serve(async (req) => {
       });
     }
 
+    // Stream-parse file content for smaller files
+    const reader = file.stream().getReader();
+    const decoder = new TextDecoder();
     let buffer = '';
     let lineNumber = 0;
 
