@@ -234,8 +234,11 @@ const Webinars = () => {
             <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
               Past Webinars
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
               Explore our collection of trade finance webinars and insights
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Total Webinars: {gDriveVideos.length}
             </p>
           </div>
 
@@ -260,8 +263,8 @@ const Webinars = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold mb-1">{video.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Webinar {index + 1}
+                        <p className="text-xs text-muted-foreground">
+                          {video.date}
                         </p>
                       </div>
                       <Button

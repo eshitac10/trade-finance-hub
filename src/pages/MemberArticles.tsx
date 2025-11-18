@@ -324,7 +324,7 @@ const MemberArticles = () => {
         <div className="mb-12 text-justify">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 text-foreground dark:text-red-400">
                 Member Articles
               </h1>
               <p className="banking-text text-lg text-muted-foreground max-w-2xl">
