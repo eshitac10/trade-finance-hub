@@ -69,6 +69,8 @@ const ChatImport = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [splittingFile, setSplittingFile] = useState(false);
+  const [yearlyChunks, setYearlyChunks] = useState<Array<{year: number; messages: string[]; size: number}>>([]);
   const [imports, setImports] = useState<WhatsAppImport[]>([]);
   const [selectedImport, setSelectedImport] = useState<string | null>(null);
   const [events, setEvents] = useState<WhatsAppEvent[]>([]);
@@ -326,9 +328,9 @@ const ChatImport = () => {
 
     setFile(selectedFile);
 
-    // Chunk large files (> 5MB)
+    // Split large files into yearly chunks
     if (selectedFile.size > 5 * 1024 * 1024) {
-      await chunkFile(selectedFile);
+      await splitFileIntoYears(selectedFile);
     }
 
     // Show sample preview for text files
@@ -342,6 +344,86 @@ const ChatImport = () => {
         console.error('Error reading file:', error);
       }
     }
+  };
+
+  const splitFileIntoYears = async (file: File) => {
+    setSplittingFile(true);
+    try {
+      const text = await file.text();
+      const lines = text.split('\n');
+      
+      // WhatsApp date formats: DD/MM/YY or DD/MM/YYYY
+      const dateRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4})/;
+      const yearGroups: Record<number, string[]> = {};
+      
+      for (const line of lines) {
+        const match = line.match(dateRegex);
+        if (match) {
+          const datePart = match[1];
+          const parts = datePart.split('/');
+          let year = parseInt(parts[2]);
+          
+          // Convert 2-digit year to 4-digit
+          if (year < 100) {
+            year = year < 50 ? 2000 + year : 1900 + year;
+          }
+          
+          if (!yearGroups[year]) {
+            yearGroups[year] = [];
+          }
+          yearGroups[year].push(line);
+        } else if (Object.keys(yearGroups).length > 0) {
+          // Continuation of previous message
+          const lastYear = Math.max(...Object.keys(yearGroups).map(Number));
+          yearGroups[lastYear].push(line);
+        }
+      }
+      
+      const chunks = Object.entries(yearGroups)
+        .map(([year, messages]) => ({
+          year: parseInt(year),
+          messages,
+          size: messages.join('\n').length
+        }))
+        .sort((a, b) => a.year - b.year);
+      
+      setYearlyChunks(chunks);
+      
+      toast({
+        title: "File split successfully",
+        description: `Split into ${chunks.length} yearly files (${chunks.map(c => c.year).join(', ')})`,
+      });
+    } catch (error: any) {
+      console.error('Splitting error:', error);
+      toast({
+        title: "Splitting failed",
+        description: error.message || "Failed to split file into years",
+        variant: "destructive",
+      });
+    } finally {
+      setSplittingFile(false);
+    }
+  };
+
+  const downloadYearlyChunk = (year: number) => {
+    const chunk = yearlyChunks.find(c => c.year === year);
+    if (!chunk) return;
+    
+    const content = chunk.messages.join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `WhatsApp_Chat_${year}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Download started",
+      description: `Downloading ${year} chat (${(chunk.size / 1024).toFixed(1)} KB)`,
+    });
   };
 
   const chunkFile = async (file: File) => {
@@ -824,30 +906,63 @@ const ChatImport = () => {
                 </div>
               )}
 
-              {/* Monthly Chunks Selection */}
-              {monthlyChunks.length > 0 && (
-                <div className="space-y-3 p-4 bg-accent/5 rounded-xl border border-accent/20">
-                  <Label className="text-base font-semibold flex items-center gap-2">
-                    <Split className="h-4 w-4" />
-                    Select Month to Process
-                  </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
-                    {monthlyChunks.map((chunk, idx) => (
-                      <Button
+              {/* Yearly Chunks Selection */}
+              {yearlyChunks.length > 0 && (
+                <div className="space-y-4 p-6 bg-gradient-to-br from-accent/10 to-primary/5 rounded-2xl border-2 border-accent/30 animate-fade-in shadow-md">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-lg font-bold flex items-center gap-2 text-primary">
+                      <Split className="h-5 w-5" />
+                      Download Yearly Chunks
+                    </Label>
+                    <Badge variant="secondary" className="text-sm px-3 py-1">
+                      {yearlyChunks.length} years
+                    </Badge>
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground">
+                    Your file is large. Download individual years, then upload each year separately for processing.
+                  </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {yearlyChunks.map((chunk, idx) => (
+                      <Card 
                         key={idx}
-                        variant={selectedChunk?.year === chunk.year && selectedChunk?.month === chunk.month ? "default" : "outline"}
-                        onClick={() => setSelectedChunk({ year: chunk.year, month: chunk.month })}
-                        className="justify-between"
-                        size="sm"
+                        className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 border-border hover:border-primary/50 animate-scale-in"
+                        style={{ animationDelay: `${idx * 50}ms` }}
                       >
-                        <span>{chunk.label}</span>
-                        <Badge variant="secondary" className="ml-2">{chunk.count}</Badge>
-                      </Button>
+                        <CardContent className="p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="font-bold text-lg text-primary">{chunk.year}</div>
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {chunk.messages.length.toLocaleString()} messages
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {(chunk.size / 1024).toFixed(1)} KB
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-2 group-hover:bg-primary group-hover:text-primary-foreground transition-all"
+                            onClick={() => downloadYearlyChunk(chunk.year)}
+                          >
+                            <Download className="h-3 w-3 mr-1" />
+                            Download
+                          </Button>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Selected: {selectedChunk ? `${monthlyChunks.find(c => c.year === selectedChunk.year && c.month === selectedChunk.month)?.label} (${monthlyChunks.find(c => c.year === selectedChunk.year && c.month === selectedChunk.month)?.count} messages)` : 'None'}
-                  </p>
+                  
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="text-sm font-semibold text-primary mb-1">💡 Next Steps:</p>
+                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>Download the year you want to analyze</li>
+                      <li>Upload that downloaded file using the file input above</li>
+                      <li>Process and view the categorized conversations</li>
+                    </ol>
+                  </div>
                 </div>
               )}
 
@@ -869,7 +984,7 @@ const ChatImport = () => {
 
               <Button 
                 onClick={handleUpload} 
-                disabled={!file || uploading || (monthlyChunks.length > 0 && !selectedChunk)}
+                disabled={!file || uploading || yearlyChunks.length > 0}
                 className="w-full h-12 text-base bg-gradient-primary hover:shadow-accent font-semibold rounded-xl"
               >
                 {processing ? (
@@ -877,15 +992,20 @@ const ChatImport = () => {
                     <CreativeLoader size="sm" className="mr-2" />
                     Processing with AI...
                   </>
-                ) : chunkingFile ? (
+                ) : splittingFile ? (
                   <>
                     <CreativeLoader size="sm" className="mr-2" />
-                    Chunking file...
+                    Splitting into years...
+                  </>
+                ) : yearlyChunks.length > 0 ? (
+                  <>
+                    <Download className="h-5 w-5 mr-2" />
+                    Download yearly chunks above
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-5 w-5 mr-2" />
-                    {monthlyChunks.length > 0 ? 'Process Selected Month' : 'Process File'}
+                    Process File
                   </>
                 )}
               </Button>
