@@ -93,7 +93,7 @@ const ArticlesGoogleDrive = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12">
-          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 text-foreground">
             Articles & Resources
           </h1>
           <p className="banking-text text-lg text-muted-foreground max-w-2xl">
