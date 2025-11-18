@@ -327,21 +327,22 @@ const ChatImport = () => {
     }
 
     setFile(selectedFile);
+    setYearlyChunks([]); // Reset yearly chunks when new file is selected
 
-    // Split large files into yearly chunks
+    // Split large files into yearly chunks (over 5MB)
     if (selectedFile.size > 5 * 1024 * 1024) {
       await splitFileIntoYears(selectedFile);
-    }
-
-    // Show sample preview for text files
-    if (selectedFile.name.endsWith('.txt')) {
-      try {
-        const text = await selectedFile.text();
-        const lines = text.split('\n').slice(0, 20);
-        setSampleLines(lines);
-        setShowSamplePreview(true);
-      } catch (error) {
-        console.error('Error reading file:', error);
+    } else {
+      // Show sample preview for small text files
+      if (selectedFile.name.endsWith('.txt')) {
+        try {
+          const text = await selectedFile.text();
+          const lines = text.split('\n').slice(0, 20);
+          setSampleLines(lines);
+          setShowSamplePreview(true);
+        } catch (error) {
+          console.error('Error reading file:', error);
+        }
       }
     }
   };
@@ -422,7 +423,7 @@ const ChatImport = () => {
     
     toast({
       title: "Download started",
-      description: `Downloading ${year} chat (${(chunk.size / 1024).toFixed(1)} KB)`,
+      description: `Download complete! Now upload ${year} chat to process it (${(chunk.size / 1024).toFixed(1)} KB)`,
     });
   };
 
@@ -985,7 +986,7 @@ const ChatImport = () => {
               <Button 
                 onClick={handleUpload} 
                 disabled={!file || uploading || yearlyChunks.length > 0}
-                className="w-full h-12 text-base bg-gradient-primary hover:shadow-accent font-semibold rounded-xl"
+                className="w-full h-12 text-base bg-gradient-primary hover:shadow-accent font-semibold rounded-xl transition-all"
               >
                 {processing ? (
                   <>
@@ -1000,15 +1001,21 @@ const ChatImport = () => {
                 ) : yearlyChunks.length > 0 ? (
                   <>
                     <Download className="h-5 w-5 mr-2" />
-                    Download yearly chunks above
+                    Download yearly chunks above, then upload each year
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-5 w-5 mr-2" />
-                    Process File
+                    Upload & Process Chat
                   </>
                 )}
               </Button>
+              
+              {yearlyChunks.length > 0 && (
+                <p className="text-xs text-muted-foreground text-center mt-2 animate-fade-in">
+                  💡 After downloading, select a yearly file above to upload and process it
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
