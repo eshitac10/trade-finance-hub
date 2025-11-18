@@ -130,10 +130,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 </DropdownMenu>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/stats")}
+                  onClick={() => navigate("/statistics")}
                   className="banking-text font-bold text-foreground hover:text-accent hover:bg-accent/10 transition-colors"
                 >
-                  Stats
+                  Statistics
                 </Button>
               </div>
 
@@ -225,10 +225,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       </div>
                       <Button
                         variant="ghost"
-                        onClick={() => navigate("/stats")}
+                        onClick={() => navigate("/statistics")}
                         className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10"
                       >
-                        Stats
+                        Statistics
                       </Button>
                       <div className="border-t border-border pt-4">
                         <Button
