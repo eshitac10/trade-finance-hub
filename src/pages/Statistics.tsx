@@ -52,9 +52,7 @@ interface AnalyticsData {
 const Statistics = () => {
   const [stats, setStats] = useState<UsageStats | null>(null);
   const [oldDataStats, setOldDataStats] = useState<OldDataStats | null>(null);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [cleanupLoading, setCleanupLoading] = useState(false);
   const [timeSeriesData, setTimeSeriesData] = useState<{
     week: TimeSeriesData[];
@@ -243,42 +241,8 @@ const Statistics = () => {
     }
   };
 
-  const fetchAnalytics = async () => {
-    setAnalyticsLoading(true);
-    try {
-      // Simulated analytics data - in production this would come from real analytics API
-      const mockAnalytics: AnalyticsData = {
-        dailyUsers: Math.floor(Math.random() * 100) + 50,
-        monthlyUsers: Math.floor(Math.random() * 500) + 200,
-        yearlyUsers: Math.floor(Math.random() * 2000) + 1000,
-        avgDailyTime: Math.random() * 60 + 15,
-        avgMonthlyTime: Math.random() * 300 + 100,
-        avgYearlyTime: Math.random() * 3000 + 1000,
-        topPages: [
-          { path: '/dashboard', views: Math.floor(Math.random() * 1000) + 500 },
-          { path: '/forum', views: Math.floor(Math.random() * 800) + 400 },
-          { path: '/events', views: Math.floor(Math.random() * 600) + 300 },
-          { path: '/memories', views: Math.floor(Math.random() * 400) + 200 },
-          { path: '/articles', views: Math.floor(Math.random() * 300) + 150 }
-        ].sort((a, b) => b.views - a.views)
-      };
-
-      setAnalytics(mockAnalytics);
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load analytics data',
-        variant: 'destructive'
-      });
-    } finally {
-      setAnalyticsLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchStats();
-    fetchAnalytics();
   }, []);
 
   if (loading) {
@@ -296,24 +260,23 @@ const Statistics = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Statistics</h1>
-            <p className="text-muted-foreground">Real-time analytics and data usage insights</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">Statistics</h1>
+              <p className="text-muted-foreground">Database insights and data usage</p>
+            </div>
+            <Button onClick={fetchStats} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
-          <Button onClick={() => { fetchStats(); fetchAnalytics(); }} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh All
-          </Button>
-        </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="cleanup">Data Cleanup</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="trends">Trends</TabsTrigger>
+              <TabsTrigger value="cleanup">Data Cleanup</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -383,152 +346,9 @@ const Statistics = () => {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Real-Time User Analytics
-                </CardTitle>
-                <CardDescription>Live usage data and user engagement metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {analyticsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                ) : analytics ? (
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        Active Users
-                      </h3>
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Daily</CardDescription>
-                            <CardTitle className="text-3xl">{analytics.dailyUsers}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">Users in last 24 hours</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Monthly</CardDescription>
-                            <CardTitle className="text-3xl">{analytics.monthlyUsers}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">Users in last 30 days</p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Yearly</CardDescription>
-                            <CardTitle className="text-3xl">{analytics.yearlyUsers}</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">Users in last 12 months</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Clock className="h-5 w-5" />
-                        Average Time Spent
-                      </h3>
-                      <div className="grid gap-4 md:grid-cols-3">
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Daily Average</CardDescription>
-                            <CardTitle className="text-2xl">
-                              {Math.floor(analytics.avgDailyTime)} min
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              {(analytics.avgDailyTime / 60).toFixed(1)} hours per user
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Monthly Average</CardDescription>
-                            <CardTitle className="text-2xl">
-                              {Math.floor(analytics.avgMonthlyTime)} min
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              {(analytics.avgMonthlyTime / 60).toFixed(1)} hours per user
-                            </p>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardHeader className="pb-3">
-                            <CardDescription>Yearly Average</CardDescription>
-                            <CardTitle className="text-2xl">
-                              {Math.floor(analytics.avgYearlyTime)} min
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-muted-foreground">
-                              {(analytics.avgYearlyTime / 60).toFixed(1)} hours per user
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Eye className="h-5 w-5" />
-                        Most Viewed Pages
-                      </h3>
-                      <div className="space-y-3">
-                        {analytics.topPages.map((page, index) => (
-                          <div key={page.path} className="flex items-center justify-between p-4 border rounded-lg bg-card">
-                            <div className="flex items-center gap-3">
-                              <Badge variant="secondary" className="w-8 h-8 flex items-center justify-center">
-                                {index + 1}
-                              </Badge>
-                              <div>
-                                <p className="font-medium">{page.path}</p>
-                                <p className="text-sm text-muted-foreground">{page.views.toLocaleString()} views</p>
-                              </div>
-                            </div>
-                            <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <Button onClick={fetchAnalytics} variant="outline" size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Refresh Analytics
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No analytics data available
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="trends" className="space-y-6">
+            <TabsContent value="trends" className="space-y-6">
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
