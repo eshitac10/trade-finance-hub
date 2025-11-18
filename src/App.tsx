@@ -16,6 +16,7 @@ import Events from "./pages/Events";
 import ChatImport from "./pages/ChatImport";
 import Memories from "./pages/Memories";
 import MemoriesGoogleDrive from "./pages/MemoriesGoogleDrive";
+import Stats from "./pages/Stats";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/events" element={<Events />} />
           <Route path="/chat-import" element={<ChatImport />} />
           <Route path="/memories" element={<MemoriesGoogleDrive />} />
+          <Route path="/stats" element={<Stats />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
