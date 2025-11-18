@@ -18,7 +18,7 @@ import {
   Upload, FileText, Clock, Users, Tag, Calendar, 
   Download, Edit2, Trash2, Merge, Split, Search,
   AlertCircle, ChevronRight, MessageSquare, Filter, Copy,
-  TrendingUp, Activity, BarChart3, Sparkles
+  TrendingUp, Activity, BarChart3, Sparkles, X
 } from 'lucide-react';
 import CreativeLoader from '@/components/CreativeLoader';
 import { formatDistanceToNow } from 'date-fns';
@@ -98,6 +98,11 @@ const ChatImport = () => {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
   const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
+  
+  // Edit and delete states
+  const [editingImport, setEditingImport] = useState<WhatsAppImport | null>(null);
+  const [newFilename, setNewFilename] = useState('');
+  const [deletingImport, setDeletingImport] = useState<WhatsAppImport | null>(null);
   const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -514,8 +519,6 @@ const ChatImport = () => {
   };
 
   const handleDeleteImport = async (importId: string) => {
-    if (!confirm("Delete this failed import? You can then re-upload the file with the fixed parser.")) return;
-    
     const { error } = await supabase
       .from('whatsapp_imports')
       .delete()
@@ -530,13 +533,39 @@ const ChatImport = () => {
     } else {
       toast({
         title: "Success",
-        description: "Import deleted. Re-upload your file to process it with the fixed parser."
+        description: "Import deleted successfully",
       });
       if (selectedImport === importId) {
         setSelectedImport(null);
         setSelectedEvent(null);
         setMessages([]);
       }
+      setDeletingImport(null);
+      fetchImports();
+    }
+  };
+
+  const handleEditImport = async () => {
+    if (!editingImport || !newFilename.trim()) return;
+
+    const { error } = await supabase
+      .from('whatsapp_imports')
+      .update({ filename: newFilename.trim() })
+      .eq('id', editingImport.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update filename",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Filename updated successfully",
+      });
+      setEditingImport(null);
+      setNewFilename('');
       fetchImports();
     }
   };
@@ -864,7 +893,7 @@ const ChatImport = () => {
 
         {/* Sample Preview Dialog */}
         <Dialog open={showSamplePreview} onOpenChange={setShowSamplePreview}>
-          <DialogContent>
+          <DialogContent className="animate-scale-in">
             <DialogHeader>
               <DialogTitle>Sample Preview</DialogTitle>
               <DialogDescription>
@@ -876,6 +905,97 @@ const ChatImport = () => {
                 <div key={i} className="text-sm font-mono mb-1">{line}</div>
               ))}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Import Dialog */}
+        <Dialog open={!!editingImport} onOpenChange={(open) => !open && setEditingImport(null)}>
+          <DialogContent className="animate-scale-in bg-card/95 backdrop-blur-xl border-2 border-primary/20 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <div className="p-2 bg-gradient-primary rounded-lg">
+                  <Edit2 className="h-5 w-5 text-primary-foreground" />
+                </div>
+                Edit Filename
+              </DialogTitle>
+              <DialogDescription>
+                Update the name of this imported chat
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="filename" className="text-sm font-semibold">Filename</Label>
+                <Input
+                  id="filename"
+                  value={newFilename}
+                  onChange={(e) => setNewFilename(e.target.value)}
+                  placeholder="Enter new filename"
+                  className="h-11 border-2 focus:border-primary transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleEditImport();
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setEditingImport(null)}
+                className="transition-all hover:scale-105"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditImport}
+                disabled={!newFilename.trim()}
+                className="bg-gradient-primary hover:opacity-90 transition-all hover:scale-105 shadow-md"
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={!!deletingImport} onOpenChange={(open) => !open && setDeletingImport(null)}>
+          <DialogContent className="animate-scale-in bg-card/95 backdrop-blur-xl border-2 border-destructive/20 shadow-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl text-destructive">
+                <div className="p-2 bg-destructive/10 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-destructive" />
+                </div>
+                Delete Import
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this import? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            {deletingImport && (
+              <div className="py-4 px-4 bg-muted/50 rounded-lg border border-border/50">
+                <div className="font-semibold mb-1">{deletingImport.filename}</div>
+                <div className="text-sm text-muted-foreground">
+                  {deletingImport.total_messages} messages • {(deletingImport.file_size / 1024 / 1024).toFixed(2)} MB
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setDeletingImport(null)}
+                className="transition-all hover:scale-105"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deletingImport && handleDeleteImport(deletingImport.id)}
+                className="transition-all hover:scale-105 shadow-md"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Import
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
 
@@ -892,21 +1012,22 @@ const ChatImport = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[400px] pr-4">
+                  <ScrollArea className="h-[400px] pr-4">
                   {imports.map((imp, idx) => (
                     <Card
                       key={imp.id}
-                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group ${
+                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group animate-fade-in ${
                         selectedImport === imp.id 
                           ? 'border-primary bg-primary/5 shadow-accent' 
                           : imp.total_messages === 0
                           ? 'border-destructive/50 bg-destructive/5'
                           : 'border-border hover:border-primary/50'
                       }`}
+                      style={{ animationDelay: `${idx * 50}ms` }}
                       onClick={() => handleSelectImport(imp.id)}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="font-semibold pr-8 break-words flex-1">{imp.filename}</div>
+                        <div className="font-semibold pr-16 break-words flex-1">{imp.filename}</div>
                         {imp.total_messages === 0 && (
                           <Badge variant="destructive" className="text-xs shrink-0">
                             Failed
@@ -919,18 +1040,35 @@ const ChatImport = () => {
                       <div className="text-xs text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(imp.upload_date), { addSuffix: true })}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteImport(imp.id);
-                        }}
-                        title={imp.total_messages === 0 ? "Delete failed import & re-upload" : "Delete import"}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      
+                      {/* Action buttons */}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 animate-scale-in">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all hover:scale-110"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingImport(imp);
+                            setNewFilename(imp.filename);
+                          }}
+                          title="Edit filename"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive transition-all hover:scale-110"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingImport(imp);
+                          }}
+                          title="Delete import"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </ScrollArea>
