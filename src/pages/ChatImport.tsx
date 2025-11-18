@@ -103,6 +103,8 @@ const ChatImport = () => {
   const [editingImport, setEditingImport] = useState<WhatsAppImport | null>(null);
   const [newFilename, setNewFilename] = useState('');
   const [deletingImport, setDeletingImport] = useState<WhatsAppImport | null>(null);
+  const [selectedImports, setSelectedImports] = useState<Set<string>>(new Set());
+  const [deletingBulk, setDeletingBulk] = useState(false);
   const [summaryLength, setSummaryLength] = useState<'short' | 'medium' | 'long'>('medium');
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
