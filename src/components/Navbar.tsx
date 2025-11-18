@@ -128,13 +128,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate("/statistics")}
-                  className="banking-text font-bold text-foreground hover:text-accent hover:bg-accent/10 transition-colors"
-                >
-                  Statistics
-                </Button>
               </div>
 
               {/* Desktop Actions */}
@@ -223,13 +216,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           Upcoming Webinars/Events
                         </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        onClick={() => navigate("/statistics")}
-                        className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10"
-                      >
-                        Statistics
-                      </Button>
                       <div className="border-t border-border pt-4">
                         <Button
                           onClick={handleLogout}
