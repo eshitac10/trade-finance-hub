@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          duration_seconds: number | null
+          event_type: string
+          id: string
+          page_path: string
+          session_id: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          duration_seconds?: number | null
+          event_type: string
+          id?: string
+          page_path: string
+          session_id: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          duration_seconds?: number | null
+          event_type?: string
+          id?: string
+          page_path?: string
+          session_id?: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           description: string | null
