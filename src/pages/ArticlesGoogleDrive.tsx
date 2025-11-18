@@ -102,7 +102,7 @@ const ArticlesGoogleDrive = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-card backdrop-blur-xl border-border/60">
+            <Card className="bg-card backdrop-blur-xl border-border/60">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                 <FileText className="h-6 w-6 text-primary" />
