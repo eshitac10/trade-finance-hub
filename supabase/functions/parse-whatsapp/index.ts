@@ -97,6 +97,7 @@ function parseTimestamp(timestamp: string): string {
         let date: Date;
         
         if (format === formats[0]) {
+          // MM/DD/YYYY or MM/DD/YY format (WhatsApp standard)
           let [, month, day, year, hours, minutes, seconds, period] = match;
           
           // Handle 2-digit year
@@ -108,8 +109,9 @@ function parseTimestamp(timestamp: string): string {
           // Handle 12-hour format
           let hour = parseInt(hours);
           if (period) {
-            if (period.toLowerCase() === 'pm' && hour < 12) hour += 12;
-            if (period.toLowerCase() === 'am' && hour === 12) hour = 0;
+            const isPM = period.toLowerCase() === 'pm';
+            if (isPM && hour < 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
           }
           
           date = new Date(fullYear, parseInt(month) - 1, parseInt(day), hour, parseInt(minutes), parseInt(seconds || '0'));

@@ -990,7 +990,7 @@ const ChatImport = () => {
             </span>
           </div>
           <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-            Member Important Conversations
+            Member Conversations
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Upload WhatsApp chats and automatically extract key events and conversations with intelligent AI analysis

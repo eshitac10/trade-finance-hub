@@ -57,7 +57,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/95 border-b border-border shadow-lg">
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background border-b border-border shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
 
@@ -93,7 +93,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       onClick={() => navigate("/chat-import")}
                       className="banking-text cursor-pointer rounded-lg px-4 py-3 text-foreground hover:bg-accent/10 hover:text-accent transition-all duration-300 focus:bg-accent/10 focus:text-accent"
                     >
-                      Member Important Conversations
+                      Member Conversations
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => navigate("/memories")}
