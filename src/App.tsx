@@ -27,22 +27,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<DashboardHome />} />
-          <Route path="/articles" element={<ArticlesGoogleDrive />} />
-          <Route path="/article/:id" element={<ArticleDetail />} />
-          <Route path="/forum/topic/:topicId" element={<TopicDetail />} />
-          <Route path="/webinars" element={<Webinars />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/chat-import" element={<ChatImport />} />
-          <Route path="/memories" element={<MemoriesGoogleDrive />} />
-          <Route path="/statistics" element={<Statistics />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
