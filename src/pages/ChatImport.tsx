@@ -510,14 +510,15 @@ const ChatImport = () => {
         importId = (result2 as any)?.importId;
       }
 
-      // Poll import status with better timeout handling
+      // Enhanced polling with better feedback
       const pollImportStatus = async (id: string) => {
         const start = Date.now();
-        const timeout = 120000; // 2 minutes max polling
+        const timeout = 180000; // 3 minutes max polling
         let attempts = 0;
         
         while (Date.now() - start < timeout) {
           attempts++;
+          
           const { data: imp, error } = await supabase
             .from('whatsapp_imports')
             .select('status, total_messages')
@@ -526,54 +527,69 @@ const ChatImport = () => {
             
           if (error) {
             console.error('Error polling status:', error);
-            break;
+            return { success: false, error: 'Database error' };
           }
           
           console.log(`Poll attempt ${attempts}: status=${imp?.status}, messages=${imp?.total_messages}`);
           
-          if (imp?.status === 'completed' && imp?.total_messages > 0) {
-            return { success: true, messages: imp.total_messages };
+          // Check if completed
+          if (imp?.status === 'completed') {
+            // Double-check we have messages
+            const { count } = await supabase
+              .from('whatsapp_messages')
+              .select('*', { count: 'exact', head: true })
+              .eq('import_id', id);
+              
+            if (count && count > 0) {
+              return { success: true, messages: count };
+            }
           }
           
           if (imp?.status === 'failed') {
             return { success: false, error: 'Processing failed' };
           }
           
-          // Wait 2 seconds before next poll
-          await new Promise(r => setTimeout(r, 2000));
+          // Wait 3 seconds before next poll
+          await new Promise(r => setTimeout(r, 3000));
         }
         
-        console.warn('Polling timed out after', attempts, 'attempts');
-        return { success: false, error: 'Processing timeout - will continue in background' };
+        // Check one final time after timeout
+        const { data: finalCheck } = await supabase
+          .from('whatsapp_imports')
+          .select('status, total_messages')
+          .eq('id', id)
+          .single();
+          
+        if (finalCheck?.status === 'completed' && finalCheck?.total_messages > 0) {
+          return { success: true, messages: finalCheck.total_messages };
+        }
+        
+        return { success: false, error: 'Processing timeout' };
       };
 
       if (importId) {
         const result = await pollImportStatus(importId);
         
-        if (result.success) {
+        if (!result.success) {
           toast({
-            title: 'Processing complete!',
-            description: `Successfully processed ${result.messages} messages`,
+            title: 'Processing issue',
+            description: result.error || 'Please refresh the page to see your imported chats',
+            variant: 'destructive',
           });
-        } else {
-          toast({
-            title: 'Processing in background',
-            description: result.error || 'Your file is being processed. Refresh in a minute to see results.',
-            variant: 'default',
-          });
+          setUploading(false);
+          setProcessing(false);
+          return;
         }
-      }
 
+        // Success - clear states and refresh
+        setFile(null);
+        setShowSamplePreview(false);
+        setYearlyChunks([]);
 
-      setFile(null);
-      setShowSamplePreview(false);
-      setYearlyChunks([]); // Clear yearly chunks
-
-      // Refresh imports list
-      await fetchImports();
-      
-      // Auto-select and load the newly imported data
-      if (importId) {
+        // Refresh imports list
+        await fetchImports();
+        
+        // Auto-select and load the newly imported data
         setSelectedImport(importId);
         
         // Fetch events for this import
@@ -590,12 +606,25 @@ const ChatImport = () => {
           await fetchMessages(firstEvent.id);
           
           toast({
-            title: 'Import complete!',
+            title: '✅ Import complete!',
             description: `Found ${evts.length} conversations with ${evts.reduce((sum, e) => sum + (e.message_count || 0), 0)} messages`,
           });
         } else {
           // No events detected, load all messages from this import
-          await fetchMessagesByImport(importId);
+          const { data: msgs } = await supabase
+            .from('whatsapp_messages')
+            .select('*')
+            .eq('import_id', importId)
+            .order('datetime_iso', { ascending: true })
+            .limit(100);
+            
+          if (msgs && msgs.length > 0) {
+            setMessages(msgs);
+            toast({
+              title: '✅ Import complete!',
+              description: `Loaded ${result.messages} messages (showing first 100)`,
+            });
+          }
         }
       }
     } catch (error) {
@@ -1170,11 +1199,12 @@ const ChatImport = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                  <ScrollArea className="h-[400px] pr-4">
+                  <ScrollArea className="h-[600px]">
+                  <div className="space-y-2 pr-4">
                   {imports.map((imp, idx) => (
                     <Card
                       key={imp.id}
-                      className={`mb-3 p-4 cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group animate-fade-in ${
+                      className={`cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group animate-fade-in ${
                         selectedImport === imp.id 
                           ? 'border-primary bg-primary/5 shadow-accent' 
                           : imp.total_messages === 0
@@ -1229,6 +1259,7 @@ const ChatImport = () => {
                       </div>
                     </Card>
                   ))}
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
