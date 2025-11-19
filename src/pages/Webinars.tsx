@@ -83,7 +83,19 @@ const Webinars = () => {
             month: 'short',
             year: '2-digit'
           })
-        }));
+        }))
+        .sort((a: any, b: any) => {
+          // Extract webinar number from title (e.g., "TFW 18th Webinar" -> 18)
+          const getWebinarNumber = (title: string) => {
+            const match = title.match(/TFW\s+(\d+)(st|nd|rd|th)\s+Webinar/i);
+            return match ? parseInt(match[1]) : 0;
+          };
+          
+          const numA = getWebinarNumber(a.name);
+          const numB = getWebinarNumber(b.name);
+          
+          return numA - numB;
+        });
 
       setGDriveVideos(videoFiles);
     } catch (error) {
