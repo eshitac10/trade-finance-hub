@@ -186,9 +186,9 @@ const Security = () => {
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-muted rounded-lg">
+            <div className="mt-6 p-4 bg-card rounded-lg border border-border">
               <p className="text-sm text-muted-foreground">
-                <strong>Note:</strong> For password reset via OTP to your mobile number, 
+                <strong className="text-foreground">Note:</strong> For password reset via OTP to your mobile number, 
                 please contact the administrator. Phone authentication requires additional setup.
               </p>
             </div>

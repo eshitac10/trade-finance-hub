@@ -1001,12 +1001,12 @@ const ChatImport = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background dark:bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 dark:bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-primary opacity-5 dark:opacity-10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-primary opacity-5 rounded-full blur-3xl"></div>
       </div>
 
       <Navbar />
@@ -1263,8 +1263,8 @@ const ChatImport = () => {
               </DialogDescription>
             </DialogHeader>
             {deletingImport && (
-              <div className="py-4 px-4 bg-muted/50 rounded-lg border border-border/50">
-                <div className="font-semibold mb-1">{deletingImport.filename}</div>
+              <div className="py-4 px-4 bg-card rounded-lg border border-border">
+                <div className="font-semibold mb-1 text-foreground">{deletingImport.filename}</div>
                 <div className="text-sm text-muted-foreground">
                   {deletingImport.total_messages} messages • {(deletingImport.file_size / 1024 / 1024).toFixed(2)} MB
                 </div>
@@ -1293,7 +1293,7 @@ const ChatImport = () => {
         {/* Imports List & Timeline */}
         {imports.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <Card className="lg:col-span-1 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
+            <Card className="lg:col-span-1 bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-xl">
@@ -1590,8 +1590,8 @@ const ChatImport = () => {
             </Card>
 
             {/* Messages Card */}
-            <Card className="mt-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 dark:from-accent/10 dark:to-primary/10 pointer-events-none"></div>
+            <Card className="mt-8 bg-card backdrop-blur-xl border-border/60 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 pointer-events-none"></div>
             <CardHeader className="relative">
               <div className="flex items-center justify-between">
                 <div>
@@ -1663,7 +1663,7 @@ const ChatImport = () => {
               )}
               
               {/* Advanced Filters */}
-              <div className="space-y-4 mt-6 p-6 bg-gradient-to-br from-muted/30 to-muted/10 rounded-xl border border-border/50">
+              <div className="space-y-4 mt-6 p-6 bg-card/50 rounded-xl border border-border">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

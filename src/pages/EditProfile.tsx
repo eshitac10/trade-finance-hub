@@ -171,7 +171,7 @@ const EditProfile = () => {
                   type="email"
                   value={profile.email}
                   disabled
-                  className="bg-muted"
+                  className="bg-muted text-muted-foreground"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Email cannot be changed
