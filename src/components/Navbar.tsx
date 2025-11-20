@@ -325,20 +325,14 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
             </>
           ) : (
             <>
-              {/* Unauthenticated - Login/Signup centered with theme toggle on right */}
-              <div className="hidden md:flex items-center justify-center flex-1 space-x-4">
+              {/* Unauthenticated - Login centered with theme toggle on right */}
+              <div className="hidden md:flex items-center justify-center flex-1">
                 <Button
                   onClick={() => navigate("/auth")}
                   variant="outline"
                   className="border-[#C9A961] text-[#C9A961] hover:bg-[#C9A961]/20 banking-text font-bold"
                 >
                   Login
-                </Button>
-                <Button
-                  onClick={() => navigate("/signup")}
-                  className="bg-gradient-to-r from-[#C9A961] to-[#1A0505] hover:shadow-lg text-white banking-text font-bold"
-                >
-                  Sign Up
                 </Button>
               </div>
 
@@ -377,12 +371,6 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                         className="border-border hover:bg-accent/10 banking-text font-bold w-full"
                       >
                         Login
-                      </Button>
-                      <Button
-                        onClick={() => navigate("/signup")}
-                        className="bg-gradient-primary hover:shadow-lg banking-text font-bold w-full"
-                      >
-                        Sign Up
                       </Button>
                     </div>
                   </SheetContent>
