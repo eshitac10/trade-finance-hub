@@ -146,17 +146,6 @@ const AdminPanel = () => {
   };
 
   const handleResetPassword = async (userId: string, email: string) => {
-    // Prevent password reset for super admin accounts
-    const superAdmins = ['its.priyo@gmail.com', 'pproy1956@gmail.com'];
-    if (superAdmins.includes(email)) {
-      toast({
-        title: "Cannot Reset",
-        description: "Super admin passwords cannot be reset from this panel",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!confirm(`Are you sure you want to reset the password for ${email}?`)) return;
 
     try {
@@ -199,16 +188,6 @@ const AdminPanel = () => {
   };
 
   const handleDeleteUser = async (userId: string, email: string) => {
-    // Prevent deletion of super admin accounts
-    const superAdmins = ['its.priyo@gmail.com', 'pproy1956@gmail.com'];
-    if (superAdmins.includes(email)) {
-      toast({
-        title: "Cannot Delete",
-        description: "Super admin accounts cannot be deleted",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!confirm(`Are you sure you want to delete user ${email}?`)) return;
 
@@ -387,8 +366,7 @@ const AdminPanel = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleResetPassword(user.id, user.email)}
-                        disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
-                        title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin passwords cannot be reset" : "Reset password"}
+                        title="Reset password"
                       >
                         <KeyRound className="h-4 w-4" />
                       </Button>
@@ -396,8 +374,7 @@ const AdminPanel = () => {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleDeleteUser(user.id, user.email)}
-                        disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
-                        title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin accounts cannot be deleted" : "Delete user"}
+                        title="Delete user"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
