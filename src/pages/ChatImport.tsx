@@ -119,19 +119,29 @@ const ChatImport = () => {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const checkAuth = async () => {
+    setLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate('/auth');
       return;
     }
-    fetchImports();
+    await fetchImports();
+    setLoading(false);
   };
 
   const fetchImports = async () => {
-    setLoading(true);
     const { data, error } = await supabase
       .from('whatsapp_imports')
       .select('*')
@@ -146,7 +156,6 @@ const ChatImport = () => {
     } else {
       setImports(data || []);
     }
-    setLoading(false);
   };
 
   const fetchEvents = async (importId: string) => {
