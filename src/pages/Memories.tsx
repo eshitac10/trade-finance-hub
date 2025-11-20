@@ -29,6 +29,7 @@ interface MemoryFolder {
   user_id: string;
   name: string;
   created_at: string;
+  cover_url?: string | null;
 }
 
 const Memories = () => {
@@ -53,6 +54,13 @@ const Memories = () => {
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [targetFolder, setTargetFolder] = useState<string | null>(null);
   const [editFolderId, setEditFolderId] = useState<string | null>(null);
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
+  const [selectedFolderToDelete, setSelectedFolderToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editCoverDialogOpen, setEditCoverDialogOpen] = useState(false);
+  const [selectedFolderForCover, setSelectedFolderForCover] = useState<MemoryFolder | null>(null);
+  const [coverImageSource, setCoverImageSource] = useState<'upload' | 'select' | null>(null);
+  const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -72,6 +80,16 @@ const Memories = () => {
       return;
     }
     setCurrentUserId(session.user.id);
+    
+    // Check if user is admin
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .eq("role", "admin")
+      .single();
+    
+    setIsAdmin(!!roles);
   };
 
   const fetchFolders = async () => {
@@ -345,12 +363,19 @@ const Memories = () => {
     }
   };
 
-  const handleDeleteFolder = async (folderId: string) => {
+  const handleDeleteFolderConfirm = (folderId: string, folderName: string) => {
+    setSelectedFolderToDelete({ id: folderId, name: folderName });
+    setDeleteFolderDialogOpen(true);
+  };
+
+  const handleDeleteFolder = async () => {
+    if (!selectedFolderToDelete) return;
+
     try {
       const { error } = await supabase
         .from('memory_folders')
         .delete()
-        .eq('id', folderId);
+        .eq('id', selectedFolderToDelete.id);
 
       if (error) throw error;
 
@@ -359,14 +384,89 @@ const Memories = () => {
         description: "Folder deleted successfully",
       });
 
-      if (selectedFolder === folderId) {
+      if (selectedFolder === selectedFolderToDelete.id) {
         setSelectedFolder(null);
       }
+      setDeleteFolderDialogOpen(false);
       fetchFolders();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to delete folder",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditCover = (folder: MemoryFolder) => {
+    setSelectedFolderForCover(folder);
+    setCoverImageSource(null);
+    setSelectedCoverFile(null);
+    setEditCoverDialogOpen(true);
+  };
+
+  const handleUploadCover = async () => {
+    if (!selectedFolderForCover || !selectedCoverFile) return;
+
+    try {
+      const fileExt = selectedCoverFile.name.split('.').pop();
+      const fileName = `covers/${selectedFolderForCover.id}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('memories')
+        .upload(fileName, selectedCoverFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('memories')
+        .getPublicUrl(fileName);
+
+      const { error: updateError } = await supabase
+        .from('memory_folders')
+        .update({ cover_url: publicUrl })
+        .eq('id', selectedFolderForCover.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success!",
+        description: "Folder cover updated successfully",
+      });
+
+      setEditCoverDialogOpen(false);
+      fetchFolders();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update cover",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelectMemoryAsCover = async (memoryUrl: string) => {
+    if (!selectedFolderForCover) return;
+
+    try {
+      const { error } = await supabase
+        .from('memory_folders')
+        .update({ cover_url: memoryUrl })
+        .eq('id', selectedFolderForCover.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Folder cover updated successfully",
+      });
+
+      setEditCoverDialogOpen(false);
+      fetchFolders();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update cover",
         variant: "destructive",
       });
     }
@@ -542,10 +642,21 @@ const Memories = () => {
                 <Folder className="h-4 w-4" />
                 {folder.name}
               </Button>
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditCover(folder)}
+                  className="h-8 w-8 p-0 text-primary hover:text-primary"
+                  title="Edit folder cover"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleDeleteFolder(folder.id)}
+                onClick={() => handleDeleteFolderConfirm(folder.id, folder.name)}
                 className="h-8 w-8 p-0 text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
@@ -705,7 +816,7 @@ const Memories = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Dialog */}
+        {/* Delete Memory Dialog */}
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
             <AlertDialogHeader>
@@ -725,6 +836,128 @@ const Memories = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Delete Folder Dialog */}
+        <AlertDialog open={deleteFolderDialogOpen} onOpenChange={setDeleteFolderDialogOpen}>
+          <AlertDialogContent className="bg-card/95 backdrop-blur-xl border-border/60">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="professional-heading text-2xl">Delete Folder</AlertDialogTitle>
+              <AlertDialogDescription className="banking-text">
+                Are you sure you want to delete <strong>{selectedFolderToDelete?.name}</strong>? 
+                This will not delete the memories inside, but they will be moved to "All Memories".
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteFolder}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete Folder
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Edit Folder Cover Dialog */}
+        <Dialog open={editCoverDialogOpen} onOpenChange={setEditCoverDialogOpen}>
+          <DialogContent className="bg-card/98 backdrop-blur-2xl border-accent/30 shadow-2xl rounded-2xl max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="professional-heading text-3xl bg-gradient-primary bg-clip-text text-transparent">
+                Edit Folder Cover - {selectedFolderForCover?.name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 pt-4">
+              {!coverImageSource ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => setCoverImageSource('upload')}
+                    className="h-32 bg-gradient-to-br from-primary to-accent hover:shadow-premium transition-all text-primary-foreground font-bold rounded-xl flex flex-col gap-2"
+                  >
+                    <Plus className="h-8 w-8" />
+                    Upload from Gallery
+                  </Button>
+                  <Button
+                    onClick={() => setCoverImageSource('select')}
+                    className="h-32 bg-gradient-to-br from-accent to-primary hover:shadow-premium transition-all text-accent-foreground font-bold rounded-xl flex flex-col gap-2"
+                  >
+                    <ImageIcon className="h-8 w-8" />
+                    Choose from Folder
+                  </Button>
+                </div>
+              ) : coverImageSource === 'upload' ? (
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group">
+                    <input
+                      type="file"
+                      id="cover-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => setSelectedCoverFile(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="cover-upload" className="cursor-pointer">
+                      <div className="p-4 bg-primary/10 rounded-full inline-block mb-3 group-hover:scale-110 transition-transform">
+                        <ImageIcon className="h-8 w-8 text-primary" />
+                      </div>
+                      <p className="banking-text text-base text-foreground mb-2 font-medium">
+                        {selectedCoverFile ? `✓ ${selectedCoverFile.name}` : "Click to upload cover image"}
+                      </p>
+                    </label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setCoverImageSource(null)}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleUploadCover}
+                      disabled={!selectedCoverFile}
+                      className="flex-1 bg-gradient-to-r from-primary to-accent hover:shadow-premium transition-all text-primary-foreground font-bold"
+                    >
+                      Set as Cover
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="banking-text text-sm text-muted-foreground">
+                    Select a memory from this folder to use as cover:
+                  </p>
+                  <div className="grid grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                    {memories
+                      .filter(m => m.folder_id === selectedFolderForCover?.id && m.file_type === 'image')
+                      .map((memory) => (
+                        <button
+                          key={memory.id}
+                          onClick={() => handleSelectMemoryAsCover(memory.image_url)}
+                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-all group"
+                        >
+                          <img
+                            src={memory.image_url}
+                            alt={memory.caption || "Memory"}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="text-white font-bold">Select</span>
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                  <Button
+                    onClick={() => setCoverImageSource(null)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Back
+                  </Button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
