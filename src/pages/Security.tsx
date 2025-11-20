@@ -146,7 +146,7 @@ const Security = () => {
           <CardContent>
             <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Old Password
                 </label>
                 <Input
@@ -158,7 +158,7 @@ const Security = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   New Password
                 </label>
                 <Input
@@ -170,7 +170,7 @@ const Security = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Confirm New Password
                 </label>
                 <Input

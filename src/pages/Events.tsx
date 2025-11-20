@@ -460,7 +460,7 @@ ${event.location ? `📍 Location: ${event.location}` : ''}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-lg">{event.title}</h3>
+                        <h3 className="font-semibold text-lg text-foreground">{event.title}</h3>
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             size="sm"

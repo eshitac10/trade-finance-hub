@@ -1019,7 +1019,7 @@ const ChatImport = () => {
               AI-Powered Conversation Analysis
             </span>
           </div>
-          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 text-foreground">
             Member Conversations
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -1028,8 +1028,8 @@ const ChatImport = () => {
         </div>
 
         {/* Upload Section */}
-        <Card className="mb-8 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-primary opacity-5 dark:opacity-10"></div>
+        <Card className="mb-8 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
           <CardHeader className="relative">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <div className="p-3 bg-gradient-primary rounded-xl">

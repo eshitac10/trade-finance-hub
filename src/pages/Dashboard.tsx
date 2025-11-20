@@ -189,7 +189,7 @@ const Dashboard = () => {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="professional-heading text-4xl text-primary mb-2 flex items-center gap-3">
+              <h1 className="professional-heading text-4xl text-foreground mb-2 flex items-center gap-3">
                 <Sparkles className="h-10 w-10 text-accent animate-pulse" />
                 Welcome Back! 👋
               </h1>
@@ -225,7 +225,7 @@ const Dashboard = () => {
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-4xl font-bold text-primary mb-1 group-hover:scale-105 transition-transform">{stat.value}</p>
+                    <p className="text-4xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform">{stat.value}</p>
                     <p className="text-sm text-muted-foreground mb-3">{stat.label}</p>
                     <Progress value={stat.progress} className="h-1.5" />
                   </div>
@@ -275,7 +275,7 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Quick Actions */}
               <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300 animate-slide-in-left">
-                <h3 className="professional-heading text-xl text-primary mb-4 flex items-center">
+                <h3 className="professional-heading text-xl text-foreground mb-4 flex items-center">
                   <Zap className="h-5 w-5 mr-2 text-accent" />
                   Quick Actions
                 </h3>
@@ -300,7 +300,7 @@ const Dashboard = () => {
 
               {/* Performance Chart Placeholder */}
               <Card className="p-6 bg-gradient-to-br from-card/90 to-accent/5 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300 animate-slide-in-right">
-                <h3 className="professional-heading text-xl text-primary mb-4 flex items-center">
+                <h3 className="professional-heading text-xl text-foreground mb-4 flex items-center">
                   <BarChart3 className="h-5 w-5 mr-2 text-accent" />
                   Your Activity Trends
                 </h3>
@@ -320,7 +320,7 @@ const Dashboard = () => {
           <TabsContent value="activity" className="space-y-4">
             <Card className="p-6 bg-card/90 backdrop-blur-sm border-border hover:shadow-2xl transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="professional-heading text-xl text-primary flex items-center">
+                <h3 className="professional-heading text-xl text-foreground flex items-center">
                   <Activity className="h-5 w-5 mr-2 text-accent animate-pulse" />
                   Recent Activity
                 </h3>

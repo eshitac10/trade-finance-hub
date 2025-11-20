@@ -152,7 +152,7 @@ const EditProfile = () => {
           <CardContent>
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Full Name
                 </label>
                 <Input
@@ -164,7 +164,7 @@ const EditProfile = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Email
                 </label>
                 <Input
@@ -178,7 +178,7 @@ const EditProfile = () => {
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Mobile Number
                 </label>
                 <Input
@@ -189,7 +189,7 @@ const EditProfile = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   Birthday
                 </label>
                 <Input
@@ -199,7 +199,7 @@ const EditProfile = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">
+                <label className="text-sm font-medium mb-2 block text-foreground">
                   About
                 </label>
                 <Textarea

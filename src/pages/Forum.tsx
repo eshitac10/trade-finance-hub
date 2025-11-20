@@ -329,7 +329,7 @@ const Forum = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="professional-heading text-3xl sm:text-4xl text-primary mb-2">Forum</h1>
+          <h1 className="professional-heading text-3xl sm:text-4xl text-foreground mb-2">Forum</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             Connect and discuss with trade finance professionals
           </p>

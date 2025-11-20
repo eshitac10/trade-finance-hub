@@ -210,7 +210,7 @@ const DashboardHome = () => {
                   <BookOpen className="h-12 w-12 text-accent-foreground" />
                 </div>
                 <div className="h-1 w-16 bg-gradient-to-r from-accent to-primary rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
-                <h3 className="professional-heading text-2xl text-foreground dark:text-[#8B0000] mb-5 group-hover:text-accent transition-colors duration-500">
+                <h3 className="professional-heading text-2xl text-foreground mb-5 group-hover:text-accent transition-colors duration-500">
                   Past Webinars
                 </h3>
                 <p className="text-muted-foreground leading-relaxed text-base mb-6">
@@ -237,7 +237,7 @@ const DashboardHome = () => {
                   <Globe2 className="h-12 w-12 text-primary-foreground" />
                 </div>
                 <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full mb-6 group-hover:w-24 transition-all duration-500"></div>
-                <h3 className="professional-heading text-2xl text-foreground dark:text-[#8B0000] mb-5 group-hover:text-accent transition-colors duration-500">
+                <h3 className="professional-heading text-2xl text-foreground mb-5 group-hover:text-accent transition-colors duration-500">
                   Global Events
                 </h3>
                 <p className="text-muted-foreground leading-relaxed text-base mb-6">

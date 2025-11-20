@@ -231,7 +231,7 @@ const AdminPanel = () => {
       <Navbar />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold flex items-center gap-3 mb-2">
+          <h1 className="text-4xl font-bold flex items-center gap-3 mb-2 text-foreground">
             <Shield className="h-10 w-10 text-primary" />
             Admin Panel
           </h1>
@@ -312,12 +312,12 @@ const AdminPanel = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                  <span className="text-sm font-medium">Total Users</span>
-                  <span className="text-2xl font-bold">{users.length}</span>
+                  <span className="text-sm font-medium text-foreground">Total Users</span>
+                  <span className="text-2xl font-bold text-foreground">{users.length}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                  <span className="text-sm font-medium">Admin Users</span>
-                  <span className="text-2xl font-bold">
+                  <span className="text-sm font-medium text-foreground">Admin Users</span>
+                  <span className="text-2xl font-bold text-foreground">
                     {users.filter(u => u.role === 'admin').length}
                   </span>
                 </div>
@@ -350,7 +350,7 @@ const AdminPanel = () => {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium">{user.email}</p>
+                        <p className="font-medium text-foreground">{user.email}</p>
                         {user.role === 'admin' && (
                           <span className="px-2 py-1 text-xs bg-primary/20 text-primary rounded-full">
                             Admin
