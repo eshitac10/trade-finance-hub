@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Sun, Moon, Menu, ChevronDown, Shield } from "lucide-react";
+import { LogOut, Sun, Moon, Menu, ChevronDown, Shield, User, Lock, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -23,6 +23,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState("");
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -41,8 +42,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           .single();
         
         setIsAdmin(!!roleData);
+        
+        // Fetch user's full name
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUserName(profileData?.full_name || "");
       } else {
         setIsAdmin(false);
+        setUserName("");
       }
     };
 
@@ -62,8 +73,18 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           .single();
         
         setIsAdmin(!!roleData);
+        
+        // Fetch user's full name
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUserName(profileData?.full_name || "");
       } else {
         setIsAdmin(false);
+        setUserName("");
       }
     });
 
@@ -99,16 +120,45 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 >
                   Home
                 </Button>
-                {isAdmin && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate("/admin")}
-                    className="banking-text font-bold text-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center gap-2"
-                  >
-                    <Shield className="h-4 w-4" />
-                    Admin Panel
-                  </Button>
-                )}
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="banking-text font-bold text-foreground hover:text-accent hover:bg-accent/10 transition-colors"
+                    >
+                      <User className="mr-1 h-4 w-4" />
+                      Account
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48 bg-background border-border">
+                    {isAdmin && (
+                      <DropdownMenuItem
+                        onClick={() => navigate("/admin")}
+                        className="cursor-pointer hover:bg-accent/10"
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin Panel
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => navigate("/security")}
+                      className="cursor-pointer hover:bg-accent/10"
+                    >
+                      <Lock className="mr-2 h-4 w-4" />
+                      Security
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/edit-profile")}
+                      className="cursor-pointer hover:bg-accent/10"
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Profile
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -169,6 +219,11 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
 
               {/* Desktop Actions */}
               <div className="hidden md:flex items-center space-x-4">
+                {userName && (
+                  <span className="banking-text font-medium text-foreground">
+                    Hello, {userName}
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

@@ -24,6 +24,7 @@ const AdminPanel = () => {
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newFullName, setNewFullName] = useState("");
+  const [newMobile, setNewMobile] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
 
@@ -105,7 +106,8 @@ const AdminPanel = () => {
         body: { 
           email: newEmail, 
           password: newPassword,
-          full_name: newFullName 
+          full_name: newFullName,
+          mobile_number: newMobile
         },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
@@ -122,6 +124,7 @@ const AdminPanel = () => {
       setNewEmail("");
       setNewPassword("");
       setNewFullName("");
+      setNewMobile("");
       loadUsers();
     } catch (error: any) {
       toast({
@@ -224,6 +227,16 @@ const AdminPanel = () => {
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="+1234567890"
+                    value={newMobile}
+                    onChange={(e) => setNewMobile(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

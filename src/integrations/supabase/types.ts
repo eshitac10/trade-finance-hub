@@ -351,27 +351,36 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about: string | null
           avatar_url: string | null
+          birthday: string | null
           created_at: string
           email: string
           full_name: string | null
           id: string
+          mobile_number: string | null
           updated_at: string
         }
         Insert: {
+          about?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           email: string
           full_name?: string | null
           id: string
+          mobile_number?: string | null
           updated_at?: string
         }
         Update: {
+          about?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
           id?: string
+          mobile_number?: string | null
           updated_at?: string
         }
         Relationships: []
