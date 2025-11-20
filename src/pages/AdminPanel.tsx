@@ -311,11 +311,11 @@ const AdminPanel = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                <div className="flex justify-between items-center p-4 bg-card rounded-lg border border-border">
                   <span className="text-sm font-medium text-foreground">Total Users</span>
                   <span className="text-2xl font-bold text-foreground">{users.length}</span>
                 </div>
-                <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                <div className="flex justify-between items-center p-4 bg-card rounded-lg border border-border">
                   <span className="text-sm font-medium text-foreground">Admin Users</span>
                   <span className="text-2xl font-bold text-foreground">
                     {users.filter(u => u.role === 'admin').length}
@@ -346,7 +346,7 @@ const AdminPanel = () => {
                 {users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-4 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
@@ -396,10 +396,10 @@ const AdminPanel = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm font-medium mb-2">New Password:</p>
+            <div className="p-4 bg-card rounded-lg border border-border">
+              <p className="text-sm font-medium mb-2 text-foreground">New Password:</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 p-2 bg-background rounded border text-sm font-mono">
+                <code className="flex-1 p-2 bg-muted rounded border border-border text-sm font-mono text-foreground">
                   {resetPasswordData.password}
                 </code>
                 <Button
@@ -415,8 +415,8 @@ const AdminPanel = () => {
                 </Button>
               </div>
             </div>
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-              <p className="text-sm text-amber-600 dark:text-amber-400">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-sm text-destructive">
                 <strong>Important:</strong> Copy this password and share it with the user securely. 
                 It cannot be retrieved again.
               </p>
