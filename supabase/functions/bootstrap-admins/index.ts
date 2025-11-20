@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     )
 
     const admins = [
-      { email: 'its.priyo', password: 'Priyanka007' },
+      { email: 'its.priyo@gmail.com', password: 'Priyanka007' },
       { email: 'pproy1956@gmail.com', password: 'Pinaki1956' }
     ]
 
