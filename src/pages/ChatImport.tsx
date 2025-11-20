@@ -118,28 +118,35 @@ const ChatImport = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session && mounted) {
+        navigate('/auth');
+        return;
+      }
+      
+      if (session && mounted) {
+        await fetchImports();
+      }
+    };
+
     checkAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+      if (!session && mounted) {
         navigate('/auth');
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
-
-  const checkAuth = async () => {
-    setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/auth');
-      return;
-    }
-    await fetchImports();
-    setLoading(false);
-  };
 
   const fetchImports = async () => {
     const { data, error } = await supabase
