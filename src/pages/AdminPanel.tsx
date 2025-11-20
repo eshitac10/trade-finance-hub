@@ -23,7 +23,9 @@ const AdminPanel = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newFullName, setNewFullName] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
 
   useEffect(() => {
     checkAdminStatus();
@@ -35,6 +37,8 @@ const AdminPanel = () => {
       navigate("/auth");
       return;
     }
+
+    setCurrentUserEmail(session.user.email || "");
 
     const { data: roles } = await supabase
       .from("user_roles")
@@ -85,10 +89,10 @@ const AdminPanel = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!newEmail || !newPassword) {
+    if (!newEmail || !newPassword || !newFullName) {
       toast({
         title: "Validation Error",
-        description: "Please provide both email and password",
+        description: "Please provide email, password, and full name",
         variant: "destructive",
       });
       return;
@@ -98,7 +102,11 @@ const AdminPanel = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       const { data, error } = await supabase.functions.invoke("create-user", {
-        body: { email: newEmail, password: newPassword },
+        body: { 
+          email: newEmail, 
+          password: newPassword,
+          full_name: newFullName 
+        },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
@@ -113,6 +121,7 @@ const AdminPanel = () => {
 
       setNewEmail("");
       setNewPassword("");
+      setNewFullName("");
       loadUsers();
     } catch (error: any) {
       toast({
@@ -124,6 +133,17 @@ const AdminPanel = () => {
   };
 
   const handleDeleteUser = async (userId: string, email: string) => {
+    // Prevent deletion of super admin accounts
+    const superAdmins = ['its.priyo@gmail.com', 'pproy1956@gmail.com'];
+    if (superAdmins.includes(email)) {
+      toast({
+        title: "Cannot Delete",
+        description: "Super admin accounts cannot be deleted",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!confirm(`Are you sure you want to delete user ${email}?`)) return;
 
     try {
@@ -185,6 +205,17 @@ const AdminPanel = () => {
             <CardContent>
               <form onSubmit={handleCreateUser} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="John Doe"
+                    value={newFullName}
+                    onChange={(e) => setNewFullName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -204,6 +235,7 @@ const AdminPanel = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
+                    minLength={6}
                   />
                 </div>
                 <Button type="submit" className="w-full">
@@ -278,6 +310,8 @@ const AdminPanel = () => {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDeleteUser(user.id, user.email)}
+                      disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
+                      title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin accounts cannot be deleted" : "Delete user"}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

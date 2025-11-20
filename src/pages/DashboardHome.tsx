@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 const DashboardHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -23,13 +24,35 @@ const DashboardHome = () => {
         navigate('/');
         return;
       }
+
+      // Fetch user profile to get full name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profile?.full_name) {
+        setUserName(profile.full_name);
+      }
     };
     
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session) {
         navigate('/');
+      } else {
+        // Fetch user profile on auth change
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profile?.full_name) {
+          setUserName(profile.full_name);
+        }
       }
     });
 
@@ -59,6 +82,11 @@ const DashboardHome = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6 sm:space-y-8">
+            {userName && (
+              <p className="text-xl sm:text-2xl text-primary-foreground/90 mb-4 animate-fade-up drop-shadow-lg" style={{ animationDelay: '0.05s' }}>
+                Welcome, {userName}!
+              </p>
+            )}
             <h1 className="professional-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 sm:mb-8 tracking-tight animate-fade-up drop-shadow-2xl px-4" style={{ animationDelay: '0.1s' }}>
               Trade Finance World
             </h1>

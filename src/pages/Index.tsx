@@ -37,11 +37,6 @@ const Index = () => {
     setLoading(true);
 
     try {
-      // Hardcoded admin credentials check
-      if (loginEmail !== "admin@tfworld.com" || loginPassword !== "admin123") {
-        throw new Error("Invalid credentials");
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
