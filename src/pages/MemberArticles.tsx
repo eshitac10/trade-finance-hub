@@ -317,14 +317,14 @@ const MemberArticles = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background dark:bg-background">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12 text-justify">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 text-foreground dark:text-red-400">
+              <h1 className="professional-heading text-5xl md:text-6xl font-bold mb-4 text-foreground">
                 Member Articles
               </h1>
               <p className="banking-text text-lg text-muted-foreground max-w-2xl">

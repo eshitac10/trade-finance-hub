@@ -222,7 +222,7 @@ const Members = () => {
                   </AvatarFallback>
                 </Avatar>
                 
-                <h3 className="font-semibold text-base group-hover:text-primary transition-colors duration-300">
+                <h3 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors duration-300">
                   {member.name}
                 </h3>
               </div>

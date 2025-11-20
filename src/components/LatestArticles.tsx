@@ -104,7 +104,7 @@ const LatestArticles = () => {
   if (articles.length === 0) return null;
 
   return (
-    <section className="py-20 bg-card/60 dark:bg-card/80 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-background via-secondary/20 to-background relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/5 to-accent/5 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-accent/5 to-primary/5 rounded-full blur-3xl animate-float-delayed" />
@@ -116,7 +116,7 @@ const LatestArticles = () => {
             <TrendingUp className="h-4 w-4 mr-2" />
             Featured Content
           </Badge>
-          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 text-red-500 dark:text-red-400">
+          <h2 className="professional-heading text-4xl md:text-5xl font-bold mb-4 text-primary">
             Latest Articles
           </h2>
           <p className="banking-text text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -129,7 +129,7 @@ const LatestArticles = () => {
           {articles.map((article, index) => (
             <Card
               key={article.id}
-              className="group overflow-hidden bg-card/50 backdrop-blur-xl border-border/60 hover:shadow-premium transition-all duration-500 hover:-translate-y-2 cursor-pointer animate-fade-up"
+              className="group overflow-hidden bg-card backdrop-blur-xl border-border hover:shadow-premium transition-all duration-500 hover:-translate-y-2 cursor-pointer animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s` }}
               onClick={() => navigate(`/article/${article.id}`)}
             >
@@ -151,7 +151,7 @@ const LatestArticles = () => {
 
               {/* Article Content */}
               <CardContent className="p-6">
-                <h3 className="banking-text text-xl font-semibold mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                <h3 className="banking-text text-xl font-semibold mb-3 line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-300">
                   {article.name}
                 </h3>
                 <div className="flex items-center justify-between text-sm text-muted-foreground banking-text">

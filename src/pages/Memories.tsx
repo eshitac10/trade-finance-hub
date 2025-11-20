@@ -390,7 +390,7 @@ const Memories = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="professional-heading text-5xl md:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="professional-heading text-5xl md:text-6xl font-bold text-foreground">
             Memories
           </h1>
           <div className="flex gap-2">

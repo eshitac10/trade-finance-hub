@@ -97,7 +97,7 @@ const Index = () => {
         {/* About Section */}
         <div className="space-y-6 sm:space-y-8 animate-slide-up">
           <div className="text-center space-y-6">
-            <h1 className="helvetica-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-primary mb-4 sm:mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide whitespace-nowrap">
+            <h1 className="helvetica-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground mb-4 sm:mb-6 animate-fade-up drop-shadow-lg uppercase tracking-wide whitespace-nowrap">
               Trade Finance World
             </h1>
             <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-primary via-accent to-gold rounded-full mb-6 mx-auto shadow-gold"></div>

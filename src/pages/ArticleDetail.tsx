@@ -114,7 +114,7 @@ const ArticleDetail = () => {
 
             {/* Article Header */}
             <div className="p-8 pb-4">
-              <h1 className="professional-heading text-4xl font-bold mb-4">
+              <h1 className="professional-heading text-4xl font-bold mb-4 text-foreground">
                 {article.name}
               </h1>
               
