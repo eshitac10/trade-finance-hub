@@ -121,15 +121,22 @@ const ChatImport = () => {
     let mounted = true;
 
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session && mounted) {
-        navigate('/auth');
-        return;
-      }
-      
-      if (session && mounted) {
-        await fetchImports();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session && mounted) {
+          navigate('/auth');
+          return;
+        }
+        
+        if (session && mounted) {
+          await fetchImports();
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -163,17 +170,18 @@ const ChatImport = () => {
           description: "Failed to load imports",
           variant: "destructive"
         });
-        return;
+        setImports([]);
+      } else {
+        setImports(data || []);
       }
-
-      setImports(data || []);
     } catch (error) {
       console.error('Error in fetchImports:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: "Failed to load imports",
         variant: "destructive"
       });
+      setImports([]);
     } finally {
       setLoading(false);
     }

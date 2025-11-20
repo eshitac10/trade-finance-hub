@@ -43,33 +43,39 @@ const AdminPanel = () => {
   }, []);
 
   const checkAdminStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
 
-    setCurrentUserEmail(session.user.email || "");
+      setCurrentUserEmail(session.user.email || "");
 
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "admin")
-      .single();
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .single();
 
-    if (!roles) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have admin privileges.",
-        variant: "destructive",
-      });
+      if (!roles) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+
+      setIsAdmin(true);
+      await loadUsers();
+    } catch (error) {
+      console.error('Admin check error:', error);
+      setLoading(false);
       navigate("/");
-      return;
     }
-
-    setIsAdmin(true);
-    loadUsers();
   };
 
   const loadUsers = async () => {
@@ -87,11 +93,13 @@ const AdminPanel = () => {
 
       setUsers(data.users || []);
     } catch (error: any) {
+      console.error('Load users error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to load users",
         variant: "destructive",
       });
+      setUsers([]);
     } finally {
       setLoading(false);
     }
