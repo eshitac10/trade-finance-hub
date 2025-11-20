@@ -62,6 +62,21 @@ Deno.serve(async (req) => {
       })
     }
 
+    // Check if target user is an admin (prevent deleting other admins)
+    const { data: targetRoles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle()
+
+    if (targetRoles) {
+      return new Response(JSON.stringify({ error: 'Cannot delete admin accounts. Contact system administrator if needed.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     console.log('Deleting user:', userId)
 
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
