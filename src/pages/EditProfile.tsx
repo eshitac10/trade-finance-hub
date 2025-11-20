@@ -12,6 +12,7 @@ import Navbar from "@/components/Navbar";
 const EditProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [profile, setProfile] = useState({
     full_name: "",
     email: "",
@@ -21,8 +22,35 @@ const EditProfile = () => {
   });
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    let mounted = true;
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session && mounted) {
+        navigate('/auth');
+        return;
+      }
+      
+      if (mounted) {
+        setAuthLoading(false);
+        fetchProfile();
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session && mounted) {
+        navigate('/auth');
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const fetchProfile = async () => {
     try {
@@ -89,6 +117,14 @@ const EditProfile = () => {
       setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
