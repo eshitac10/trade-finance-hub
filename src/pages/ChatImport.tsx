@@ -1031,20 +1031,20 @@ const ChatImport = () => {
         <Card className="mb-8 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 animate-scale-in rounded-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-primary opacity-5"></div>
           <CardHeader className="relative">
-            <CardTitle className="flex items-center gap-3 text-2xl">
+            <CardTitle className="flex items-center gap-3 text-2xl text-foreground">
               <div className="p-3 bg-gradient-primary rounded-xl">
                 <Upload className="h-6 w-6 text-primary-foreground" />
               </div>
               Upload Chat Export
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base text-muted-foreground">
               Drag and drop your WhatsApp .txt or .zip file (max 1 GB)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 relative">
             <div className="grid gap-6">
               <div className="space-y-2">
-                <Label htmlFor="file" className="text-base font-semibold">Choose File</Label>
+                <Label htmlFor="file" className="text-base font-semibold text-foreground">Choose File</Label>
                 <Input
                   id="file"
                   type="file"
@@ -1061,7 +1061,7 @@ const ChatImport = () => {
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">{file.name}</p>
+                    <p className="font-medium text-foreground">{file.name}</p>
                     <p className="text-sm text-muted-foreground">
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
@@ -1090,7 +1090,7 @@ const ChatImport = () => {
                     {yearlyChunks.map((chunk, idx) => (
                       <Card 
                         key={idx}
-                        className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 border-border hover:border-primary/50 animate-scale-in"
+                        className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 border-border hover:border-primary/50 animate-scale-in bg-card"
                         style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         <CardContent className="p-4 space-y-2">
@@ -1130,7 +1130,7 @@ const ChatImport = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="timezone" className="text-base font-semibold">Timezone</Label>
+                <Label htmlFor="timezone" className="text-base font-semibold text-foreground">Timezone</Label>
                 <Select value={timezone} onValueChange={setTimezone}>
                   <SelectTrigger id="timezone" className="h-12">
                     <SelectValue />
@@ -1293,10 +1293,10 @@ const ChatImport = () => {
         {/* Imports List & Timeline */}
         {imports.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <Card className="lg:col-span-1 bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
+            <Card className="lg:col-span-1 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-xl">
+                  <CardTitle className="flex items-center gap-2 text-xl text-foreground">
                     <div className="p-2 bg-gradient-primary rounded-lg">
                       <FileText className="h-5 w-5 text-primary-foreground" />
                     </div>
@@ -1349,7 +1349,7 @@ const ChatImport = () => {
                           ? 'border-primary bg-primary/5 shadow-accent' 
                           : imp.total_messages === 0
                           ? 'border-destructive/50 bg-destructive/5'
-                          : 'border-border hover:border-primary/50'
+                          : 'border-border hover:border-primary/50 bg-card'
                       }`}
                       style={{ animationDelay: `${idx * 50}ms` }}
                       onClick={() => handleSelectImport(imp.id)}
@@ -1370,7 +1370,7 @@ const ChatImport = () => {
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <div className="font-semibold pr-16 break-words flex-1">{imp.filename}</div>
+                              <div className="font-semibold pr-16 break-words flex-1 text-foreground">{imp.filename}</div>
                               {imp.total_messages === 0 && (
                                 <Badge variant="destructive" className="text-xs shrink-0">
                                   Failed
@@ -1423,10 +1423,10 @@ const ChatImport = () => {
             </Card>
 
             {/* Events Timeline */}
-            <Card className="lg:col-span-2 bg-card dark:bg-card backdrop-blur-xl border-border/60 shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 dark:from-primary/10 dark:to-accent/10 pointer-events-none"></div>
+            <Card className="lg:col-span-2 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
               <CardHeader className="relative">
-                <CardTitle className="flex items-center gap-2 text-xl">
+                <CardTitle className="flex items-center gap-2 text-xl text-foreground">
                   <div className="p-2 bg-gradient-primary rounded-lg">
                     <Activity className="h-5 w-5 text-primary-foreground" />
                   </div>
@@ -1444,7 +1444,7 @@ const ChatImport = () => {
                           className={`mb-4 p-5 cursor-pointer transition-all duration-300 hover:shadow-premium hover:-translate-y-1 group border-2 ${
                             selectedEvent === event.id
                               ? 'border-accent bg-gradient-to-r from-primary/10 to-accent/10 shadow-accent'
-                              : 'border-border hover:border-accent/50 bg-card/50 backdrop-blur-sm'
+                              : 'border-border hover:border-accent/50 bg-card backdrop-blur-sm'
                           }`}
                         >
                           <CardHeader className="p-0">
@@ -1454,11 +1454,11 @@ const ChatImport = () => {
                                   <div className="p-2 bg-gradient-primary rounded-lg">
                                     <Calendar className="h-4 w-4 text-primary-foreground" />
                                   </div>
-                                  <CardTitle className="text-base group-hover:text-accent transition-colors line-clamp-1">
+                                  <CardTitle className="text-base group-hover:text-accent transition-colors line-clamp-1 text-foreground">
                                     {event.title.length > 50 ? event.title.substring(0, 50) + '...' : event.title}
                                   </CardTitle>
                                 </div>
-                                <CardDescription className="flex items-center gap-2 text-sm">
+                                <CardDescription className="flex items-center gap-2 text-sm text-muted-foreground">
                                   <Clock className="h-3.5 w-3.5" />
                                   {new Date(event.start_datetime).toLocaleString()}
                                 </CardDescription>
