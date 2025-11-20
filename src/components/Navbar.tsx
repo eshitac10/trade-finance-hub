@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Sun, Moon, Menu, ChevronDown } from "lucide-react";
+import { LogOut, Sun, Moon, Menu, ChevronDown, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -22,6 +22,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -30,14 +31,40 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
         data: { session },
       } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
+      
+      if (session) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .single();
+        
+        setIsAdmin(!!roleData);
+      } else {
+        setIsAdmin(false);
+      }
     };
 
     checkAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setIsAuthenticated(!!session);
+      
+      if (session) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .single();
+        
+        setIsAdmin(!!roleData);
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -72,6 +99,16 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                 >
                   Home
                 </Button>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate("/admin")}
+                    className="banking-text font-bold text-foreground hover:text-accent hover:bg-accent/10 transition-colors flex items-center gap-2"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin Panel
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
