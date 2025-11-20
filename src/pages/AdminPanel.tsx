@@ -15,6 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -37,6 +47,11 @@ const AdminPanel = () => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [resetPasswordData, setResetPasswordData] = useState({ email: "", password: "" });
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; email: string } | null>(null);
+  const [manageRoleDialogOpen, setManageRoleDialogOpen] = useState(false);
+  const [selectedUserForRole, setSelectedUserForRole] = useState<User | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -153,14 +168,19 @@ const AdminPanel = () => {
     }
   };
 
-  const handleResetPassword = async (userId: string, email: string) => {
-    if (!confirm(`Are you sure you want to reset the password for ${email}?`)) return;
+  const handleResetPasswordConfirm = (userId: string, email: string) => {
+    setSelectedUser({ id: userId, email });
+    setResetPasswordDialogOpen(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedUser) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       const { data, error } = await supabase.functions.invoke("reset-user-password", {
-        body: { userId },
+        body: { userId: selectedUser.id },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
@@ -168,13 +188,14 @@ const AdminPanel = () => {
 
       if (error) throw error;
 
-      setResetPasswordData({ email, password: data.newPassword });
+      setResetPasswordData({ email: selectedUser.email, password: data.newPassword });
+      setResetPasswordDialogOpen(false);
       setShowPasswordDialog(true);
       setPasswordCopied(false);
 
       toast({
         title: "Success",
-        description: `Password reset for ${email}`,
+        description: `Password reset for ${selectedUser.email}`,
       });
     } catch (error: any) {
       toast({
@@ -195,15 +216,19 @@ const AdminPanel = () => {
     });
   };
 
-  const handleDeleteUser = async (userId: string, email: string) => {
+  const handleDeleteUserConfirm = (userId: string, email: string) => {
+    setSelectedUser({ id: userId, email });
+    setDeleteDialogOpen(true);
+  };
 
-    if (!confirm(`Are you sure you want to delete user ${email}?`)) return;
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       const { error } = await supabase.functions.invoke("delete-user", {
-        body: { userId },
+        body: { userId: selectedUser.id },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
@@ -213,14 +238,68 @@ const AdminPanel = () => {
 
       toast({
         title: "Success",
-        description: `User ${email} deleted successfully`,
+        description: `User ${selectedUser.email} deleted successfully`,
       });
 
+      setDeleteDialogOpen(false);
       loadUsers();
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleManageRole = (user: User) => {
+    setSelectedUserForRole(user);
+    setManageRoleDialogOpen(true);
+  };
+
+  const handleToggleAdmin = async (makeAdmin: boolean) => {
+    if (!selectedUserForRole) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (makeAdmin) {
+        // Add admin role
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: selectedUserForRole.id,
+            role: 'admin'
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: `${selectedUserForRole.email} is now an admin`,
+        });
+      } else {
+        // Remove admin role
+        const { error } = await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', selectedUserForRole.id)
+          .eq('role', 'admin');
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: `Admin access removed from ${selectedUserForRole.email}`,
+        });
+      }
+
+      setManageRoleDialogOpen(false);
+      loadUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update role",
         variant: "destructive",
       });
     }
@@ -373,7 +452,15 @@ const AdminPanel = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleResetPassword(user.id, user.email)}
+                        onClick={() => handleManageRole(user)}
+                        title="Manage admin access"
+                      >
+                        <Shield className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleResetPasswordConfirm(user.id, user.email)}
                         title="Reset password"
                       >
                         <KeyRound className="h-4 w-4" />
@@ -381,7 +468,7 @@ const AdminPanel = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDeleteUser(user.id, user.email)}
+                        onClick={() => handleDeleteUserConfirm(user.id, user.email)}
                         title="Delete user"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -432,6 +519,85 @@ const AdminPanel = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Delete User</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Are you sure you want to delete <strong>{selectedUser?.email}</strong>? 
+              This action cannot be undone and will permanently delete the user's account and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset Password Confirmation Dialog */}
+      <AlertDialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Reset Password</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Are you sure you want to reset the password for <strong>{selectedUser?.email}</strong>? 
+              A new random password will be generated.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetPassword}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Reset Password
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Manage Admin Role Dialog */}
+      <AlertDialog open={manageRoleDialogOpen} onOpenChange={setManageRoleDialogOpen}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Manage Admin Access
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              <strong>{selectedUserForRole?.email}</strong> is currently 
+              {selectedUserForRole?.role === 'admin' ? ' an admin' : ' not an admin'}. 
+              What would you like to do?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+            {selectedUserForRole?.role === 'admin' ? (
+              <AlertDialogAction
+                onClick={() => handleToggleAdmin(false)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Remove Admin Access
+              </AlertDialogAction>
+            ) : (
+              <AlertDialogAction
+                onClick={() => handleToggleAdmin(true)}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Make Admin
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
