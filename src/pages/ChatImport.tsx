@@ -149,19 +149,33 @@ const ChatImport = () => {
   }, [navigate]);
 
   const fetchImports = async () => {
-    const { data, error } = await supabase
-      .from('whatsapp_imports')
-      .select('*')
-      .order('upload_date', { ascending: false });
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('whatsapp_imports')
+        .select('*')
+        .order('upload_date', { ascending: false });
 
-    if (error) {
+      if (error) {
+        console.error('Error fetching imports:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load imports",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setImports(data || []);
+    } catch (error) {
+      console.error('Error in fetchImports:', error);
       toast({
         title: "Error",
         description: "Failed to load imports",
         variant: "destructive"
       });
-    } else {
-      setImports(data || []);
+    } finally {
+      setLoading(false);
     }
   };
 

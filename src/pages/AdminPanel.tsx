@@ -6,8 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Users, Shield } from "lucide-react";
+import { Trash2, Plus, Users, Shield, KeyRound, Copy, Check } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface User {
   id: string;
@@ -27,6 +34,9 @@ const AdminPanel = () => {
   const [newMobile, setNewMobile] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [resetPasswordData, setResetPasswordData] = useState({ email: "", password: "" });
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -133,6 +143,59 @@ const AdminPanel = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleResetPassword = async (userId: string, email: string) => {
+    // Prevent password reset for super admin accounts
+    const superAdmins = ['its.priyo@gmail.com', 'pproy1956@gmail.com'];
+    if (superAdmins.includes(email)) {
+      toast({
+        title: "Cannot Reset",
+        description: "Super admin passwords cannot be reset from this panel",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to reset the password for ${email}?`)) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data, error } = await supabase.functions.invoke("reset-user-password", {
+        body: { userId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      setResetPasswordData({ email, password: data.newPassword });
+      setShowPasswordDialog(true);
+      setPasswordCopied(false);
+
+      toast({
+        title: "Success",
+        description: `Password reset for ${email}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyPasswordToClipboard = () => {
+    navigator.clipboard.writeText(resetPasswordData.password);
+    setPasswordCopied(true);
+    setTimeout(() => setPasswordCopied(false), 2000);
+    toast({
+      title: "Copied",
+      description: "Password copied to clipboard",
+    });
   };
 
   const handleDeleteUser = async (userId: string, email: string) => {
@@ -319,15 +382,26 @@ const AdminPanel = () => {
                         Created: {new Date(user.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteUser(user.id, user.email)}
-                      disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
-                      title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin accounts cannot be deleted" : "Delete user"}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleResetPassword(user.id, user.email)}
+                        disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
+                        title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin passwords cannot be reset" : "Reset password"}
+                      >
+                        <KeyRound className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteUser(user.id, user.email)}
+                        disabled={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email)}
+                        title={['its.priyo@gmail.com', 'pproy1956@gmail.com'].includes(user.email) ? "Super admin accounts cannot be deleted" : "Delete user"}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -335,6 +409,44 @@ const AdminPanel = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Password Reset Successful</DialogTitle>
+            <DialogDescription>
+              New password has been generated for {resetPasswordData.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm font-medium mb-2">New Password:</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 p-2 bg-background rounded border text-sm font-mono">
+                  {resetPasswordData.password}
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyPasswordToClipboard}
+                >
+                  {passwordCopied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                <strong>Important:</strong> Copy this password and share it with the user securely. 
+                It cannot be retrieved again.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
