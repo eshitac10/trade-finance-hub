@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,17 +31,52 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [mounted, setMounted] = useState(false);
-  const userEmail = localStorage.getItem('userEmail') || 'admin@tfworld.com';
+  const [userEmail, setUserEmail] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Check authentication
+  // Check authentication with Supabase
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (!isAuthenticated) {
-      navigate('/');
-    } else {
-      setMounted(true);
-    }
+    let mounted = true;
+
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session && mounted) {
+        navigate('/auth');
+        return;
+      }
+      
+      if (session && mounted) {
+        setUserEmail(session.user.email || '');
+        setMounted(true);
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session && mounted) {
+        navigate('/auth');
+      } else if (session && mounted) {
+        setUserEmail(session.user.email || '');
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/30 to-accent/5 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   // Sample data
   const stats = [
