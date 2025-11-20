@@ -109,7 +109,7 @@ const DashboardHome = () => {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-10 text-center">
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-card backdrop-blur-sm border border-border hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.1s' }}>
               <div className="relative">
                 <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
@@ -122,7 +122,7 @@ const DashboardHome = () => {
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Global Members</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-card backdrop-blur-sm border border-border hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.2s' }}>
               <div className="relative">
                 <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
@@ -135,7 +135,7 @@ const DashboardHome = () => {
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Countries</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-card backdrop-blur-sm border border-border hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.3s' }}>
               <div className="relative">
                 <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-primary to-accent rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
@@ -148,7 +148,7 @@ const DashboardHome = () => {
               </div>
               <div className="text-muted-foreground font-semibold text-xs sm:text-sm lg:text-base">Events</div>
             </div>
-            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-gradient-card backdrop-blur-sm border border-border/60 hover:bg-background/60 hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
+            <div className="group animate-slide-up transition-all duration-500 cursor-default p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-card backdrop-blur-sm border border-border hover:shadow-premium hover:border-primary/40 hover:-translate-y-4" style={{ animationDelay: '0.4s' }}>
               <div className="relative">
                 <div className="inline-block p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-accent to-primary rounded-xl sm:rounded-2xl mb-3 sm:mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-elegant">
                   <AnimatedCounter 
@@ -198,7 +198,7 @@ const DashboardHome = () => {
             
             <div 
               onClick={() => navigate('/webinars')}
-              className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
+              className="group p-10 bg-card rounded-3xl shadow-professional border border-border hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
               style={{ animationDelay: '0.2s' }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -225,7 +225,7 @@ const DashboardHome = () => {
             
             <div 
               onClick={() => navigate('/events')}
-              className="group p-10 bg-gradient-card rounded-3xl shadow-professional border border-border/60 hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
+              className="group p-10 bg-card rounded-3xl shadow-professional border border-border hover:shadow-premium hover:border-primary/40 transition-all duration-700 hover:-translate-y-6 animate-fade-in relative overflow-hidden backdrop-blur-sm cursor-pointer" 
               style={{ animationDelay: '0.3s' }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>

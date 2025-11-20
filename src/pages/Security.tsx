@@ -133,13 +133,13 @@ const Security = () => {
           Back to Dashboard
         </Button>
 
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              <CardTitle>Security Settings</CardTitle>
+              <Lock className="h-5 w-5 text-foreground" />
+              <CardTitle className="text-foreground">Security Settings</CardTitle>
             </div>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground">
               Change your password to keep your account secure
             </CardDescription>
           </CardHeader>

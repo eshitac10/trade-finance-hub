@@ -139,13 +139,13 @@ const EditProfile = () => {
           Back to Dashboard
         </Button>
 
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              <CardTitle>Edit Profile</CardTitle>
+              <User className="h-5 w-5 text-foreground" />
+              <CardTitle className="text-foreground">Edit Profile</CardTitle>
             </div>
-            <CardDescription>
+            <CardDescription className="text-muted-foreground">
               Update your personal information
             </CardDescription>
           </CardHeader>
