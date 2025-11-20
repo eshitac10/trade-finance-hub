@@ -239,13 +239,13 @@ const AdminPanel = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Plus className="h-5 w-5" />
                 Create New User
               </CardTitle>
-              <CardDescription>Add a new user to the system</CardDescription>
+              <CardDescription className="text-muted-foreground">Add a new user to the system</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleCreateUser} className="space-y-4">
@@ -301,13 +301,13 @@ const AdminPanel = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Users className="h-5 w-5" />
                 User Statistics
               </CardTitle>
-              <CardDescription>Overview of system users</CardDescription>
+              <CardDescription className="text-muted-foreground">Overview of system users</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -326,13 +326,13 @@ const AdminPanel = () => {
           </Card>
         </div>
 
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <Users className="h-5 w-5" />
               All Users
             </CardTitle>
-            <CardDescription>Manage existing user accounts</CardDescription>
+            <CardDescription className="text-muted-foreground">Manage existing user accounts</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
