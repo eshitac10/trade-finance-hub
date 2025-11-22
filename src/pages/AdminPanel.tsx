@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Users, Shield, KeyRound, Copy, Check } from "lucide-react";
+import { Trash2, Plus, Users, Shield, KeyRound, Copy, Check, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import {
   Dialog,
@@ -52,6 +52,10 @@ const AdminPanel = () => {
   const [selectedUser, setSelectedUser] = useState<{ id: string; email: string } | null>(null);
   const [manageRoleDialogOpen, setManageRoleDialogOpen] = useState(false);
   const [selectedUserForRole, setSelectedUserForRole] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [manualResetPassword, setManualResetPassword] = useState("");
+  const [showManualResetPassword, setShowManualResetPassword] = useState(false);
+  const [useManualPassword, setUseManualPassword] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -170,17 +174,40 @@ const AdminPanel = () => {
 
   const handleResetPasswordConfirm = (userId: string, email: string) => {
     setSelectedUser({ id: userId, email });
+    setUseManualPassword(false);
+    setManualResetPassword("");
     setResetPasswordDialogOpen(true);
   };
 
   const handleResetPassword = async () => {
     if (!selectedUser) return;
 
+    if (useManualPassword && !manualResetPassword) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (useManualPassword && manualResetPassword.length < 6) {
+      toast({
+        title: "Validation Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
       const { data, error } = await supabase.functions.invoke("reset-user-password", {
-        body: { userId: selectedUser.id },
+        body: { 
+          userId: selectedUser.id,
+          ...(useManualPassword && { newPassword: manualResetPassword })
+        },
         headers: {
           Authorization: `Bearer ${session?.access_token}`,
         },
@@ -188,10 +215,14 @@ const AdminPanel = () => {
 
       if (error) throw error;
 
-      setResetPasswordData({ email: selectedUser.email, password: data.newPassword });
+      setResetPasswordData({ 
+        email: selectedUser.email, 
+        password: useManualPassword ? manualResetPassword : data.newPassword 
+      });
       setResetPasswordDialogOpen(false);
       setShowPasswordDialog(true);
       setPasswordCopied(false);
+      setManualResetPassword("");
 
       toast({
         title: "Success",
@@ -370,15 +401,30 @@ const AdminPanel = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
@@ -547,9 +593,67 @@ const AdminPanel = () => {
         <AlertDialogContent className="bg-card border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground">Reset Password</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              Are you sure you want to reset the password for <strong>{selectedUser?.email}</strong>? 
-              A new random password will be generated.
+            <AlertDialogDescription className="text-muted-foreground space-y-4">
+              <p>Reset the password for <strong>{selectedUser?.email}</strong></p>
+              
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="auto-generate"
+                    checked={!useManualPassword}
+                    onChange={() => setUseManualPassword(false)}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="auto-generate" className="text-sm font-normal cursor-pointer">
+                    Auto-generate random password
+                  </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="manual-password"
+                    checked={useManualPassword}
+                    onChange={() => setUseManualPassword(true)}
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor="manual-password" className="text-sm font-normal cursor-pointer">
+                    Enter password manually
+                  </Label>
+                </div>
+
+                {useManualPassword && (
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="manual-reset-password" className="text-foreground">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="manual-reset-password"
+                        type={showManualResetPassword ? "text" : "password"}
+                        placeholder="Enter new password"
+                        value={manualResetPassword}
+                        onChange={(e) => setManualResetPassword(e.target.value)}
+                        minLength={6}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowManualResetPassword(!showManualResetPassword)}
+                      >
+                        {showManualResetPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
+                  </div>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
