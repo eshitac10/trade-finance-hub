@@ -1549,11 +1549,11 @@ const ChatImport = () => {
         {selectedEvent && selectedEventData && (
           <>
             {/* AI Summary Card */}
-            <Card className="mt-8 border-gold/30 shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
-              <CardHeader>
+            <Card className="mt-8 bg-card border-border shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+              <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 helvetica-bold">
-                    <Sparkles className="h-5 w-5 text-gold" />
+                  <CardTitle className="flex items-center gap-2 helvetica-bold text-foreground">
+                    <Sparkles className="h-5 w-5 text-primary" />
                     AI Smart Summary
                   </CardTitle>
                   <div className="flex gap-2">
@@ -1570,7 +1570,7 @@ const ChatImport = () => {
                     <Button
                       onClick={() => generateSummary()}
                       disabled={loadingSummary || messages.length === 0}
-                      className="bg-gradient-to-r from-primary via-accent to-gold hover:shadow-gold/50"
+                      className="bg-gradient-to-r from-primary to-accent hover:shadow-lg"
                       size="sm"
                     >
                       {loadingSummary ? "Generating..." : "Generate Summary"}
@@ -1578,7 +1578,7 @@ const ChatImport = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-card">
                 {loadingSummary ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-full" />
@@ -1586,8 +1586,8 @@ const ChatImport = () => {
                     <Skeleton className="h-4 w-4/6" />
                   </div>
                 ) : summary ? (
-                  <div className="bg-gradient-to-r from-primary/5 via-gold/10 to-accent/5 border border-gold/20 rounded-lg p-4">
-                    <p className="text-sm leading-relaxed banking-text">{summary}</p>
+                  <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-border rounded-lg p-4">
+                    <p className="text-sm leading-relaxed text-foreground">{summary}</p>
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm italic text-center py-4">
