@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { userId } = await req.json();
+    const { userId, newPassword: providedPassword } = await req.json();
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Missing userId' }), {
@@ -83,11 +83,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate a secure random password (12 characters with mixed case, numbers, and symbols)
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let newPassword = '';
-    for (let i = 0; i < 12; i++) {
-      newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    // Use provided password or generate a secure random one
+    let newPassword: string;
+    if (providedPassword && providedPassword.length >= 6) {
+      newPassword = providedPassword;
+    } else {
+      // Generate a secure random password (12 characters with mixed case, numbers, and symbols)
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      newPassword = '';
+      for (let i = 0; i < 12; i++) {
+        newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
     }
 
     // Reset the user's password
