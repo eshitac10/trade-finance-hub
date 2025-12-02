@@ -1356,7 +1356,7 @@ const ChatImport = () => {
                   {imports.map((imp, idx) => (
                     <Card
                       key={imp.id}
-                      className={`cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative group animate-fade-in ${
+                      className={`cursor-pointer transition-all duration-300 hover:shadow-elegant hover:-translate-y-1 border-2 relative animate-fade-in ${
                         selectedImport === imp.id 
                           ? 'border-primary bg-primary/5 shadow-accent' 
                           : imp.total_messages === 0
@@ -1367,7 +1367,7 @@ const ChatImport = () => {
                       onClick={() => handleSelectImport(imp.id)}
                     >
                       <div className="p-4">
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-center gap-3">
                           {/* Checkbox */}
                           <input
                             type="checkbox"
@@ -1376,54 +1376,53 @@ const ChatImport = () => {
                               e.stopPropagation();
                               toggleSelectImport(imp.id);
                             }}
-                            className="mt-1 h-4 w-4 rounded border-border cursor-pointer flex-shrink-0"
+                            className="h-4 w-4 rounded border-border cursor-pointer flex-shrink-0"
                             onClick={(e) => e.stopPropagation()}
                           />
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <div className="font-semibold pr-16 break-words flex-1 text-foreground">{imp.filename}</div>
+                              <div className="font-semibold break-words flex-1 text-foreground line-clamp-1">{imp.filename}</div>
                               {imp.total_messages === 0 && (
                                 <Badge variant="destructive" className="text-xs shrink-0">
                                   Failed
                                 </Badge>
                               )}
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              {imp.total_messages} messages
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span>{imp.total_messages} messages</span>
+                              <span className="text-xs">•</span>
+                              <span className="text-xs">{formatDistanceToNow(new Date(imp.upload_date), { addSuffix: true })}</span>
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(new Date(imp.upload_date), { addSuffix: true })}
-                            </div>
-                            
-                            {/* Action buttons */}
-                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 animate-scale-in">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all hover:scale-110"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingImport(imp);
-                                  setNewFilename(imp.filename);
-                                }}
-                                title="Edit filename"
-                              >
-                                <Edit2 className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive transition-all hover:scale-110"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeletingImport(imp);
-                                }}
-                                title="Delete import"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
+                          </div>
+                          
+                          {/* Always visible action buttons */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingImport(imp);
+                                setNewFilename(imp.filename);
+                              }}
+                              title="Edit filename"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeletingImport(imp);
+                              }}
+                              title="Delete import"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </div>
