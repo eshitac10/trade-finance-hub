@@ -68,21 +68,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check if target user is an admin (prevent resetting admin passwords)
-    const { data: targetRoles } = await supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .maybeSingle();
-
-    if (targetRoles) {
-      return new Response(JSON.stringify({ error: 'Cannot reset admin passwords. Admin users must change their own passwords.' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Use provided password or generate a secure random one
     let newPassword: string;
     if (providedPassword && providedPassword.length >= 6) {
