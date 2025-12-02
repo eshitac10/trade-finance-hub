@@ -1526,6 +1526,121 @@ const ChatImport = () => {
           </div>
         )}
 
+        {/* Global Search - Available when import is selected */}
+        {selectedImport && !selectedEvent && (
+          <Card className="mt-8 bg-card backdrop-blur-xl border-border shadow-elegant rounded-2xl overflow-hidden animate-fade-in">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-accent/10">
+              <CardTitle className="flex items-center gap-2 helvetica-bold text-foreground">
+                <Search className="h-5 w-5 text-primary" />
+                Search All Messages
+              </CardTitle>
+              <CardDescription>
+                Search through all messages in this import by text, author, or date
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search messages, dates (DD/MM/YYYY), or authors..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 bg-background/50 border-2 focus:border-primary"
+                  />
+                </div>
+                <Button
+                  onClick={async () => {
+                    if (selectedImport) {
+                      await fetchMessagesByImport(selectedImport, 0, 100);
+                    }
+                  }}
+                  className="h-12 px-6 bg-gradient-primary hover:shadow-lg"
+                  disabled={!selectedImport}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Load & Search Messages
+                </Button>
+              </div>
+              
+              {messages.length > 0 && (
+                <div className="space-y-4">
+                  {/* Search Results Info */}
+                  <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      <span className="font-medium">
+                        Found {filteredMessages.length} of {messages.length} messages
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Select value={filterAuthor} onValueChange={setFilterAuthor}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Filter by author" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All authors</SelectItem>
+                          {uniqueAuthors.map((author) => (
+                            <SelectItem key={author} value={author}>{author}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {/* Search Results */}
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-2 pr-4">
+                      {filteredMessages.slice(0, 50).map((msg) => (
+                        <Card key={msg.id} className="p-4 bg-card/50 border border-border/50 hover:border-primary/30 transition-all">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="outline" className="text-xs font-semibold">
+                                  {msg.author}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(msg.datetime_iso).toLocaleString()}
+                                </span>
+                              </div>
+                              <p className="text-sm text-foreground break-words">
+                                {msg.text.length > 300 
+                                  ? msg.text.substring(0, 300) + '...' 
+                                  : msg.text
+                                }
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => copyMessage(msg.text)}
+                              className="h-8 w-8 p-0 shrink-0"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </Card>
+                      ))}
+                      {filteredMessages.length > 50 && (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          Showing first 50 results. Refine your search to see more specific results.
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+              
+              {messages.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Click "Load & Search Messages" to start searching through this import</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Messages Viewer */}
         {selectedEvent && selectedEventData && (
           <>
