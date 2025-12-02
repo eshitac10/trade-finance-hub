@@ -1431,7 +1431,7 @@ const ChatImport = () => {
             </Card>
 
             {/* Events Timeline */}
-            <Card className="lg:col-span-2 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl overflow-hidden">
+            <Card className="lg:col-span-2 bg-card backdrop-blur-xl border-border shadow-elegant hover:shadow-premium transition-all duration-500 rounded-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none"></div>
               <CardHeader className="relative">
                 <CardTitle className="flex items-center gap-2 text-xl text-foreground">
@@ -1509,17 +1509,17 @@ const ChatImport = () => {
                               </div>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-4">
-                              <Badge variant="secondary" className="font-medium px-3 py-1 bg-primary/10 hover:bg-primary/20 transition-colors">
+                              <Badge variant="secondary" className="font-medium px-3 py-1 bg-primary/20 text-foreground hover:bg-primary/30 transition-colors">
                                 <MessageSquare className="h-3 w-3 mr-1.5" />
                                 {event.message_count} messages
                               </Badge>
                               {event.keywords.slice(0, 3).map((kw) => (
-                                <Badge key={kw} variant="outline" className="px-3 py-1 border-primary/30 hover:border-primary transition-colors">
+                                <Badge key={kw} className="px-3 py-1 bg-accent/20 text-foreground border border-accent/40 hover:bg-accent/30 transition-colors">
                                   {kw}
                                 </Badge>
                               ))}
                               {event.keywords.length > 3 && (
-                                <Badge variant="outline" className="border-accent/30">
+                                <Badge className="bg-muted text-foreground border border-border">
                                   +{event.keywords.length - 3} more
                                 </Badge>
                               )}
