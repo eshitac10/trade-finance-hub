@@ -33,14 +33,14 @@ export const useAnalytics = () => {
           cachedUserId = user?.id || null;
         }
         
-        // Fire and forget - don't await
+        // Fire and forget - don't await, silent fail
         supabase.from('analytics_events').insert({
           session_id: sessionId,
           event_type: 'page_view',
           page_path: pagePath,
           user_id: cachedUserId,
           timestamp: new Date().toISOString()
-        }).then(() => {}).catch(() => {}); // Silent fail
+        });
       } catch (error) {
         // Silent fail
       }
@@ -52,14 +52,18 @@ export const useAnalytics = () => {
       
       // Use setTimeout to not block navigation
       setTimeout(() => {
-        supabase.from('analytics_events').insert({
-          session_id: sessionId,
-          event_type: 'page_exit',
-          page_path: pagePath,
-          user_id: cachedUserId,
-          duration_seconds: duration,
-          timestamp: new Date().toISOString()
-        }).then(() => {}).catch(() => {}); // Silent fail
+        try {
+          supabase.from('analytics_events').insert({
+            session_id: sessionId,
+            event_type: 'page_exit',
+            page_path: pagePath,
+            user_id: cachedUserId,
+            duration_seconds: duration,
+            timestamp: new Date().toISOString()
+          });
+        } catch (error) {
+          // Silent fail
+        }
       }, 0);
     };
   }, [location.pathname]);
