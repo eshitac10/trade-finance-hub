@@ -81,7 +81,7 @@ const ArticleView = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-12 max-w-4xl">
           <Skeleton className="h-8 w-32 mb-8" />
@@ -95,7 +95,7 @@ const ArticleView = () => {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-12 max-w-4xl text-center">
           <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -110,7 +110,7 @@ const ArticleView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <div className="container mx-auto px-4 py-12 max-w-4xl">

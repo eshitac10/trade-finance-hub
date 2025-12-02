@@ -1001,7 +1001,7 @@ const ChatImport = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <CreativeLoader size="lg" text="Loading..." className="min-h-[500px]" />
       </div>
