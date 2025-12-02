@@ -21,7 +21,7 @@ interface NavbarProps {
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = loading
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("");
   const { theme, setTheme } = useTheme();
@@ -103,6 +103,19 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const handleSocialClick = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
+
+  // Show nothing while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background border-b border-border shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center h-20">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background border-b border-border shadow-lg">
