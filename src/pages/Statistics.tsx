@@ -39,10 +39,21 @@ const Statistics = () => {
   const fetchStatistics = async () => {
     try {
       const now = new Date();
-      const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString();
-      const weekStart = new Date(now.setDate(now.getDate() - 7)).toISOString();
-      const monthStart = new Date(now.setDate(now.getDate() - 30)).toISOString();
-      const yearStart = new Date(now.setFullYear(now.getFullYear() - 1)).toISOString();
+      
+      // Create separate Date objects for each time range to avoid mutation
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).toISOString();
+      
+      const weekDate = new Date(now);
+      weekDate.setDate(weekDate.getDate() - 7);
+      const weekStart = weekDate.toISOString();
+      
+      const monthDate = new Date(now);
+      monthDate.setDate(monthDate.getDate() - 30);
+      const monthStart = monthDate.toISOString();
+      
+      const yearDate = new Date(now);
+      yearDate.setFullYear(yearDate.getFullYear() - 1);
+      const yearStart = yearDate.toISOString();
 
       // Fetch all events
       const { data: allEvents, error } = await supabase
