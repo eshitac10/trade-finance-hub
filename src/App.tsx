@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const AnalyticsWrapper = ({ children }: { children: React.ReactNode }) => {
   useAnalytics();
@@ -33,34 +34,36 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnalyticsWrapper>
-          <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<DashboardHome />} />
-          <Route path="/articles" element={<ArticlesGoogleDrive />} />
-          <Route path="/article/:id" element={<ArticleDetail />} />
-          <Route path="/forum/topic/:topicId" element={<TopicDetail />} />
-          <Route path="/webinars" element={<Webinars />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/chat-import" element={<ChatImport />} />
-          <Route path="/memories" element={<MemoriesGoogleDrive />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/initialize-admins" element={<InitializeAdmins />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/edit-profile" element={<EditProfile />} />
-          <Route path="/statistics" element={<Statistics />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnalyticsWrapper>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnalyticsWrapper>
+            <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<DashboardHome />} />
+            <Route path="/articles" element={<ArticlesGoogleDrive />} />
+            <Route path="/article/:id" element={<ArticleDetail />} />
+            <Route path="/forum/topic/:topicId" element={<TopicDetail />} />
+            <Route path="/webinars" element={<Webinars />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/chat-import" element={<ChatImport />} />
+            <Route path="/memories" element={<MemoriesGoogleDrive />} />
+            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/initialize-admins" element={<InitializeAdmins />} />
+            <Route path="/security" element={<Security />} />
+            <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/statistics" element={<Statistics />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AnalyticsWrapper>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

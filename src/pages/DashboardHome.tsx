@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-
 import AnimatedCounter from '@/components/AnimatedCounter';
 import LatestArticles from '@/components/LatestArticles';
 import { Button } from '@/components/ui/button';
@@ -10,54 +9,18 @@ import { ArrowRight, Users, BookOpen, Globe2, TrendingUp, Shield, Award } from '
 import tradeFinanceHero from '@/assets/trade-finance-hero.png';
 import tradeNetworking from '@/assets/trade-networking.png';
 import tradePatternBg from '@/assets/trade-pattern-bg.png';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardHome = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [userName, setUserName] = useState<string>("");
+  const { isAuthenticated, userName } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate('/');
-        return;
-      }
-
-      // Fetch user profile to get full name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (profile?.full_name) {
-        setUserName(profile.full_name);
-      }
-    };
-    
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        navigate('/');
-      } else {
-        // Fetch user profile on auth change
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (profile?.full_name) {
-          setUserName(profile.full_name);
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    if (isAuthenticated === false) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen bg-background">
