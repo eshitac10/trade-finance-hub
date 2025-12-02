@@ -27,44 +27,67 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      
-      if (session) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .single();
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        // First check for existing session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        setIsAdmin(!!roleData);
+        console.log('Navbar auth check:', { session: !!session, error });
         
-        // Fetch user's full name
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', session.user.id)
-          .single();
+        if (!mounted) return;
         
-        setUserName(profileData?.full_name || "");
-      } else {
-        setIsAdmin(false);
-        setUserName("");
+        if (session && session.user) {
+          setIsAuthenticated(true);
+          
+          // Fetch admin role
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .single();
+          
+          if (mounted) setIsAdmin(!!roleData);
+          
+          // Fetch user's full name
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (mounted) setUserName(profileData?.full_name || "");
+        } else {
+          if (mounted) {
+            setIsAuthenticated(false);
+            setIsAdmin(false);
+            setUserName("");
+          }
+        }
+      } catch (error) {
+        console.error('Navbar auth error:', error);
+        if (mounted) {
+          setIsAuthenticated(false);
+          setIsAdmin(false);
+          setUserName("");
+        }
       }
     };
 
-    checkAuth();
+    initializeAuth();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setIsAuthenticated(!!session);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Navbar auth state change:', { event, session: !!session });
       
-      if (session) {
+      if (!mounted) return;
+      
+      if (session && session.user) {
+        setIsAuthenticated(true);
+        
+        // Fetch admin role
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
@@ -72,7 +95,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           .eq('role', 'admin')
           .single();
         
-        setIsAdmin(!!roleData);
+        if (mounted) setIsAdmin(!!roleData);
         
         // Fetch user's full name
         const { data: profileData } = await supabase
@@ -81,14 +104,20 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
           .eq('id', session.user.id)
           .single();
         
-        setUserName(profileData?.full_name || "");
+        if (mounted) setUserName(profileData?.full_name || "");
       } else {
-        setIsAdmin(false);
-        setUserName("");
+        if (mounted) {
+          setIsAuthenticated(false);
+          setIsAdmin(false);
+          setUserName("");
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
