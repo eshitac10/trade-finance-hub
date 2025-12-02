@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Sun, Moon, Menu, ChevronDown, Shield, User, Lock, Edit } from "lucide-react";
+import { LogOut, Sun, Moon, Menu, ChevronDown, Shield, User, Lock, Edit, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -156,6 +156,13 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       <Edit className="mr-2 h-4 w-4" />
                       Edit Profile
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/statistics")}
+                      className="cursor-pointer hover:bg-accent/10"
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      Statistics
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
@@ -267,7 +274,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                       >
                         Home
                       </Button>
-                      <div className="space-y-2">
+                       <div className="space-y-2">
                         <p className="text-muted-foreground text-xs px-3 font-bold">Resources</p>
                         <Button
                           variant="ghost"
@@ -289,6 +296,43 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
                           className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10 pl-6"
                         >
                           Memories
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-muted-foreground text-xs px-3 font-bold">Account</p>
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            onClick={() => navigate("/admin")}
+                            className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10 pl-6"
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Admin Panel
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/security")}
+                          className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10 pl-6"
+                        >
+                          <Lock className="h-4 w-4 mr-2" />
+                          Security
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/edit-profile")}
+                          className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10 pl-6"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate("/statistics")}
+                          className="justify-start w-full banking-text text-foreground hover:text-accent hover:bg-accent/10 pl-6"
+                        >
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          Statistics
                         </Button>
                       </div>
                       <div className="space-y-2">

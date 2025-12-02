@@ -21,6 +21,7 @@ import AdminPanel from "./pages/AdminPanel";
 import InitializeAdmins from "./pages/InitializeAdmins";
 import Security from "./pages/Security";
 import EditProfile from "./pages/EditProfile";
+import Statistics from "./pages/Statistics";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/initialize-admins" element={<InitializeAdmins />} />
           <Route path="/security" element={<Security />} />
           <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/statistics" element={<Statistics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
