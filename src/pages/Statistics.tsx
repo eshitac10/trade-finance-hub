@@ -4,9 +4,20 @@ import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Activity, Users, Eye, Clock, TrendingUp, Calendar } from 'lucide-react';
+import { Activity, Users, Eye, Clock, TrendingUp, Calendar, User } from 'lucide-react';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface UserStats {
+  userId: string;
+  userName: string;
+  email: string;
+  loginCount: number;
+  totalTime: number;
+  avgTimePerSession: number;
+}
 
 const Statistics = () => {
   const navigate = useNavigate();
@@ -22,6 +33,17 @@ const Statistics = () => {
     weeklyData: [] as any[],
     monthlyData: [] as any[],
     pageViews: [] as any[]
+  });
+  const [userStats, setUserStats] = useState<{
+    today: UserStats[];
+    week: UserStats[];
+    month: UserStats[];
+    year: UserStats[];
+  }>({
+    today: [],
+    week: [],
+    month: [],
+    year: []
   });
 
   useEffect(() => {
@@ -40,7 +62,6 @@ const Statistics = () => {
     try {
       const now = new Date();
       
-      // Create separate Date objects for each time range to avoid mutation
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0).toISOString();
       
       const weekDate = new Date(now);
@@ -55,43 +76,99 @@ const Statistics = () => {
       yearDate.setFullYear(yearDate.getFullYear() - 1);
       const yearStart = yearDate.toISOString();
 
-      // Fetch all events
-      const { data: allEvents, error } = await supabase
-        .from('analytics_events')
-        .select('*')
-        .order('timestamp', { ascending: true });
+      // Fetch all events and profiles in parallel
+      const [eventsResult, profilesResult] = await Promise.all([
+        supabase
+          .from('analytics_events')
+          .select('*')
+          .order('timestamp', { ascending: true }),
+        supabase
+          .from('profiles')
+          .select('id, full_name, email')
+      ]);
 
-      if (error) throw error;
+      if (eventsResult.error) throw eventsResult.error;
+      
+      const allEvents = eventsResult.data || [];
+      const profiles = profilesResult.data || [];
+      
+      // Create profile lookup map
+      const profileMap = new Map(profiles.map(p => [p.id, p]));
 
       // Calculate unique sessions
-      const uniqueSessions = new Set(allEvents?.map(e => e.session_id) || []);
+      const uniqueSessions = new Set(allEvents.map(e => e.session_id));
       const totalSessions = uniqueSessions.size;
 
       // Calculate average duration
-      const durations = allEvents?.filter(e => e.duration_seconds).map(e => e.duration_seconds) || [];
+      const durations = allEvents.filter(e => e.duration_seconds).map(e => e.duration_seconds);
       const avgDuration = durations.length > 0 
         ? Math.round(durations.reduce((a, b) => a + (b || 0), 0) / durations.length)
         : 0;
 
+      // Helper function to calculate user stats for a time period
+      const calculateUserStats = (events: typeof allEvents): UserStats[] => {
+        const userMap = new Map<string, { 
+          sessions: Set<string>; 
+          totalTime: number; 
+          userName: string; 
+          email: string;
+        }>();
+
+        events.forEach(event => {
+          if (event.user_id) {
+            const existing = userMap.get(event.user_id);
+            const profile = profileMap.get(event.user_id);
+            
+            if (existing) {
+              existing.sessions.add(event.session_id);
+              if (event.duration_seconds) {
+                existing.totalTime += event.duration_seconds;
+              }
+            } else {
+              userMap.set(event.user_id, {
+                sessions: new Set([event.session_id]),
+                totalTime: event.duration_seconds || 0,
+                userName: profile?.full_name || 'Unknown User',
+                email: profile?.email || 'N/A'
+              });
+            }
+          }
+        });
+
+        return Array.from(userMap.entries()).map(([userId, data]) => ({
+          userId,
+          userName: data.userName,
+          email: data.email,
+          loginCount: data.sessions.size,
+          totalTime: data.totalTime,
+          avgTimePerSession: data.sessions.size > 0 ? Math.round(data.totalTime / data.sessions.size) : 0
+        })).sort((a, b) => b.loginCount - a.loginCount);
+      };
+
+      // Filter events by time period
+      const todayEvents = allEvents.filter(e => e.timestamp >= todayStart);
+      const weekEvents = allEvents.filter(e => e.timestamp >= weekStart);
+      const monthEvents = allEvents.filter(e => e.timestamp >= monthStart);
+      const yearEvents = allEvents.filter(e => e.timestamp >= yearStart);
+
+      // Calculate user stats for each period
+      const todayUserStats = calculateUserStats(todayEvents);
+      const weekUserStats = calculateUserStats(weekEvents);
+      const monthUserStats = calculateUserStats(monthEvents);
+      const yearUserStats = calculateUserStats(yearEvents);
+
+      setUserStats({
+        today: todayUserStats,
+        week: weekUserStats,
+        month: monthUserStats,
+        year: yearUserStats
+      });
+
       // Today's unique sessions
-      const todaySessions = new Set(
-        allEvents?.filter(e => e.timestamp >= todayStart).map(e => e.session_id) || []
-      );
-
-      // Week's unique sessions
-      const weekSessions = new Set(
-        allEvents?.filter(e => e.timestamp >= weekStart).map(e => e.session_id) || []
-      );
-
-      // Month's unique sessions
-      const monthSessions = new Set(
-        allEvents?.filter(e => e.timestamp >= monthStart).map(e => e.session_id) || []
-      );
-
-      // Year's unique sessions
-      const yearSessions = new Set(
-        allEvents?.filter(e => e.timestamp >= yearStart).map(e => e.session_id) || []
-      );
+      const todaySessions = new Set(todayEvents.map(e => e.session_id));
+      const weekSessions = new Set(weekEvents.map(e => e.session_id));
+      const monthSessions = new Set(monthEvents.map(e => e.session_id));
+      const yearSessions = new Set(yearEvents.map(e => e.session_id));
 
       // Daily data for last 7 days
       const dailyData = [];
@@ -102,7 +179,7 @@ const Statistics = () => {
         const dayEnd = new Date(date.setHours(23, 59, 59, 999)).toISOString();
         
         const daySessions = new Set(
-          allEvents?.filter(e => e.timestamp >= dayStart && e.timestamp <= dayEnd).map(e => e.session_id) || []
+          allEvents.filter(e => e.timestamp >= dayStart && e.timestamp <= dayEnd).map(e => e.session_id)
         );
         
         dailyData.push({
@@ -120,7 +197,7 @@ const Statistics = () => {
         const weekEndDate = new Date(date.setDate(date.getDate() + 6)).toISOString();
         
         const weekSessionsData = new Set(
-          allEvents?.filter(e => e.timestamp >= weekStartDate && e.timestamp <= weekEndDate).map(e => e.session_id) || []
+          allEvents.filter(e => e.timestamp >= weekStartDate && e.timestamp <= weekEndDate).map(e => e.session_id)
         );
         
         weeklyData.push({
@@ -138,7 +215,7 @@ const Statistics = () => {
         const monthEndDate = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59).toISOString();
         
         const monthSessionsData = new Set(
-          allEvents?.filter(e => e.timestamp >= monthStartDate && e.timestamp <= monthEndDate).map(e => e.session_id) || []
+          allEvents.filter(e => e.timestamp >= monthStartDate && e.timestamp <= monthEndDate).map(e => e.session_id)
         );
         
         monthlyData.push({
@@ -149,7 +226,7 @@ const Statistics = () => {
 
       // Page views by path
       const pageViewsMap = new Map();
-      allEvents?.forEach(event => {
+      allEvents.forEach(event => {
         const path = event.page_path;
         pageViewsMap.set(path, (pageViewsMap.get(path) || 0) + 1);
       });
@@ -178,7 +255,60 @@ const Statistics = () => {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins < 60) return `${mins}m ${secs}s`;
+    const hours = Math.floor(mins / 60);
+    return `${hours}h ${mins % 60}m`;
+  };
+
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))'];
+
+  const UserStatsTable = ({ data, period }: { data: UserStats[]; period: string }) => (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>User</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead className="text-center">Sessions</TableHead>
+            <TableHead className="text-center">Total Time</TableHead>
+            <TableHead className="text-center">Avg/Session</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                No user activity for this period
+              </TableCell>
+            </TableRow>
+          ) : (
+            data.map((user) => (
+              <TableRow key={user.userId}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    {user.userName}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                <TableCell className="text-center">
+                  <span className="inline-flex items-center justify-center bg-primary/10 text-primary px-2 py-1 rounded-full text-sm font-medium">
+                    {user.loginCount}
+                  </span>
+                </TableCell>
+                <TableCell className="text-center">{formatTime(user.totalTime)}</TableCell>
+                <TableCell className="text-center">{formatTime(user.avgTimePerSession)}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -308,6 +438,38 @@ const Statistics = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* User Activity Details */}
+        <Card className="bg-card border-border mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              User Activity Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="today" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-4">
+                <TabsTrigger value="today">Today ({userStats.today.length})</TabsTrigger>
+                <TabsTrigger value="week">This Week ({userStats.week.length})</TabsTrigger>
+                <TabsTrigger value="month">This Month ({userStats.month.length})</TabsTrigger>
+                <TabsTrigger value="year">This Year ({userStats.year.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="today">
+                <UserStatsTable data={userStats.today} period="today" />
+              </TabsContent>
+              <TabsContent value="week">
+                <UserStatsTable data={userStats.week} period="week" />
+              </TabsContent>
+              <TabsContent value="month">
+                <UserStatsTable data={userStats.month} period="month" />
+              </TabsContent>
+              <TabsContent value="year">
+                <UserStatsTable data={userStats.year} period="year" />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
