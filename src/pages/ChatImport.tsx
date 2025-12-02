@@ -158,10 +158,12 @@ const ChatImport = () => {
   const fetchImports = async () => {
     setLoading(true);
     try {
+      // Optimize query with explicit column selection and limit
       const { data, error } = await supabase
         .from('whatsapp_imports')
-        .select('*')
-        .order('upload_date', { ascending: false });
+        .select('id, filename, file_size, upload_date, total_messages, status')
+        .order('upload_date', { ascending: false })
+        .limit(100); // Prevent loading too many at once
 
       if (error) {
         console.error('Error fetching imports:', error);
@@ -188,11 +190,13 @@ const ChatImport = () => {
   };
 
   const fetchEvents = async (importId: string) => {
+    // Optimize query with only needed columns
     const { data, error } = await supabase
       .from('whatsapp_events')
-      .select('*')
+      .select('id, title, start_datetime, end_datetime, message_count, keywords, tags, confidence_score')
       .eq('import_id', importId)
-      .order('start_datetime', { ascending: false });
+      .order('start_datetime', { ascending: false })
+      .limit(50); // Prevent loading too many events
 
     if (error) {
       toast({
@@ -207,7 +211,7 @@ const ChatImport = () => {
     }
   };
 
-  const fetchMessages = async (eventId: string, page = 0, pageSize = 100) => {
+  const fetchMessages = async (eventId: string, page = 0, pageSize = 50) => {
     if (page === 0) {
       setMessages([]); // Clear only on first page
       setSummary(""); // Clear previous summary
@@ -218,9 +222,10 @@ const ChatImport = () => {
     const from = page * pageSize;
     const to = from + pageSize - 1;
     
+    // Optimize query with only needed columns and smaller page size
     const { data, error, count } = await supabase
       .from('whatsapp_messages')
-      .select('*', { count: 'exact' })
+      .select('id, datetime_iso, author, text, attachments', { count: 'exact' })
       .eq('event_id', eventId)
       .order('datetime_iso', { ascending: false }) // Newest first
       .range(from, to);
@@ -255,7 +260,7 @@ const ChatImport = () => {
   };
 
   // Fallback: fetch recent messages for an import when no events are detected
-  const fetchMessagesByImport = async (importId: string, page = 0, pageSize = 100) => {
+  const fetchMessagesByImport = async (importId: string, page = 0, pageSize = 50) => {
     if (page === 0) {
       setMessages([]);
       setSummary("");
@@ -264,9 +269,10 @@ const ChatImport = () => {
     const from = page * pageSize;
     const to = from + pageSize - 1;
 
+    // Optimize query with only needed columns
     const { data, error, count } = await supabase
       .from('whatsapp_messages')
-      .select('*', { count: 'exact' })
+      .select('id, datetime_iso, author, text, attachments', { count: 'exact' })
       .eq('import_id', importId)
       .order('datetime_iso', { ascending: false })
       .range(from, to);
