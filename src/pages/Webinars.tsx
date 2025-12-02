@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Play, ExternalLink, Video, Sparkles, Plus, Trash2, Edit } from "lucide-react";
+import { Play, ExternalLink, Video, Sparkles, Plus, Trash2, Edit, Folder, ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,23 @@ interface Webinar {
   description: string;
 }
 
+interface DriveItem {
+  id: string;
+  name: string;
+  mimeType: string;
+  webViewLink?: string;
+  thumbnailLink?: string;
+  coverImage?: string;
+  modifiedTime?: string;
+  createdTime?: string;
+}
+
+interface FolderHistory {
+  id: string;
+  name: string;
+}
+
+const ROOT_FOLDER_ID = "1oEhcHDdOVwcqf7emtjA0LzRwidmTaF86";
 
 const Webinars = () => {
   const navigate = useNavigate();
@@ -31,8 +48,10 @@ const Webinars = () => {
   const [newWebinarUrl, setNewWebinarUrl] = useState("");
   const [newWebinarDescription, setNewWebinarDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [gDriveVideos, setGDriveVideos] = useState<any[]>([]);
-  const [loadingVideos, setLoadingVideos] = useState(true);
+  const [driveItems, setDriveItems] = useState<DriveItem[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  const [currentFolderId, setCurrentFolderId] = useState(ROOT_FOLDER_ID);
+  const [folderHistory, setFolderHistory] = useState<FolderHistory[]>([{ id: ROOT_FOLDER_ID, name: "Webinars" }]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,70 +64,91 @@ const Webinars = () => {
     
     checkAuth();
     loadWebinars();
-    fetchGDriveVideos();
   }, [navigate]);
 
-  const fetchGDriveVideos = async () => {
-    setLoadingVideos(true);
+  useEffect(() => {
+    fetchDriveItems(currentFolderId);
+  }, [currentFolderId]);
+
+  const fetchDriveItems = async (folderId: string) => {
+    setLoadingItems(true);
     try {
-      // Fetch videos from the specified Google Drive folder
       const { data, error } = await supabase.functions.invoke('fetch-google-drive', {
-        body: { folderId: '1oEhcHDdOVwcqf7emtjA0LzRwidmTaF86' }
+        body: { folderId }
       });
 
       if (error) {
         console.error('Error fetching Google Drive folder:', error);
         toast({
           title: "Error",
-          description: "Failed to fetch webinars from Google Drive",
+          description: "Failed to fetch items from Google Drive",
           variant: "destructive",
         });
-        setLoadingVideos(false);
+        setLoadingItems(false);
         return;
       }
 
-      // Filter for video files only and map to expected format
-      const videoFiles = (data.files || [])
-        .filter((file: any) => 
-          file.mimeType && (
-            file.mimeType.includes('video/') || 
-            file.mimeType === 'application/vnd.google-apps.video'
-          )
-        )
-        .map((file: any) => ({
-          ...file,
-          name: file.name,
-          date: new Date(file.modifiedTime || file.createdTime).toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: '2-digit'
-          })
-        }))
-        .sort((a: any, b: any) => {
-          // Extract webinar number from title (e.g., "TFW 18th Webinar" -> 18)
+      // Sort items: folders first, then videos sorted by webinar number
+      const sortedItems = (data.files || []).sort((a: DriveItem, b: DriveItem) => {
+        const aIsFolder = a.mimeType === 'application/vnd.google-apps.folder';
+        const bIsFolder = b.mimeType === 'application/vnd.google-apps.folder';
+        
+        if (aIsFolder && !bIsFolder) return -1;
+        if (!aIsFolder && bIsFolder) return 1;
+        
+        // For videos, sort by webinar number
+        if (!aIsFolder && !bIsFolder) {
           const getWebinarNumber = (title: string) => {
             const match = title.match(/TFW\s+(\d+)(st|nd|rd|th)\s+Webinar/i);
             return match ? parseInt(match[1]) : 0;
           };
-          
-          const numA = getWebinarNumber(a.name);
-          const numB = getWebinarNumber(b.name);
-          
-          return numA - numB;
-        });
+          return getWebinarNumber(a.name) - getWebinarNumber(b.name);
+        }
+        
+        return a.name.localeCompare(b.name);
+      });
 
-      setGDriveVideos(videoFiles);
+      setDriveItems(sortedItems);
     } catch (error) {
-      console.error('Error fetching Google Drive videos:', error);
+      console.error('Error fetching Google Drive items:', error);
       toast({
         title: "Error",
-        description: "An error occurred while fetching webinars",
+        description: "An error occurred while fetching items",
         variant: "destructive",
       });
     } finally {
-      setLoadingVideos(false);
+      setLoadingItems(false);
     }
   };
+
+  const navigateToFolder = (folder: DriveItem) => {
+    setFolderHistory(prev => [...prev, { id: folder.id, name: folder.name }]);
+    setCurrentFolderId(folder.id);
+  };
+
+  const navigateBack = () => {
+    if (folderHistory.length > 1) {
+      const newHistory = [...folderHistory];
+      newHistory.pop();
+      setFolderHistory(newHistory);
+      setCurrentFolderId(newHistory[newHistory.length - 1].id);
+    }
+  };
+
+  const navigateToBreadcrumb = (index: number) => {
+    const newHistory = folderHistory.slice(0, index + 1);
+    setFolderHistory(newHistory);
+    setCurrentFolderId(newHistory[newHistory.length - 1].id);
+  };
+
+  const isVideo = (mimeType: string) => 
+    mimeType.includes('video/') || mimeType === 'application/vnd.google-apps.video';
+  
+  const isFolder = (mimeType: string) => 
+    mimeType === 'application/vnd.google-apps.folder';
+
+  const folders = driveItems.filter(item => isFolder(item.mimeType));
+  const videos = driveItems.filter(item => isVideo(item.mimeType));
 
   const loadWebinars = () => {
     const defaultWebinars: Webinar[] = [];
@@ -230,6 +270,15 @@ const Webinars = () => {
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
+  const handleItemClick = (item: DriveItem) => {
+    if (isFolder(item.mimeType)) {
+      navigateToFolder(item);
+    }
+  };
+
+  const isInSubfolder = folderHistory.length > 1;
+  const currentFolderName = folderHistory[folderHistory.length - 1]?.name || "Webinars";
+
   return (
     <>
       <Navbar />
@@ -244,48 +293,181 @@ const Webinars = () => {
               Explore our collection of trade finance webinars and insights
             </p>
             <p className="text-sm text-muted-foreground">
-              Total Webinars: {gDriveVideos.length}
+              Total Videos: {videos.length}
             </p>
           </div>
 
-          {loadingVideos ? (
+          {/* Breadcrumb Navigation */}
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            {folderHistory.map((folder, index) => (
+              <div key={folder.id} className="flex items-center">
+                {index > 0 && <span className="text-muted-foreground mx-2">/</span>}
+                <Button
+                  variant={index === folderHistory.length - 1 ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => navigateToBreadcrumb(index)}
+                  className={index === folderHistory.length - 1 ? "font-semibold" : "text-muted-foreground hover:text-foreground"}
+                >
+                  {index === 0 ? <Home className="h-4 w-4 mr-1" /> : <Folder className="h-4 w-4 mr-1" />}
+                  {folder.name}
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {/* Back Button */}
+          {isInSubfolder && (
+            <Button
+              variant="outline"
+              onClick={navigateBack}
+              className="mb-4 border-primary/20 hover:bg-primary/5"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to {folderHistory[folderHistory.length - 2]?.name || "Previous Folder"}
+            </Button>
+          )}
+
+          {/* Current Folder Info */}
+          {isInSubfolder && (
+            <div className="mb-6 p-4 bg-card/50 rounded-lg border border-border/50">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Folder className="h-5 w-5 text-accent" />
+                {currentFolderName}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {driveItems.length} item{driveItems.length !== 1 ? 's' : ''} in this folder
+              </p>
+            </div>
+          )}
+
+          {loadingItems ? (
             <div className="mb-12 text-center text-muted-foreground">
-              Loading webinars from Google Drive...
+              Loading items from Google Drive...
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6 mb-12">
-              {gDriveVideos.map((video, index) => (
-                <Card key={video.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20">
-                  <CardContent className="p-6">
-                    <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-4">
-                      <iframe
-                        src={`https://drive.google.com/file/d/${video.id}/preview`}
-                        width="100%"
-                        height="100%"
-                        allow="autoplay"
-                        className="w-full h-full"
-                      />
-                    </div>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-1">{video.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {video.date}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => window.open(video.webViewLink, '_blank')}
-                        className="ml-2"
+            <>
+              {/* Folders Section */}
+              {folders.length > 0 && (
+                <div className="mb-12">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Folder className="h-6 w-6 text-accent" />
+                    Folders
+                  </h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {folders.map((folder) => (
+                      <Card 
+                        key={folder.id} 
+                        className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20 cursor-pointer group"
+                        onClick={() => handleItemClick(folder)}
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <CardContent className="p-6">
+                          <div className="aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-accent/20 to-primary/10 mb-4 flex items-center justify-center">
+                            {folder.coverImage ? (
+                              <img
+                                src={folder.coverImage.replace('=s220', '=s800')}
+                                alt={folder.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            ) : (
+                              <Folder className="h-20 w-20 text-accent/60" />
+                            )}
+                          </div>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-1 group-hover:text-accent transition-colors">{folder.name}</h3>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <ArrowLeft className="h-3 w-3 rotate-180" />
+                                Click to open
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Videos Section */}
+              {videos.length > 0 && (
+                <div className="mb-12">
+                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Video className="h-6 w-6 text-primary" />
+                    Videos
+                  </h2>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {videos.map((video) => (
+                      <Card key={video.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 border-primary/20">
+                        <CardContent className="p-6">
+                          <div className="aspect-video rounded-lg overflow-hidden bg-muted mb-4">
+                            <iframe
+                              src={`https://drive.google.com/file/d/${video.id}/preview`}
+                              width="100%"
+                              height="100%"
+                              allow="autoplay"
+                              className="w-full h-full"
+                            />
+                          </div>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold mb-1">{video.name}</h3>
+                              <p className="text-xs text-muted-foreground">
+                                {video.modifiedTime || video.createdTime
+                                  ? new Date(video.modifiedTime || video.createdTime!).toLocaleDateString('en-GB', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: '2-digit'
+                                    })
+                                  : ''}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => window.open(video.webViewLink, '_blank')}
+                              className="ml-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {driveItems.length === 0 && (
+                <div className="text-center py-20">
+                  {isInSubfolder ? (
+                    <>
+                      <Folder className="h-20 w-20 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <h3 className="text-2xl font-semibold mb-2">Empty Folder</h3>
+                      <p className="text-muted-foreground mb-4">
+                        This folder doesn't have any items yet
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={navigateBack}
+                        className="border-primary/20 hover:bg-primary/5"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Go Back
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-20 w-20 text-muted-foreground mx-auto mb-4 opacity-50" />
+                      <h3 className="text-2xl font-semibold mb-2">No Webinars Found</h3>
+                      <p className="text-muted-foreground">
+                        No webinars available at the moment
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
