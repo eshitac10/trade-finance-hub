@@ -62,12 +62,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setIsAuthenticated(true);
           setUserId(session.user.id);
-          await fetchUserData(session.user.id);
+          setLoading(false); // Clear loading immediately
+          
+          // Fetch user data in background without blocking
+          setTimeout(() => {
+            if (mounted) fetchUserData(session.user.id);
+          }, 0);
         } else {
           setIsAuthenticated(false);
           setIsAdmin(false);
           setUserName('');
           setUserId(null);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Auth init error:', error);
@@ -76,28 +82,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setIsAdmin(false);
           setUserName('');
           setUserId(null);
+          setLoading(false);
         }
-      } finally {
-        if (mounted) setLoading(false);
       }
     };
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       
       if (session?.user) {
         setIsAuthenticated(true);
         setUserId(session.user.id);
-        await fetchUserData(session.user.id);
+        setLoading(false); // Clear loading immediately
+        
+        // Fetch user data in background without blocking
+        setTimeout(() => {
+          if (mounted) fetchUserData(session.user.id);
+        }, 0);
       } else {
         setIsAuthenticated(false);
         setIsAdmin(false);
         setUserName('');
         setUserId(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
