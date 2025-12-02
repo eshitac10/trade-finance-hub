@@ -22,14 +22,13 @@ const Index = () => {
 
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
+    // Defer auth check to not block rendering
+    setTimeout(async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         navigate("/dashboard");
       }
-    };
-    checkUser();
+    }, 0);
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
