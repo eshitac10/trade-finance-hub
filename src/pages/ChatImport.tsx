@@ -18,7 +18,7 @@ import {
   Upload, FileText, Clock, Users, Tag, Calendar, 
   Download, Edit2, Trash2, Merge, Split, Search,
   AlertCircle, ChevronRight, MessageSquare, Filter, Copy,
-  TrendingUp, Activity, BarChart3, Sparkles, X
+  TrendingUp, Activity, BarChart3, Sparkles, X, AlertTriangle
 } from 'lucide-react';
 import CreativeLoader from '@/components/CreativeLoader';
 import { formatDistanceToNow } from 'date-fns';
@@ -999,6 +999,29 @@ const ChatImport = () => {
       </div>
 
       <Navbar />
+      
+      {/* Dramatic Work in Progress Banner */}
+      <div className="relative z-20 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(0,0,0,0.1) 10px,
+            rgba(0,0,0,0.1) 20px
+          )`
+        }}></div>
+        <div className="relative flex items-center justify-center gap-3 py-4 px-4">
+          <div className="flex items-center gap-2 animate-pulse">
+            <AlertTriangle className="h-6 w-6 text-white" />
+            <span className="text-white font-bold text-lg md:text-xl tracking-wide uppercase">
+              🚧 Work in Progress 🚧
+            </span>
+            <AlertTriangle className="h-6 w-6 text-white" />
+          </div>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-300 via-white to-yellow-300 animate-shimmer"></div>
+      </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <div className="mb-12 text-center animate-fade-in">
