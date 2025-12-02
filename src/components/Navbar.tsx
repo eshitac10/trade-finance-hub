@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Sun, Moon, Menu, ChevronDown, Shield, User, Lock, Edit, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 interface NavbarProps {
@@ -21,104 +21,8 @@ interface NavbarProps {
 const Navbar = ({ onLoginClick }: NavbarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null = loading
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState("");
+  const { isAuthenticated, isAdmin, userName, loading } = useAuth();
   const { theme, setTheme } = useTheme();
-
-  useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
-      try {
-        // First check for existing session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('Navbar auth check:', { session: !!session, error });
-        
-        if (!mounted) return;
-        
-        if (session && session.user) {
-          setIsAuthenticated(true);
-          
-          // Fetch admin role
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .eq('role', 'admin')
-            .single();
-          
-          if (mounted) setIsAdmin(!!roleData);
-          
-          // Fetch user's full name
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (mounted) setUserName(profileData?.full_name || "");
-        } else {
-          if (mounted) {
-            setIsAuthenticated(false);
-            setIsAdmin(false);
-            setUserName("");
-          }
-        }
-      } catch (error) {
-        console.error('Navbar auth error:', error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          setIsAdmin(false);
-          setUserName("");
-        }
-      }
-    };
-
-    initializeAuth();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Navbar auth state change:', { event, session: !!session });
-      
-      if (!mounted) return;
-      
-      if (session && session.user) {
-        setIsAuthenticated(true);
-        
-        // Fetch admin role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .single();
-        
-        if (mounted) setIsAdmin(!!roleData);
-        
-        // Fetch user's full name
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (mounted) setUserName(profileData?.full_name || "");
-      } else {
-        if (mounted) {
-          setIsAuthenticated(false);
-          setIsAdmin(false);
-          setUserName("");
-        }
-      }
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -134,7 +38,7 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
   };
 
   // Show nothing while checking authentication
-  if (isAuthenticated === null) {
+  if (loading) {
     return (
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background border-b border-border shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
