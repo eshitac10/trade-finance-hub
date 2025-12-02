@@ -31,20 +31,32 @@ const ArticlesGoogleDrive = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    // Non-blocking auth check
+    setTimeout(async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/");
         return;
       }
-    };
+    }, 0);
     
-    checkAuth();
     fetchGoogleDriveItems();
   }, [navigate]);
 
   const fetchGoogleDriveItems = async () => {
     try {
+      // Check cache first (5 min TTL)
+      const cacheKey = 'articles_cache';
+      const cacheTimeKey = 'articles_cache_time';
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTime = sessionStorage.getItem(cacheTimeKey);
+      
+      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
+        setItems(JSON.parse(cached));
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       const { data, error } = await supabase.functions.invoke('fetch-google-drive', {
         body: { folderId: '1ue-dkScVVjq4abyCxP81GbUZgO6M8gTa' }
@@ -54,6 +66,9 @@ const ArticlesGoogleDrive = () => {
 
       if (data?.files) {
         setItems(data.files);
+        // Cache results
+        sessionStorage.setItem(cacheKey, JSON.stringify(data.files));
+        sessionStorage.setItem(cacheTimeKey, Date.now().toString());
       }
     } catch (error: any) {
       console.error('Error fetching Google Drive items:', error);

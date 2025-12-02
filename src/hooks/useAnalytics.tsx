@@ -12,6 +12,9 @@ const getSessionId = () => {
   return sessionId;
 };
 
+// Cache user ID to avoid repeated auth calls
+let cachedUserId: string | null = null;
+
 export const useAnalytics = () => {
   const location = useLocation();
   const pageStartTime = useRef<number>(Date.now());
@@ -21,48 +24,43 @@ export const useAnalytics = () => {
     const pagePath = location.pathname;
     pageStartTime.current = Date.now();
 
-    // Track page view
-    const trackPageView = async () => {
+    // CRITICAL: Defer analytics to not block page rendering
+    setTimeout(async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Use cached user ID if available
+        if (!cachedUserId) {
+          const { data: { user } } = await supabase.auth.getUser();
+          cachedUserId = user?.id || null;
+        }
         
-        await supabase.from('analytics_events').insert({
+        // Fire and forget - don't await
+        supabase.from('analytics_events').insert({
           session_id: sessionId,
           event_type: 'page_view',
           page_path: pagePath,
-          user_id: user?.id || null,
+          user_id: cachedUserId,
           timestamp: new Date().toISOString()
-        });
+        }).then(() => {}).catch(() => {}); // Silent fail
       } catch (error) {
-        console.error('Analytics tracking error:', error);
+        // Silent fail
       }
-    };
-
-    trackPageView();
+    }, 0);
 
     // Track page exit on cleanup
     return () => {
       const duration = Math.round((Date.now() - pageStartTime.current) / 1000);
       
-      // Use sendBeacon for reliable tracking even during page unload
-      const trackPageExit = async () => {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          await supabase.from('analytics_events').insert({
-            session_id: sessionId,
-            event_type: 'page_exit',
-            page_path: pagePath,
-            user_id: user?.id || null,
-            duration_seconds: duration,
-            timestamp: new Date().toISOString()
-          });
-        } catch (error) {
-          // Silently fail on exit tracking
-        }
-      };
-
-      trackPageExit();
+      // Use setTimeout to not block navigation
+      setTimeout(() => {
+        supabase.from('analytics_events').insert({
+          session_id: sessionId,
+          event_type: 'page_exit',
+          page_path: pagePath,
+          user_id: cachedUserId,
+          duration_seconds: duration,
+          timestamp: new Date().toISOString()
+        }).then(() => {}).catch(() => {}); // Silent fail
+      }, 0);
     };
   }, [location.pathname]);
 };
