@@ -158,31 +158,21 @@ const ChatImport = () => {
   const fetchImports = async () => {
     setLoading(true);
     try {
-      // Optimize query with explicit column selection and limit
+      // OPTIMIZED: Minimal columns, smaller limit
       const { data, error } = await supabase
         .from('whatsapp_imports')
         .select('id, filename, file_size, upload_date, total_messages, status')
         .order('upload_date', { ascending: false })
-        .limit(100); // Prevent loading too many at once
+        .limit(50); // Reduced from 100
 
       if (error) {
         console.error('Error fetching imports:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load imports",
-          variant: "destructive"
-        });
         setImports([]);
       } else {
         setImports(data || []);
       }
     } catch (error) {
       console.error('Error in fetchImports:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to load imports",
-        variant: "destructive"
-      });
       setImports([]);
     } finally {
       setLoading(false);
@@ -190,20 +180,17 @@ const ChatImport = () => {
   };
 
   const fetchEvents = async (importId: string) => {
-    // Optimize query with only needed columns
+    // Optimize query - reduced limit for faster initial load
     const { data, error } = await supabase
       .from('whatsapp_events')
       .select('id, title, start_datetime, end_datetime, message_count, keywords, tags, confidence_score')
       .eq('import_id', importId)
       .order('start_datetime', { ascending: false })
-      .limit(50); // Prevent loading too many events
+      .limit(20); // Reduced from 50 for faster loading
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load events",
-        variant: "destructive"
-      });
+      console.error('Error loading events:', error);
+      setEvents([]);
       return [] as WhatsAppEvent[];
     } else {
       setEvents(data || []);
@@ -211,51 +198,43 @@ const ChatImport = () => {
     }
   };
 
-  const fetchMessages = async (eventId: string, page = 0, pageSize = 50) => {
+  const fetchMessages = async (eventId: string, page = 0, pageSize = 30) => {
     if (page === 0) {
-      setMessages([]); // Clear only on first page
-      setSummary(""); // Clear previous summary
+      setMessages([]);
+      setSummary("");
     }
-    
-    console.log('Fetching messages for event:', eventId, 'page:', page);
     
     const from = page * pageSize;
     const to = from + pageSize - 1;
     
-    // Optimize query with only needed columns and smaller page size
-    const { data, error, count } = await supabase
+    // OPTIMIZED: Smaller page size, minimal columns
+    const { data, error } = await supabase
       .from('whatsapp_messages')
-      .select('id, datetime_iso, author, text, attachments', { count: 'exact' })
+      .select('id, datetime_iso, author, text')
       .eq('event_id', eventId)
-      .order('datetime_iso', { ascending: false }) // Newest first
+      .order('datetime_iso', { ascending: false })
       .range(from, to);
 
     if (error) {
       console.error('Error fetching messages:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load messages",
-        variant: "destructive"
-      });
+      return;
+    }
+    
+    const enrichedMessages = (data || []).map(msg => {
+      const date = new Date(msg.datetime_iso);
+      return {
+        ...msg,
+        attachments: [], // Skip for performance
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        week: Math.ceil(date.getDate() / 7)
+      };
+    });
+    
+    if (page === 0) {
+      setMessages(enrichedMessages);
     } else {
-      console.log('Fetched messages:', data?.length, 'Total count:', count);
-      
-      // Add year, month, week to each message
-      const enrichedMessages = (data || []).map(msg => {
-        const date = new Date(msg.datetime_iso);
-        return {
-          ...msg,
-          year: date.getFullYear(),
-          month: date.getMonth() + 1,
-          week: Math.ceil(date.getDate() / 7)
-        };
-      });
-      
-      if (page === 0) {
-        setMessages(enrichedMessages);
-      } else {
-        setMessages(prev => [...prev, ...enrichedMessages]);
-      }
+      setMessages(prev => [...prev, ...enrichedMessages]);
     }
   };
 
@@ -693,13 +672,9 @@ const ChatImport = () => {
     setMessages([]);
     setSummary("");
     
-    const evts = await fetchEvents(importId);
-    if (!evts || evts.length === 0) {
-      await fetchMessagesByImport(importId);
-    } else if (evts.length > 0) {
-      setSelectedEvent(evts[0].id);
-      await fetchMessages(evts[0].id);
-    }
+    // OPTIMIZATION: Only fetch events, don't auto-load messages
+    // User will click on an event to load messages (lazy loading)
+    await fetchEvents(importId);
   };
 
   const handleSelectEvent = (eventId: string) => {
