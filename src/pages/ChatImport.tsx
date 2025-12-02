@@ -1023,7 +1023,7 @@ const ChatImport = () => {
         <div className="mb-12 text-center animate-fade-in">
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-primary/10 rounded-full mb-6 animate-scale-in">
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-            <span className="text-sm font-semibold bg-gradient-primary bg-clip-text text-transparent">
+            <span className="text-sm font-semibold text-primary">
               AI-Powered Conversation Analysis
             </span>
           </div>
