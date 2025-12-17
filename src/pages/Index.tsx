@@ -136,9 +136,6 @@ const Index = () => {
                 Originally conceived as a trade finance group of bankers and corporate professionals, the community has since grown to include members from <span className="helvetica-bold text-foreground">FinTechs, Treasuries, Technology, Digitalisation, and Legal sectors</span>.
               </p>
 
-              <p>
-                We have distinguished members from across the globe, including professionals from <span className="helvetica-bold text-foreground">FEDAI, ICC, ITFA, ADB, BAFT, NSDL</span>, and even a distinguished representative from the <span className="helvetica-bold text-foreground">Reserve Bank of India</span>.
-              </p>
 
               <div className="my-6 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent"></div>
 
